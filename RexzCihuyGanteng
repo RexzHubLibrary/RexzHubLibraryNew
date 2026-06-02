@@ -1,5 +1,5 @@
 -- [[
---     LIBRARY UI REXZ
+--     LIBRARY UI REXZ (UPDATED: WITH SMOOTH MINIMIZE BUTTON)
 --     Bahasa: Indonesia Profesional
 --     Pengembang: RexzCihuy
 -- ]]
@@ -16,6 +16,7 @@ function RexzLibrary.new(dummyHubName, title)
     local self = setmetatable({}, RexzLibrary)
     self.Tabs = {}
     self.CurrentTab = nil
+    self.Minimized = false -- Menyimpan status minimize Window Utama
     
     local fixedHubName = "Rexz Hub"
 
@@ -80,6 +81,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainFrame.Active = true
     MainFrame.Draggable = true
     MainFrame.Visible = true
+    MainFrame.ClipsDescendants = true -- Memastikan konten terpotong rapi saat di-minimize
     MainFrame.Parent = ScreenGui
     self.MainFrame = MainFrame
 
@@ -92,9 +94,23 @@ function RexzLibrary.new(dummyHubName, title)
     MainStroke.Thickness = 1.2
     MainStroke.Parent = MainFrame
 
-    ToggleBtn.MouseButton1Click:Connect(function()
-        MainFrame.Visible = not MainFrame.Visible
-    end)
+    -- Fungsi Animasi Toggle Menggunakan Tween Service
+    local function ToggleWindow()
+        self.Minimized = not self.Minimized
+        if self.Minimized then
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 480, 0, 38) -- Mengecil hanya menyisakan Header TopBar
+            })
+            tween:Play()
+        else
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 480, 0, 300) -- Kembali ke ukuran penuh
+            })
+            tween:Play()
+        end
+    end
+
+    ToggleBtn.MouseButton1Click:Connect(ToggleWindow)
 
     -- Header Bar
     local TopBar = Instance.new("Frame")
@@ -126,7 +142,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "TitleText"
-    TitleLabel.Size = UDim2.new(1, -80, 1, 0)
+    TitleLabel.Size = UDim2.new(1, -110, 1, 0) -- Menyesuaikan space agar tidak bertubrukan dengan 2 tombol aksi
     TitleLabel.Position = UDim2.new(0, 40, 0, 0)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = tostring(fixedHubName) .. " <font color='#A06EFF'>|</font> " .. tostring(title)
@@ -137,6 +153,7 @@ function RexzLibrary.new(dummyHubName, title)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = TopBar
 
+    -- TOMBOL CLOSE (X)
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "ExitAction"
     CloseBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -151,6 +168,20 @@ function RexzLibrary.new(dummyHubName, title)
     CloseBtn.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
     end)
+
+    -- 🔥 TOMBOL MINIMIZE (-) DI SAMPING CLOSE
+    local MinimizeBtn = Instance.new("TextButton")
+    MinimizeBtn.Name = "MinimizeAction"
+    MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
+    MinimizeBtn.Position = UDim2.new(1, -65, 0, 4) -- Berada tepat di sebelah kiri tombol Close
+    MinimizeBtn.BackgroundTransparency = 1
+    MinimizeBtn.Text = "—"
+    MinimizeBtn.TextColor3 = Color3.fromRGB(160, 160, 175)
+    MinimizeBtn.TextSize = 14
+    MinimizeBtn.Font = Enum.Font.GothamBold
+    MinimizeBtn.Parent = TopBar
+
+    MinimizeBtn.MouseButton1Click:Connect(ToggleWindow)
 
     -- SIDEBAR NAVIGATION CONTAINER
     local Sidebar = Instance.new("ScrollingFrame")
@@ -326,7 +357,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     end)
 end
 
--- METHOD: CREATE TAB (Fixed LayoutOrder & Icon Injection)
+-- METHOD: CREATE TAB
 function RexzLibrary:CreateTab(tabName, iconId)
     local tab = setmetatable({}, TabClass)
     tab.Elements = {}
@@ -337,7 +368,6 @@ function RexzLibrary:CreateTab(tabName, iconId)
     TabButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
-    -- Perbaikan Utama: Jika nama tab adalah Credit, otomatis pasang urutan paling bawah (9999) sejak awal dibuat
     TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
     TabButton.Parent = self.MainFrame.Sidebar
 
