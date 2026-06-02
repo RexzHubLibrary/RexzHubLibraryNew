@@ -1,5 +1,5 @@
 -- [[
---     LIBRARY UI REXZ (FULL RELEASE: UPDATED MINIMIZE & TOGGLE HIDE)
+--     LIBRARY UI REXZ (FULL RELEASE: WITH DYNAMIC RESIZE & ADVANCED COLOR PICKER)
 --     Bahasa: Indonesia Profesional
 --     Pengembang: RexzCihuy
 -- ]]
@@ -11,15 +11,19 @@ local TabClass = {}
 TabClass.__index = TabClass
 
 local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
 
 function RexzLibrary.new(dummyHubName, title)
     local self = setmetatable({}, RexzLibrary)
     self.Tabs = {}
     self.CurrentTab = nil
-    self.Minimized = false -- Status untuk melacak perkecilan Window (Hanya sisa Header)
-    self.Hidden = false    -- Status untuk melacak sembunyi total Window (Hide/Show)
+    self.Minimized = false 
+    self.Hidden = false    
+    self.AccentColor = Color3.fromRGB(160, 110, 255) -- Default Warna Ungu Rexz
     
     local fixedHubName = "Rexz Hub"
+    local baseSize = UDim2.new(0, 480, 0, 300)
 
     -- Main ScreenGui
     local ScreenGui = Instance.new("ScreenGui")
@@ -43,7 +47,7 @@ function RexzLibrary.new(dummyHubName, title)
     NotifLayout.Padding = UDim.new(0, 8)
     self.NotifHolder = NotifHolder
 
-    -- FLOATING TOGGLE BUTTON (Fungsinya Murni untuk HIDE / SHOW TOTAL)
+    -- FLOATING TOGGLE BUTTON
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "UiToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
@@ -59,7 +63,7 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleCorner.Parent = ToggleBtn
 
     local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = Color3.fromRGB(160, 110, 255)
+    ToggleStroke.Color = self.AccentColor
     ToggleStroke.Thickness = 1.5
     ToggleStroke.Parent = ToggleBtn
 
@@ -69,13 +73,13 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
     ToggleIcon.BackgroundTransparency = 1
     ToggleIcon.Image = "rbxassetid://10734950309"
-    ToggleIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    ToggleIcon.ImageColor3 = self.AccentColor
     ToggleIcon.Parent = ToggleBtn
 
     -- MAIN CONTAINER WINDOW
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainContainer"
-    MainFrame.Size = UDim2.new(0, 480, 0, 300)
+    MainFrame.Size = baseSize
     MainFrame.Position = UDim2.new(0.5, -240, 0.5, -150)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
     MainFrame.BorderSizePixel = 0
@@ -96,36 +100,69 @@ function RexzLibrary.new(dummyHubName, title)
     MainStroke.Parent = MainFrame
 
     -- =======================================================
-    -- LOGIKA PEMISAHAN: MINIMIZE VS TOGGLE HIDE
+    -- SISTEM DYNAMIC RESIZE (DRAG UNTUK BESAR/KECIL)
     -- =======================================================
+    local ResizeGrip = Instance.new("TextButton")
+    ResizeGrip.Name = "ResizeGrip"
+    ResizeGrip.Size = UDim2.new(0, 16, 0, 16)
+    ResizeGrip.Position = UDim2.new(1, -16, 1, -16)
+    ResizeGrip.BackgroundTransparency = 1
+    ResizeGrip.Text = "◢"
+    ResizeGrip.TextColor3 = Color3.fromRGB(80, 80, 95)
+    ResizeGrip.TextSize = 14
+    ResizeGrip.Font = Enum.Font.GothamBold
+    ResizeGrip.ZIndex = 10
+    ResizeGrip.Parent = MainFrame
 
-    -- 1. Fungsi Murni Minimize (Mengecilkan ukuran Frame, menyisakan TopBar)
+    local Resizing = false
+    ResizeGrip.MouseButton1Down:Connect(function()
+        Resizing = true
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if Resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
+            if self.Minimized or self.Hidden then return end
+            
+            -- Hitung ukuran baru berdasarkan posisi mouse saat ini
+            local mousePos = UserInputService:GetMouseLocation()
+            local newWidth = math.max(380, mousePos.X - MainFrame.AbsolutePosition.X)
+            local newHeight = math.max(220, mousePos.Y - MainFrame.AbsolutePosition.Y - 36) -- Kompensasi topbar offset
+            
+            baseSize = UDim2.new(0, newWidth, 0, newHeight)
+            MainFrame.Size = baseSize
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Resizing = false
+        end
+    end)
+
+    -- LOGIKA MINIMIZE VS TOGGLE HIDE
     local function MinimizeWindow()
-        if self.Hidden then return end -- Jika sedang sembunyi total, abaikan fungsi ini
+        if self.Hidden then return end 
         
         self.Minimized = not self.Minimized
         if self.Minimized then
-            -- Ciutkan ukuran frame hanya setinggi TopBar (38px)
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 38)
-            })
-            tween:Play()
+            ResizeGrip.Visible = false
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, MainFrame.Size.X.Offset, 0, 38)
+            }):Play()
         else
-            -- Kembalikan ke ukuran penuh semula (300px)
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 300)
-            })
-            tween:Play()
+            ResizeGrip.Visible = true
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = baseSize
+            }):Play()
         end
     end
 
-    -- 2. Fungsi Murni Toggle Hide (Menghilangkan & Memunculkan UI secara total dengan Fade)
     local function ToggleHideWindow()
         self.Hidden = not self.Hidden
         if self.Hidden then
-            -- Efek mengecil tipis sambil menghilang total (Sembunyi)
+            ResizeGrip.Visible = false
             local tweenScale = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Size = self.Minimized and UDim2.new(0, 430, 0, 38) or UDim2.new(0, 430, 0, 270),
+                Size = self.Minimized and UDim2.new(0, baseSize.X.Offset - 50, 0, 38) or UDim2.new(0, baseSize.X.Offset - 50, 0, baseSize.Y.Offset - 30),
                 BackgroundTransparency = 1
             })
             tweenScale:Play()
@@ -133,19 +170,15 @@ function RexzLibrary.new(dummyHubName, title)
                 MainFrame.Visible = false
             end)
         else
-            -- Tampilkan kembali UI ke ukuran yang seharusnya (Penuh / Sesuai kondisi minimize sebelumnya)
             MainFrame.Visible = true
-            local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)
-            
-            local tweenShow = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = targetSize,
+            ResizeGrip.Visible = not self.Minimized
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = self.Minimized and UDim2.new(0, baseSize.X.Offset, 0, 38) or baseSize,
                 BackgroundTransparency = 0
-            })
-            tweenShow:Play()
+            }):Play()
         end
     end
 
-    -- Hubungkan Tombol Floating ke fungsi Toggle Hide
     ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
 
     -- Header Bar
@@ -173,7 +206,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainIcon.Position = UDim2.new(0, 12, 0, 9)
     MainIcon.BackgroundTransparency = 1
     MainIcon.Image = "rbxassetid://10734950309"
-    MainIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    MainIcon.ImageColor3 = self.AccentColor
     MainIcon.Parent = TopBar
 
     local TitleLabel = Instance.new("TextLabel")
@@ -181,7 +214,7 @@ function RexzLibrary.new(dummyHubName, title)
     TitleLabel.Size = UDim2.new(1, -110, 1, 0)
     TitleLabel.Position = UDim2.new(0, 40, 0, 0)
     TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = tostring(fixedHubName) .. " <font color='#A06EFF'>|</font> " .. tostring(title)
+    TitleLabel.Text = fixedHubName .. " <font color='#A06EFF'>|</font> " .. tostring(title)
     TitleLabel.TextColor3 = Color3.fromRGB(235, 235, 240)
     TitleLabel.TextSize = 14
     TitleLabel.Font = Enum.Font.GothamBold
@@ -205,7 +238,7 @@ function RexzLibrary.new(dummyHubName, title)
         ScreenGui:Destroy()
     end)
 
-    -- TOMBOL MINIMIZE (-) -> Murni Pengecilan Vertikal
+    -- TOMBOL MINIMIZE (-)
     local MinimizeBtn = Instance.new("TextButton")
     MinimizeBtn.Name = "MinimizeAction"
     MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -219,15 +252,23 @@ function RexzLibrary.new(dummyHubName, title)
 
     MinimizeBtn.MouseButton1Click:Connect(MinimizeWindow)
 
-    -- SIDEBAR NAVIGATION CONTAINER
+    -- SIDEBAR MASTER CONTAINER
+    local SidebarContainer = Instance.new("Frame")
+    SidebarContainer.Name = "SidebarContainer"
+    SidebarContainer.Size = UDim2.new(0, 130, 1, -48)
+    SidebarContainer.Position = UDim2.new(0, 10, 0, 48)
+    SidebarContainer.BackgroundTransparency = 1
+    SidebarContainer.Parent = MainFrame
+
+    -- Scrolling Frame Area
     local Sidebar = Instance.new("ScrollingFrame")
-    Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 130, 1, -48)
-    Sidebar.Position = UDim2.new(0, 10, 0, 48)
+    Sidebar.Name = "SidebarScroll"
+    Sidebar.Size = UDim2.new(1, 0, 1, -40) 
+    Sidebar.Position = UDim2.new(0, 0, 0, 0)
     Sidebar.BackgroundTransparency = 1
     Sidebar.BorderSizePixel = 0
     Sidebar.ScrollBarThickness = 0
-    Sidebar.Parent = MainFrame
+    Sidebar.Parent = SidebarContainer
 
     local SidebarLayout = Instance.new("UIListLayout")
     SidebarLayout.Parent = Sidebar
@@ -284,7 +325,27 @@ function RexzLibrary.new(dummyHubName, title)
     ContentHolder.Parent = MainFrame
     self.ContentHolder = ContentHolder
 
-    -- REALTIME GLOBAL SEARCH ENGINE
+    -- ENGINE RE-RENDER UNTUK SISTEM WARNA DINAMIS
+    local function ApplyGlobalAccent(newColor)
+        self.AccentColor = newColor
+        ToggleStroke.Color = newColor
+        ToggleIcon.ImageColor3 = newColor
+        MainIcon.ImageColor3 = newColor
+        
+        -- Ubah warna pembatas dekorasi RichText pada Title
+        local hexStr = newColor:ToHex()
+        TitleLabel.Text = fixedHubName .. " <font color='#" .. hexStr .. "'>|</font> " .. title
+        
+        -- Perbarui indikator Tab aktif saat ini jika ada
+        for _, t in ipairs(self.Tabs) do
+            if self.CurrentTab == t then
+                t.Label.TextColor3 = newColor
+                if t.Icon then t.Icon.ImageColor3 = newColor end
+            end
+        end
+    end
+
+    -- SEARCH ENGINE FUNCTION
     SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local query = string.lower(SearchInput.Text)
         if self.CurrentTab then
@@ -292,18 +353,195 @@ function RexzLibrary.new(dummyHubName, title)
                 if query == "" then
                     item.Instance.Visible = true
                 else
-                    if string.find(string.lower(item.Name), query) then
-                        item.Instance.Visible = true
-                    else
-                        item.Instance.Visible = false
-                    end
+                    item.Instance.Visible = string.find(string.lower(item.Name), query) and true or false
                 end
             end
         end
     end)
 
     -- =======================================================
-    -- AUTO-INJECT SYSTEM: TAB CREDIT 😈
+    -- FIXED POSITION COMPONENT: SETTINGS/CONFIGURATION
+    -- =======================================================
+    local ConfigBtn = Instance.new("TextButton")
+    ConfigBtn.Name = "Config_FixedBtn"
+    ConfigBtn.Size = UDim2.new(1, -5, 0, 34)
+    ConfigBtn.Position = UDim2.new(0, 0, 1, -34)
+    ConfigBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+    ConfigBtn.Text = ""
+    ConfigBtn.BorderSizePixel = 0
+    ConfigBtn.Parent = SidebarContainer
+
+    local ConfigBtnCorner = Instance.new("UICorner")
+    ConfigBtnCorner.CornerRadius = UDim.new(0, 6)
+    ConfigBtnCorner.Parent = ConfigBtn
+
+    local ConfigBtnStroke = Instance.new("UIStroke")
+    ConfigBtnStroke.Color = Color3.fromRGB(45, 45, 55)
+    ConfigBtnStroke.Thickness = 1
+    ConfigBtnStroke.Parent = ConfigBtn
+
+    local ConfigIcon = Instance.new("ImageLabel")
+    ConfigIcon.Name = "ConfigIcon"
+    ConfigIcon.Size = UDim2.new(0, 16, 0, 16)
+    ConfigIcon.Position = UDim2.new(0, 10, 0.5, -8)
+    ConfigIcon.BackgroundTransparency = 1
+    ConfigIcon.Image = "rbxassetid://10723374117"
+    ConfigIcon.ImageColor3 = Color3.fromRGB(150, 150, 160)
+    ConfigIcon.Parent = ConfigBtn
+
+    local ConfigLabel = Instance.new("TextLabel")
+    ConfigLabel.Name = "ConfigLabel"
+    ConfigLabel.Size = UDim2.new(1, -36, 1, 0)
+    ConfigLabel.Position = UDim2.new(0, 32, 0, 0)
+    ConfigLabel.BackgroundTransparency = 1
+    ConfigLabel.Text = "Settings"
+    ConfigLabel.TextColor3 = Color3.fromRGB(160, 160, 170)
+    ConfigLabel.TextSize = 12
+    ConfigLabel.Font = Enum.Font.GothamMedium
+    ConfigLabel.TextXAlignment = Enum.TextXAlignment.Left
+    ConfigLabel.Parent = ConfigBtn
+
+    local ConfigTab = setmetatable({}, TabClass)
+    ConfigTab.Elements = {}
+    
+    local ConfigScrollBox = Instance.new("ScrollingFrame")
+    ConfigScrollBox.Name = "Settings_ContentScroll"
+    ConfigScrollBox.Size = UDim2.new(1, 0, 1, 0)
+    ConfigScrollBox.BackgroundTransparency = 1
+    ConfigScrollBox.BorderSizePixel = 0
+    ConfigScrollBox.ScrollBarThickness = 3
+    ConfigScrollBox.ScrollBarImageColor3 = Color3.fromRGB(50, 50, 60)
+    ConfigScrollBox.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ConfigScrollBox.Visible = false
+    ConfigScrollBox.Parent = ContentHolder
+    ConfigTab.ScrollBox = ConfigScrollBox
+
+    local ConfigListLayout = Instance.new("UIListLayout")
+    ConfigListLayout.Parent = ConfigScrollBox
+    ConfigListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ConfigListLayout.Padding = UDim.new(0, 6)
+
+    ConfigListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        ConfigScrollBox.CanvasSize = UDim2.new(0, 0, 0, ConfigListLayout.AbsoluteContentSize.Y + 10)
+    end)
+
+    ConfigBtn.MouseButton1Click:Connect(function()
+        for _, t in ipairs(self.Tabs) do
+            t.ScrollBox.Visible = false
+            t.BackgroundColor.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+            t.Label.TextColor3 = Color3.fromRGB(160, 160, 170)
+            if t.Icon then t.Icon.ImageColor3 = Color3.fromRGB(150, 150, 160) end
+        end
+        ConfigScrollBox.Visible = true
+        ConfigBtn.BackgroundColor3 = Color3.fromRGB(32, 30, 42)
+        ConfigLabel.TextColor3 = self.AccentColor
+        ConfigIcon.ImageColor3 = self.AccentColor
+        self.CurrentTab = ConfigTab
+    end)
+
+    SidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        Sidebar.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y)
+    end)
+
+    -- =======================================================
+    -- ADVANCED COLOR PICKER SYSTEM (SETTINGS TAB INJECTION)
+    -- =======================================================
+    local PickerFrame = Instance.new("Frame")
+    PickerFrame.Name = "Dynamic_ColorPicker"
+    PickerFrame.Size = UDim2.new(1, -4, 0, 50)
+    PickerFrame.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+    PickerFrame.BorderSizePixel = 0
+    PickerFrame.Parent = ConfigScrollBox
+
+    local PickerCorner = Instance.new("UICorner")
+    PickerCorner.CornerRadius = UDim.new(0, 6)
+    PickerCorner.Parent = PickerFrame
+
+    local PickerStroke = Instance.new("UIStroke")
+    PickerStroke.Color = Color3.fromRGB(35, 35, 45)
+    PickerStroke.Thickness = 1
+    PickerStroke.Parent = PickerFrame
+
+    local PickerLabel = Instance.new("TextLabel")
+    PickerLabel.Size = UDim2.new(0, 120, 1, 0)
+    PickerLabel.Position = UDim2.new(0, 12, 0, 0)
+    PickerLabel.BackgroundTransparency = 1
+    PickerLabel.Text = "Custom Aksen Warna"
+    PickerLabel.TextColor3 = Color3.fromRGB(215, 215, 225)
+    PickerLabel.TextSize = 12
+    PickerLabel.Font = Enum.Font.GothamMedium
+    PickerLabel.TextXAlignment = Enum.TextXAlignment.Left
+    PickerLabel.Parent = PickerFrame
+
+    -- Slider Warna (Hue Track)
+    local SliderTrack = Instance.new("ImageLabel")
+    SliderTrack.Name = "HueTrack"
+    SliderTrack.Size = UDim2.new(1, -170, 0, 10)
+    SliderTrack.Position = UDim2.new(0, 150, 0.5, -5)
+    SliderTrack.Image = "rbxassetid://14205561665" -- Nilai Gradasi RGB Spectrum Aset Murni
+    SliderTrack.Parent = PickerFrame
+
+    local TrackCorner = Instance.new("UICorner")
+    TrackCorner.CornerRadius = UDim.new(0, 4)
+    TrackCorner.Parent = SliderTrack
+
+    local SliderPin = Instance.new("TextButton")
+    SliderPin.Name = "SliderPin"
+    SliderPin.Size = UDim2.new(0, 14, 0, 14)
+    SliderPin.Position = UDim2.new(0.5, -7, 0.5, -7)
+    SliderPin.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    SliderPin.Text = ""
+    SliderPin.Parent = SliderTrack
+
+    local PinCorner = Instance.new("UICorner")
+    PinCorner.CornerRadius = UDim.new(0, 14)
+    PinCorner.Parent = SliderPin
+
+    -- Preview Box Realtime
+    local PreviewBox = Instance.new("Frame")
+    PreviewBox.Name = "PreviewBox"
+    PreviewBox.Size = UDim2.new(0, 24, 0, 24)
+    PreviewBox.Position = UDim2.new(1, -36, 0.5, -12)
+    PreviewBox.BackgroundColor3 = self.AccentColor
+    PreviewBox.Parent = PickerFrame
+
+    local PreviewCorner = Instance.new("UICorner")
+    PreviewCorner.CornerRadius = UDim.new(0, 6)
+    PreviewCorner.Parent = PreviewBox
+
+    -- Logika Input Slider Spectrum Warna
+    local ColorDragging = false
+    SliderPin.MouseButton1Down:Connect(function() ColorDragging = true end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if ColorDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local trackAbsPos = SliderTrack.AbsolutePosition.X
+            local trackAbsSize = SliderTrack.AbsoluteSize.X
+            local mouseX = math.clamp(Mouse.X - trackAbsPos, 0, trackAbsSize)
+            
+            local percentage = mouseX / trackAbsSize
+            SliderPin.Position = UDim2.new(percentage, -7, 0.5, -7)
+            
+            -- Konversi posisi persentase slider ke Color3 Hue
+            local selectedColor = Color3.fromHSV(percentage, 1, 1)
+            PreviewBox.BackgroundColor3 = selectedColor
+            ApplyGlobalAccent(selectedColor)
+        end
+    end)
+
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then ColorDragging = false end
+    end)
+
+    table.insert(ConfigTab.Elements, { Name = "Custom Aksen Warna", Instance = PickerFrame })
+
+    -- Tombol Tambahan Simpan Config bawaan
+    ConfigTab:AddButton("Save Current Configuration", 10723344432, function()
+        self:Notify("Config Saved", "Konfigurasi kustomisasi ukuran dan warna berhasil disimpan!", 4)
+    end)
+
+    -- =======================================================
+    -- AUTO-INJECT SYSTEM: TAB CREDIT
     -- =======================================================
     task.spawn(function()
         local CreditTab = self:CreateTab("Credit", 10723351930)
@@ -312,8 +550,6 @@ function RexzLibrary.new(dummyHubName, title)
             setclipboard("RexzLock")
             self:Notify("Sistem Info", "Nama owner berhasil disalin ke clipboard!", 4)
         end)
-        
-        CreditTab:AddButton("Powered by Rexz Engine", 10723344432, nil)
     end)
 
     return self
@@ -337,7 +573,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifCorner.Parent = NotifBox
 
     local NotifStroke = Instance.new("UIStroke")
-    NotifStroke.Color = Color3.fromRGB(160, 110, 255)
+    NotifStroke.Color = self.AccentColor
     NotifStroke.Thickness = 1.2
     NotifStroke.Parent = NotifBox
 
@@ -347,7 +583,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifIcon.Position = UDim2.new(0, 12, 0, 10)
     NotifIcon.BackgroundTransparency = 1
     NotifIcon.Image = "rbxassetid://10734950309"
-    NotifIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    NotifIcon.ImageColor3 = self.AccentColor
     NotifIcon.Parent = NotifBox
 
     local TitleLabel = Instance.new("TextLabel")
@@ -404,7 +640,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
     TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
-    TabButton.Parent = self.MainFrame.Sidebar
+    TabButton.Parent = self.MainSidebarScroll 
 
     local TabBtnCorner = Instance.new("UICorner")
     TabBtnCorner.CornerRadius = UDim.new(0, 6)
@@ -457,6 +693,8 @@ function RexzLibrary:CreateTab(tabName, iconId)
     end)
 
     local function ActivateTab()
+        if self.ConfigBtn then self.ConfigBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 30) end
+        
         for _, t in ipairs(self.Tabs) do
             t.ScrollBox.Visible = false
             t.BackgroundColor.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
@@ -465,8 +703,8 @@ function RexzLibrary:CreateTab(tabName, iconId)
         end
         ScrollBox.Visible = true 
         TabButton.BackgroundColor3 = Color3.fromRGB(32, 30, 42)
-        TabLabel.TextColor3 = Color3.fromRGB(160, 110, 255)
-        if tab.Icon then tab.Icon.ImageColor3 = Color3.fromRGB(160, 110, 255) end
+        TabLabel.TextColor3 = self.AccentColor
+        if tab.Icon then tab.Icon.ImageColor3 = self.AccentColor end
         self.CurrentTab = tab
     end
 
@@ -599,7 +837,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     IndicatorCorner.Parent = IndicatorFrame
 
     local IndicatorStroke = Instance.new("UIStroke")
-    IndicatorStroke.Color = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(45, 45, 55)
+    IndicatorStroke.Color = state and self.Parent.AccentColor or Color3.fromRGB(45, 45, 55)
     IndicatorStroke.Thickness = 1.2
     IndicatorStroke.Parent = IndicatorFrame
 
@@ -608,7 +846,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     RLogo.Size = UDim2.new(1, 0, 1, 0)
     RLogo.BackgroundTransparency = 1
     RLogo.Text = "R"
-    RLogo.TextColor3 = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(90, 90, 100)
+    RLogo.TextColor3 = state and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(90, 90, 100)
     RLogo.TextSize = 14
     RLogo.Font = Enum.Font.GothamBold
     RLogo.TextXAlignment = Enum.TextXAlignment.Center
@@ -618,16 +856,13 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     local function UpdateToggleVisual(animate)
         local targetBg = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
         local targetAccent = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(45, 45, 55)
-        local targetText = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(90, 90, 100)
         
         if animate then
             TweenService:Create(IndicatorFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetBg}):Play()
             TweenService:Create(IndicatorStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Color = targetAccent}):Play()
-            TweenService:Create(RLogo, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {TextColor3 = targetText}):Play()
         else
             IndicatorFrame.BackgroundColor3 = targetBg
             IndicatorStroke.Color = targetAccent
-            RLogo.TextColor3 = targetText
         end
     end
 
