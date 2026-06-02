@@ -68,7 +68,7 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleIcon.Size = UDim2.new(0, 24, 0, 24)
     ToggleIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
     ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = "rbxassetid://10734950309"
+    ToggleIcon.Image = "rbxassetid://75184333398586"
     ToggleIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
     ToggleIcon.Parent = ToggleBtn
 
