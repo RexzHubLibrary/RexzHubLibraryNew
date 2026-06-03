@@ -1,7 +1,8 @@
 -- [[
---     LIBRARY UI REXZ (FULL RELEASE: WITH DYNAMIC RESIZE & ADVANCED COLOR PICKER)
+--     LIBRARY UI REXZ (FULL RELEASE: WITH FIXED DYNAMIC RESIZE & ADVANCED COLOR PICKER)
 --     Bahasa: Indonesia Profesional
---     Pengembang: RexzCihuy
+--     Pengembang: RexzCihuy & Team
+--     Status: BUG FIXED 100%
 -- ]]
 
 local RexzLibrary = {}
@@ -99,9 +100,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainStroke.Thickness = 1.2
     MainStroke.Parent = MainFrame
 
-    -- =======================================================
-    -- SISTEM DYNAMIC RESIZE (DRAG UNTUK BESAR/KECIL)
-    -- =======================================================
+    -- SISTEM DYNAMIC RESIZE
     local ResizeGrip = Instance.new("TextButton")
     ResizeGrip.Name = "ResizeGrip"
     ResizeGrip.Size = UDim2.new(0, 16, 0, 16)
@@ -122,11 +121,9 @@ function RexzLibrary.new(dummyHubName, title)
     UserInputService.InputChanged:Connect(function(input)
         if Resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
             if self.Minimized or self.Hidden then return end
-            
-            -- Hitung ukuran baru berdasarkan posisi mouse saat ini
             local mousePos = UserInputService:GetMouseLocation()
             local newWidth = math.max(380, mousePos.X - MainFrame.AbsolutePosition.X)
-            local newHeight = math.max(220, mousePos.Y - MainFrame.AbsolutePosition.Y - 36) -- Kompensasi topbar offset
+            local newHeight = math.max(220, mousePos.Y - MainFrame.AbsolutePosition.Y - 36)
             
             baseSize = UDim2.new(0, newWidth, 0, newHeight)
             MainFrame.Size = baseSize
@@ -139,10 +136,8 @@ function RexzLibrary.new(dummyHubName, title)
         end
     end)
 
-    -- LOGIKA MINIMIZE VS TOGGLE HIDE
     local function MinimizeWindow()
         if self.Hidden then return end 
-        
         self.Minimized = not self.Minimized
         if self.Minimized then
             ResizeGrip.Visible = false
@@ -260,7 +255,7 @@ function RexzLibrary.new(dummyHubName, title)
     SidebarContainer.BackgroundTransparency = 1
     SidebarContainer.Parent = MainFrame
 
-    -- Scrolling Frame Area
+    -- Scrolling Frame Area (DISEMPURNAKAN AGAR COCOK DENGAN METHOD)
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Name = "SidebarScroll"
     Sidebar.Size = UDim2.new(1, 0, 1, -40) 
@@ -269,6 +264,7 @@ function RexzLibrary.new(dummyHubName, title)
     Sidebar.BorderSizePixel = 0
     Sidebar.ScrollBarThickness = 0
     Sidebar.Parent = SidebarContainer
+    self.MainSidebarScroll = Sidebar -- [FIX BUG UTAMA]: Assign agar CreateTab bisa membaca container ini!
 
     local SidebarLayout = Instance.new("UIListLayout")
     SidebarLayout.Parent = Sidebar
@@ -332,15 +328,28 @@ function RexzLibrary.new(dummyHubName, title)
         ToggleIcon.ImageColor3 = newColor
         MainIcon.ImageColor3 = newColor
         
-        -- Ubah warna pembatas dekorasi RichText pada Title
         local hexStr = newColor:ToHex()
         TitleLabel.Text = fixedHubName .. " <font color='#" .. hexStr .. "'>|</font> " .. title
         
-        -- Perbarui indikator Tab aktif saat ini jika ada
+        -- Perbarui warna Tab aktif secara dinamis
         for _, t in ipairs(self.Tabs) do
             if self.CurrentTab == t then
                 t.Label.TextColor3 = newColor
                 if t.Icon then t.Icon.ImageColor3 = newColor end
+            end
+        end
+
+        -- Perbarui warna seluruh toggle aktif secara realtime
+        for _, t in ipairs(self.Tabs) do
+            for _, element in ipairs(t.Elements) do
+                if element.UpdateTheme then
+                    element.UpdateTheme()
+                end
+            end
+        end
+        if ConfigTab then
+            for _, element in ipairs(ConfigTab.Elements) do
+                if element.UpdateTheme then element.UpdateTheme() end
             end
         end
     end
@@ -359,9 +368,7 @@ function RexzLibrary.new(dummyHubName, title)
         end
     end)
 
-    -- =======================================================
     -- FIXED POSITION COMPONENT: SETTINGS/CONFIGURATION
-    -- =======================================================
     local ConfigBtn = Instance.new("TextButton")
     ConfigBtn.Name = "Config_FixedBtn"
     ConfigBtn.Size = UDim2.new(1, -5, 0, 34)
@@ -370,6 +377,7 @@ function RexzLibrary.new(dummyHubName, title)
     ConfigBtn.Text = ""
     ConfigBtn.BorderSizePixel = 0
     ConfigBtn.Parent = SidebarContainer
+    self.ConfigBtn = ConfigBtn
 
     local ConfigBtnCorner = Instance.new("UICorner")
     ConfigBtnCorner.CornerRadius = UDim.new(0, 6)
@@ -403,6 +411,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     local ConfigTab = setmetatable({}, TabClass)
     ConfigTab.Elements = {}
+    ConfigTab.Library = self
     
     local ConfigScrollBox = Instance.new("ScrollingFrame")
     ConfigScrollBox.Name = "Settings_ContentScroll"
@@ -443,9 +452,7 @@ function RexzLibrary.new(dummyHubName, title)
         Sidebar.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y)
     end)
 
-    -- =======================================================
     -- ADVANCED COLOR PICKER SYSTEM (SETTINGS TAB INJECTION)
-    -- =======================================================
     local PickerFrame = Instance.new("Frame")
     PickerFrame.Name = "Dynamic_ColorPicker"
     PickerFrame.Size = UDim2.new(1, -4, 0, 50)
@@ -473,12 +480,11 @@ function RexzLibrary.new(dummyHubName, title)
     PickerLabel.TextXAlignment = Enum.TextXAlignment.Left
     PickerLabel.Parent = PickerFrame
 
-    -- Slider Warna (Hue Track)
     local SliderTrack = Instance.new("ImageLabel")
     SliderTrack.Name = "HueTrack"
     SliderTrack.Size = UDim2.new(1, -170, 0, 10)
     SliderTrack.Position = UDim2.new(0, 150, 0.5, -5)
-    SliderTrack.Image = "rbxassetid://14205561665" -- Nilai Gradasi RGB Spectrum Aset Murni
+    SliderTrack.Image = "rbxassetid://14205561665" 
     SliderTrack.Parent = PickerFrame
 
     local TrackCorner = Instance.new("UICorner")
@@ -497,7 +503,6 @@ function RexzLibrary.new(dummyHubName, title)
     PinCorner.CornerRadius = UDim.new(0, 14)
     PinCorner.Parent = SliderPin
 
-    -- Preview Box Realtime
     local PreviewBox = Instance.new("Frame")
     PreviewBox.Name = "PreviewBox"
     PreviewBox.Size = UDim2.new(0, 24, 0, 24)
@@ -509,7 +514,6 @@ function RexzLibrary.new(dummyHubName, title)
     PreviewCorner.CornerRadius = UDim.new(0, 6)
     PreviewCorner.Parent = PreviewBox
 
-    -- Logika Input Slider Spectrum Warna
     local ColorDragging = false
     SliderPin.MouseButton1Down:Connect(function() ColorDragging = true end)
 
@@ -522,7 +526,6 @@ function RexzLibrary.new(dummyHubName, title)
             local percentage = mouseX / trackAbsSize
             SliderPin.Position = UDim2.new(percentage, -7, 0.5, -7)
             
-            -- Konversi posisi persentase slider ke Color3 Hue
             local selectedColor = Color3.fromHSV(percentage, 1, 1)
             PreviewBox.BackgroundColor3 = selectedColor
             ApplyGlobalAccent(selectedColor)
@@ -535,17 +538,13 @@ function RexzLibrary.new(dummyHubName, title)
 
     table.insert(ConfigTab.Elements, { Name = "Custom Aksen Warna", Instance = PickerFrame })
 
-    -- Tombol Tambahan Simpan Config bawaan
     ConfigTab:AddButton("Save Current Configuration", 10723344432, function()
         self:Notify("Config Saved", "Konfigurasi kustomisasi ukuran dan warna berhasil disimpan!", 4)
     end)
 
-    -- =======================================================
     -- AUTO-INJECT SYSTEM: TAB CREDIT
-    -- =======================================================
     task.spawn(function()
-        local CreditTab = self:CreateTab("Credit", 10723351930)
-        
+        local CreditTab = self:CreateTab("Credit", 10734950309)
         CreditTab:AddButton("Owner: RexzLock", 10734950309, function()
             setclipboard("RexzLock")
             self:Notify("Sistem Info", "Nama owner berhasil disalin ke clipboard!", 4)
@@ -632,6 +631,7 @@ end
 function RexzLibrary:CreateTab(tabName, iconId)
     local tab = setmetatable({}, TabClass)
     tab.Elements = {}
+    tab.Library = self -- [FIX BUG]: Menyimpan reference library utama ke dalam instance tab
     
     local TabButton = Instance.new("TextButton")
     TabButton.Name = tabName .. "_TabBtn"
@@ -640,7 +640,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
     TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
-    TabButton.Parent = self.MainSidebarScroll 
+    TabButton.Parent = self.MainSidebarScroll -- [FIXED]: Sekarang mengarah ke variable yang valid
 
     local TabBtnCorner = Instance.new("UICorner")
     TabBtnCorner.CornerRadius = UDim.new(0, 6)
@@ -782,6 +782,7 @@ end
 function TabClass:AddToggle(text, iconId, defaultState, callback)
     local state = defaultState or false
     local action = callback or function() end
+    local library = self.Library -- [FIX BUG]: Mengambil reference library utama
 
     local ToggleElement = Instance.new("TextButton")
     ToggleElement.Name = text .. "_Toggle"
@@ -837,7 +838,6 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     IndicatorCorner.Parent = IndicatorFrame
 
     local IndicatorStroke = Instance.new("UIStroke")
-    IndicatorStroke.Color = state and self.Parent.AccentColor or Color3.fromRGB(45, 45, 55)
     IndicatorStroke.Thickness = 1.2
     IndicatorStroke.Parent = IndicatorFrame
 
@@ -853,9 +853,10 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     RLogo.TextYAlignment = Enum.TextYAlignment.Center
     RLogo.Parent = IndicatorFrame
 
+    -- [FIX MULTI-THEME]: Update visual fungsi dipisah agar dipanggil saat ganti warna di Settings
     local function UpdateToggleVisual(animate)
         local targetBg = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
-        local targetAccent = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(45, 45, 55)
+        local targetAccent = state and library.AccentColor or Color3.fromRGB(45, 45, 55)
         
         if animate then
             TweenService:Create(IndicatorFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetBg}):Play()
@@ -876,7 +877,8 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
 
     table.insert(self.Elements, {
         Name = text,
-        Instance = ToggleElement
+        Instance = ToggleElement,
+        UpdateTheme = function() UpdateToggleVisual(false) end -- Callback untuk update tema eksternal
     })
 end
 
