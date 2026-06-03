@@ -229,6 +229,32 @@ function RexzLibrary:SaveProfile(profileName)
     return true
 end
 
+function RexzLibrary:DeleteProfile(profileName)
+    if not delfile then
+        self:Notify("Hapus Gagal", "Executor kamu tidak mendukung delfile.", 4)
+        return false
+    end
+
+    local safeName = SanitizeName(profileName)  
+    local path = self.SaveFolder .. "/" .. safeName .. ".json"  
+
+    if not FileExists(path) then  
+        self:Notify("Hapus Gagal", "Profile \"" .. safeName .. "\" tidak ditemukan.", 4)  
+        return false  
+    end  
+
+    local ok, err = pcall(delfile, path)  
+    if not ok then  
+        self:Notify("Hapus Gagal", "Gagal menghapus file profile.", 4)  
+        return false  
+    end  
+
+    self:Notify("Profile Dihapus", "Profile \"" .. safeName .. "\" berhasil dihapus.", 4)  
+    self:RefreshSaveProfiles()  
+    return true
+end
+
+
 function RexzLibrary:LoadProfile(profileName)
     if not readfile then
         self:Notify("Load Gagal", "Executor kamu tidak mendukung readfile.", 4)
@@ -725,8 +751,21 @@ function RexzLibrary.new(dummyHubName, title)
             return  
         end  
         self:LoadProfile(selected)  
+    end)
+    
+    -- Tambahkan tombol ini tepat di bawah tombol "Load Selected"
+    SettingsTab:AddButton("Delete Selected", 10734934585, function()  
+        local selected = saveDropdown:GetValue()  
+        -- Validasi agar tidak menghapus teks default
+        if not selected or selected == "" or selected == "Belum ada profile" then  
+            self:Notify("Delete Profile", "Tidak ada profile yang dipilih.", 3)  
+            return  
+        end  
+        
+        -- Memanggil fungsi delete yang sudah kamu buat
+        self:DeleteProfile(selected)  
     end)  
-
+  
     SettingsTab:AddButton("Refresh List", 10723344432, function()  
         self:RefreshSaveProfiles()  
         self:Notify("Profile", "Daftar profile berhasil diperbarui.", 3)  
