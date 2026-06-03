@@ -1,7 +1,7 @@
 -- [[
 --     LIBRARY UI REXZ (PREMIUM INTEGRATED VERSION)
 --     File: RexzCihuyGanteng
---     Pembaruan: Kunci Posisi Bottom Sidebar & Premium Credit Tab Layout
+--     Pembaruan: Standalone Fixed Sidebar Footer (Paling Bawah Sendiri)
 --     Pengembang: RexzLock / RexzCihuy
 -- ]]
 
@@ -22,6 +22,11 @@ local Themes = {
     {Name = "Gold Edition", Color = Color3.fromRGB(255, 185, 60)}
 }
 
+-- Helper Konversi Color3 ke Hex String untuk RichText
+local function ToHex(color)
+    return string.format("#%02X%02X%02X", math.floor(color.R * 255), math.floor(color.G * 255), math.floor(color.B * 255))
+end
+
 -- [ AUTO-SYNC ]: Menghubungkan library langsung ke repositori ikon kamu
 local ICONS_URL = "https://raw.githubusercontent.com/RexzHubLibrary/RexzHubIconSupport/refs/heads/main/Icon"
 
@@ -29,7 +34,6 @@ local Success, RexzIcons = pcall(function()
     return loadstring(game:HttpGet(ICONS_URL))()
 end)
 
--- Cadangan lokal jika koneksi github bermasalah
 if not Success or type(RexzIcons) ~= "table" then
     warn("[Rexz Library] Gagal memuat database ikon, menggunakan cadangan lokal.")
     RexzIcons = {
@@ -46,7 +50,6 @@ end
 
 RexzLibrary.Icons = RexzIcons
 
--- Helper memformat input ikon (Nama kata kunci, Angka ID, atau Path)
 local function FormatIcon(iconInput)
     if not iconInput then return nil end
     local iconStr = tostring(iconInput)
@@ -245,10 +248,10 @@ function RexzLibrary.new(dummyHubName, title)
 
     MinimizeBtn.MouseButton1Click:Connect(MinimizeWindow)
 
-    -- SIDEBAR NAVIGATION
+    -- SIDEBAR NAVIGATION (Ukurannya dikurangi agar memberikan space di paling bawah)
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 130, 1, -48)
+    Sidebar.Size = UDim2.new(0, 130, 1, -88) -- Diubah dari -48 jadi -88 agar muat footer permanen
     Sidebar.Position = UDim2.new(0, 10, 0, 48)
     Sidebar.BackgroundTransparency = 1
     Sidebar.BorderSizePixel = 0
@@ -259,6 +262,38 @@ function RexzLibrary.new(dummyHubName, title)
     SidebarLayout.Parent = Sidebar
     SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
     SidebarLayout.Padding = UDim.new(0, 4)
+
+    -- =========================================================================
+    -- [ STANDALONE FIXED FOOTER ]: Elemen Independen di Paling Bawah Sendiri
+    -- =========================================================================
+    local SidebarFooter = Instance.new("Frame")
+    SidebarFooter.Name = "SidebarFooter"
+    SidebarFooter.Size = UDim2.new(0, 130, 0, 32)
+    SidebarFooter.Position = UDim2.new(0, 10, 1, -38) -- Mengunci posisi di paling bawah kontainer kiri
+    SidebarFooter.BackgroundTransparency = 1
+    SidebarFooter.Parent = MainFrame
+
+    local FooterLine = Instance.new("Frame")
+    FooterLine.Name = "FooterLine"
+    FooterLine.Size = UDim2.new(1, -6, 0, 1)
+    FooterLine.Position = UDim2.new(0, 3, 0, 0)
+    FooterLine.BackgroundColor3 = Color3.fromRGB(45, 45, 55)
+    FooterLine.BorderSizePixel = 0
+    FooterLine.Parent = SidebarFooter
+
+    local FooterText = Instance.new("TextLabel")
+    FooterText.Name = "FooterText"
+    FooterText.Size = UDim2.new(1, 0, 1, -4)
+    FooterText.Position = UDim2.new(0, 0, 0, 4)
+    FooterText.BackgroundTransparency = 1
+    FooterText.Text = "REXZ HUB <font color='" .. ToHex(Themes[self.CurrentTheme].Color) .. "'>V29</font>"
+    FooterText.TextColor3 = Color3.fromRGB(130, 130, 140)
+    FooterText.TextSize = 11
+    FooterText.Font = Enum.Font.GothamBold
+    FooterText.RichText = true
+    FooterText.TextXAlignment = Enum.TextXAlignment.Center
+    FooterText.Parent = SidebarFooter
+    -- =========================================================================
 
     -- SEARCH BAR COMPONENT
     local SearchFrame = Instance.new("Frame")
@@ -323,7 +358,7 @@ function RexzLibrary.new(dummyHubName, title)
         end
     end)
 
-    -- [ AUTO-INJECT: SETTINGS TAB ] - Posisi Di Atas Credit (9998)
+    -- [ AUTO-INJECT: SETTINGS TAB ] - Posisi Di Atas Elemen Bawah (9998)
     task.spawn(function()
         local SettingsTab = self:CreateTab("Settings", "Settings")
         local selectedSlot = 1
@@ -352,7 +387,7 @@ function RexzLibrary.new(dummyHubName, title)
         end)
     end)
 
-    -- [ AUTO-INJECT: PREMIUM CREDIT TAB ] - Posisi Paling Bawah Sendiri (9999)
+    -- [ AUTO-INJECT: CREDIT TAB ] - Menjadi Tab Biasa Yang Rapi & Tidak Mengikat Footer Elemen
     task.spawn(function()
         local CreditTab = self:CreateTab("Credit", "Credit")
         
@@ -366,7 +401,6 @@ function RexzLibrary.new(dummyHubName, title)
         
         CreditTab:AddLabel("• Versi Build : V29 Stable Edition", Color3.fromRGB(200, 200, 210))
         CreditTab:AddLabel("• Status Inti : Terenkripsi & Aman", Color3.fromRGB(80, 220, 140))
-        CreditTab:AddLabel("• Dukungan    : Komunitas Multi-Eksekutor", Color3.fromRGB(160, 160, 175))
         
         CreditTab:AddLabel("──────────────────────────────", Color3.fromRGB(55, 55, 65))
         
@@ -379,7 +413,7 @@ function RexzLibrary.new(dummyHubName, title)
     return self
 end
 
--- METHOD: LIVE PRESET THEME UPDATER
+-- METHOD: LIVE PRESET THEME UPDATER (Sekaligus Memperbarui Warna Footer Terkunci)
 function RexzLibrary:SetTheme(index)
     self.CurrentTheme = index
     local theme = Themes[index]
@@ -389,7 +423,17 @@ function RexzLibrary:SetTheme(index)
     if self.MainFrame then
         local stroke = self.MainFrame:FindFirstChildOfClass("UIStroke")
         if stroke then stroke.Color = color end
+        
+        -- Mengubah Warna Aksen RichText pada Footer Terkunci Secara Otomatis
+        local footer = self.MainFrame:FindFirstChild("SidebarFooter")
+        if footer then
+            local footerText = footer:FindFirstChild("FooterText")
+            if footerText then
+                footerText.Text = "REXZ HUB <font color='" .. ToHex(color) .. "'>V29</font>"
+            end
+        end
     end
+    
     if self.ScreenGui then
         local toggleBtn = self.ScreenGui:FindFirstChild("UiToggleBtn")
         if toggleBtn then
@@ -554,7 +598,6 @@ function RexzLibrary:CreateTab(tabName, iconId)
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
     
-    -- KUNCI ABSOLUT SIDEBAR PALING BAWAH
     if tabName == "Credit" then
         TabButton.LayoutOrder = 9999
     elseif tabName == "Settings" then
@@ -644,7 +687,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     return tab
 end
 
--- METHOD: ADD PREMIUM LABEL (BARU)
+-- METHOD: ADD PREMIUM LABEL
 function TabClass:AddLabel(text, textColor)
     local LabelElement = Instance.new("Frame")
     LabelElement.Name = text .. "_Label"
