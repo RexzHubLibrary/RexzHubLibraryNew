@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
---// OWNER   : RexzCihuy
+--// OWNER   : Rexz
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
