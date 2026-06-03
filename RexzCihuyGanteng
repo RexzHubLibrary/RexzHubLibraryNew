@@ -16,34 +16,40 @@ local CoreGui = game:GetService("CoreGui")
 local Players = game:GetService("Players")
 
 local ICON_SUPPORT_URL = "https://raw.githubusercontent.com/RexzHubLibrary/RexzHubIconSupport/refs/heads/main/Icon"
-local IconSupport = nil
+
+local IconSupport = {}
+
 pcall(function()
     IconSupport = loadstring(game:HttpGet(ICON_SUPPORT_URL))()
 end)
 
 local function ResolveIcon(icon)
-    if icon == nil then
+    if not icon then
         return nil
     end
 
+    -- Jika number langsung assetid
     if typeof(icon) == "number" then
         return "rbxassetid://" .. tostring(icon)
     end
 
+    -- Jika string
     if typeof(icon) == "string" then
+
+        -- Jika sudah assetid/full link
         if icon:match("^rbxassetid://") or icon:match("^http") then
             return icon
         end
 
-        if IconSupport and IconSupport[icon] then
-            local mapped = IconSupport[icon]
-            if typeof(mapped) == "number" then
-                return "rbxassetid://" .. tostring(mapped)
-            end
-            return tostring(mapped)
-        end
+        -- Support lowercase / alias
+        local fixed =
+            IconSupport[icon]
+            or IconSupport[icon:sub(1,1):upper() .. icon:sub(2)]
+            or IconSupport[string.upper(icon)]
 
-        return icon
+        if fixed then
+            return fixed
+        end
     end
 
     return nil
