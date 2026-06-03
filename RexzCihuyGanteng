@@ -1,5 +1,5 @@
 -- [[
---     LIBRARY UI REXZ (UPDATED: WITH SMOOTH MINIMIZE BUTTON)
+--     LIBRARY UI REXZ (UPDATED: FIXED MINIMIZE & TOGGLE HIDE)
 --     Bahasa: Indonesia Profesional
 --     Pengembang: RexzCihuy
 -- ]]
@@ -16,7 +16,8 @@ function RexzLibrary.new(dummyHubName, title)
     local self = setmetatable({}, RexzLibrary)
     self.Tabs = {}
     self.CurrentTab = nil
-    self.Minimized = false -- Menyimpan status minimize Window Utama
+    self.Minimized = false -- Status untuk melacak perkecilan Window (Hanya sisa Header)
+    self.Hidden = false    -- Status untuk melacak sembunyi total Window (Hide/Show)
     
     local fixedHubName = "Rexz Hub"
 
@@ -42,7 +43,7 @@ function RexzLibrary.new(dummyHubName, title)
     NotifLayout.Padding = UDim.new(0, 8)
     self.NotifHolder = NotifHolder
 
-    -- FLOATING TOGGLE BUTTON
+    -- FLOATING TOGGLE BUTTON (Fungsinya Murni untuk HIDE / SHOW TOTAL)
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "UiToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
@@ -81,7 +82,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainFrame.Active = true
     MainFrame.Draggable = true
     MainFrame.Visible = true
-    MainFrame.ClipsDescendants = true -- Memastikan konten terpotong rapi saat di-minimize
+    MainFrame.ClipsDescendants = true 
     MainFrame.Parent = ScreenGui
     self.MainFrame = MainFrame
 
@@ -94,23 +95,58 @@ function RexzLibrary.new(dummyHubName, title)
     MainStroke.Thickness = 1.2
     MainStroke.Parent = MainFrame
 
-    -- Fungsi Animasi Toggle Menggunakan Tween Service
-    local function ToggleWindow()
+    -- =======================================================
+    -- LOGIKA PEMISAHAN: MINIMIZE VS TOGGLE HIDE
+    -- =======================================================
+
+    -- 1. Fungsi Murni Minimize (Mengecilkan ukuran Frame, menyisakan TopBar)
+    local function MinimizeWindow()
+        if self.Hidden then return end -- Jika sedang sembunyi total, abaikan fungsi ini
+        
         self.Minimized = not self.Minimized
         if self.Minimized then
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 38) -- Mengecil hanya menyisakan Header TopBar
+            -- Ciutkan ukuran frame hanya setinggi TopBar (38px)
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 480, 0, 38)
             })
             tween:Play()
         else
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 300) -- Kembali ke ukuran penuh
+            -- Kembalikan ke ukuran penuh semula (300px)
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 480, 0, 300)
             })
             tween:Play()
         end
     end
 
-    ToggleBtn.MouseButton1Click:Connect(ToggleWindow)
+    -- 2. Fungsi Murni Toggle Hide (Menghilangkan & Memunculkan UI secara total dengan Fade)
+    local function ToggleHideWindow()
+        self.Hidden = not self.Hidden
+        if self.Hidden then
+            -- Efek mengecil tipis sambil menghilang total (Sembunyi)
+            local tweenScale = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                Size = self.Minimized and UDim2.new(0, 430, 0, 38) or UDim2.new(0, 430, 0, 270),
+                BackgroundTransparency = 1
+            })
+            tweenScale:Play()
+            tweenScale.Completed:Connect(function()
+                MainFrame.Visible = false
+            end)
+        else
+            -- Tampilkan kembali UI ke ukuran yang seharusnya (Penuh / Sesuai kondisi minimize sebelumnya)
+            MainFrame.Visible = true
+            local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)
+            
+            local tweenShow = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = targetSize,
+                BackgroundTransparency = 0
+            })
+            tweenShow:Play()
+        end
+    end
+
+    -- Hubungkan Tombol Floating ke fungsi Toggle Hide
+    ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
 
     -- Header Bar
     local TopBar = Instance.new("Frame")
@@ -142,7 +178,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "TitleText"
-    TitleLabel.Size = UDim2.new(1, -110, 1, 0) -- Menyesuaikan space agar tidak bertubrukan dengan 2 tombol aksi
+    TitleLabel.Size = UDim2.new(1, -110, 1, 0)
     TitleLabel.Position = UDim2.new(0, 40, 0, 0)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = tostring(fixedHubName) .. " <font color='#A06EFF'>|</font> " .. tostring(title)
@@ -169,11 +205,11 @@ function RexzLibrary.new(dummyHubName, title)
         ScreenGui:Destroy()
     end)
 
-    -- 🔥 TOMBOL MINIMIZE (-) DI SAMPING CLOSE
+    -- TOMBOL MINIMIZE (-) -> Murni Pengecilan Vertikal
     local MinimizeBtn = Instance.new("TextButton")
     MinimizeBtn.Name = "MinimizeAction"
     MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-    MinimizeBtn.Position = UDim2.new(1, -65, 0, 4) -- Berada tepat di sebelah kiri tombol Close
+    MinimizeBtn.Position = UDim2.new(1, -65, 0, 4) 
     MinimizeBtn.BackgroundTransparency = 1
     MinimizeBtn.Text = "—"
     MinimizeBtn.TextColor3 = Color3.fromRGB(160, 160, 175)
@@ -181,7 +217,7 @@ function RexzLibrary.new(dummyHubName, title)
     MinimizeBtn.Font = Enum.Font.GothamBold
     MinimizeBtn.Parent = TopBar
 
-    MinimizeBtn.MouseButton1Click:Connect(ToggleWindow)
+    MinimizeBtn.MouseButton1Click:Connect(MinimizeWindow)
 
     -- SIDEBAR NAVIGATION CONTAINER
     local Sidebar = Instance.new("ScrollingFrame")
@@ -267,7 +303,7 @@ function RexzLibrary.new(dummyHubName, title)
     end)
 
     -- =======================================================
-    -- AUTO-INJECT SYSTEM: TAB CREDIT (FIXED RENDERING) 😈
+    -- AUTO-INJECT SYSTEM: TAB CREDIT 😈
     -- =======================================================
     task.spawn(function()
         local CreditTab = self:CreateTab("Credit", 10723351930)
@@ -282,7 +318,6 @@ function RexzLibrary.new(dummyHubName, title)
 
     return self
 end
-
 
 -- METHOD: NOTIFY
 function RexzLibrary:Notify(notifTitle, notifText, duration)
