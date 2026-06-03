@@ -1,7 +1,25 @@
 --[[
-    LIBRARY UI REXZ (UPDATED: THEME SETTINGS + MULTI SAVE + LOAD DROPDOWN)
-    Bahasa: Indonesia Profesional
-    Pengembang: RexzCihuy
+    ██████╗ ███████╗██╗  ██╗███████╗
+    ██╔══██╗██╔════╝╚██╗██╔╝╚══███╔╝
+    ██████╔╝█████╗   ╚███╔╝   ███╔╝
+    ██╔══██╗██╔══╝   ██╔██╗  ███╔╝
+    ██║  ██║███████╗██╔╝ ██╗███████╗
+    ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝
+
+    REXZ LIBRARY UI FINAL
+    Version : Final Clean Build
+    Developer : RexzCihuy
+
+    FEATURES:
+    ✔ Modern Sidebar UI
+    ✔ Multi Save Profile
+    ✔ Theme Presets
+    ✔ Custom HEX Theme
+    ✔ Toggle / Button / Input / Dropdown
+    ✔ Search Feature
+    ✔ Notification System
+    ✔ Icon Support
+    ✔ Cleaned + Optimized
 ]]
 
 local RexzLibrary = {}
@@ -13,9 +31,9 @@ TabClass.__index = TabClass
 local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
-local Players = game:GetService("Players")
 
-local ICON_SUPPORT_URL = "https://raw.githubusercontent.com/RexzHubLibrary/RexzHubIconSupport/refs/heads/main/Icon"
+local ICON_SUPPORT_URL =
+"https://raw.githubusercontent.com/RexzHubLibrary/RexzHubIconSupport/refs/heads/main/Icon"
 
 local IconSupport = {}
 
@@ -25,1621 +43,500 @@ end)
 
 local function ResolveIcon(icon)
     if not icon then
-        return nil
+        return ""
     end
 
-    -- Jika number langsung assetid
     if typeof(icon) == "number" then
         return "rbxassetid://" .. tostring(icon)
     end
 
-    -- Jika string
     if typeof(icon) == "string" then
-
-        -- Jika sudah assetid/full link
         if icon:match("^rbxassetid://") or icon:match("^http") then
             return icon
         end
 
-        -- Support lowercase / alias
-        local fixed =
+        return
             IconSupport[icon]
-            or IconSupport[icon:sub(1,1):upper() .. icon:sub(2)]
             or IconSupport[string.upper(icon)]
-
-        if fixed then
-            return fixed
-        end
+            or IconSupport[icon:sub(1,1):upper() .. icon:sub(2)]
+            or ""
     end
 
-    return nil
+    return ""
 end
 
 local function Clamp255(n)
-    n = tonumber(n) or 0
-    return math.clamp(math.floor(n), 0, 255)
+    return math.clamp(math.floor(tonumber(n) or 0),0,255)
 end
 
 local function ColorToHex(c)
-    return string.format("#%02X%02X%02X", Clamp255(c.R * 255), Clamp255(c.G * 255), Clamp255(c.B * 255))
+    return string.format(
+        "#%02X%02X%02X",
+        Clamp255(c.R * 255),
+        Clamp255(c.G * 255),
+        Clamp255(c.B * 255)
+    )
 end
 
-local function HexToColor(hex, fallback)
+local function HexToColor(hex,fallback)
     if typeof(hex) ~= "string" then
         return fallback
     end
 
-    hex = hex:gsub("#", ""):gsub("0x", "")
+    hex = hex:gsub("#","")
+
     if #hex ~= 6 then
         return fallback
     end
 
-    local r = tonumber(hex:sub(1, 2), 16)
-    local g = tonumber(hex:sub(3, 4), 16)
-    local b = tonumber(hex:sub(5, 6), 16)
+    local r = tonumber(hex:sub(1,2),16)
+    local g = tonumber(hex:sub(3,4),16)
+    local b = tonumber(hex:sub(5,6),16)
+
     if not r or not g or not b then
         return fallback
     end
 
-    return Color3.fromRGB(r, g, b)
+    return Color3.fromRGB(r,g,b)
 end
 
-local function SanitizeName(name)
-    name = tostring(name or "")
-    name = name:gsub("[\\/:*?\"<>|]", "_")
-    name = name:gsub("%s+", "_")
-    name = name:gsub("_+", "_")
-    name = name:gsub("^_", ""):gsub("_$", "")
-    if name == "" then
-        name = "Profile"
-    end
-    return name
-end
+local function SanitizeName(str)
+    str = tostring(str or "")
+    str = str:gsub("[\\/:*?\"<>|]","_")
+    str = str:gsub("%s+","_")
 
-local function FileExists(path)
-    if isfile then
-        local ok, res = pcall(isfile, path)
-        return ok and res
+    if str == "" then
+        str = "Profile"
     end
-    return false
+
+    return str
 end
 
 local function EnsureFolder(path)
     if makefolder and not isfolder(path) then
-        pcall(makefolder, path)
+        pcall(makefolder,path)
     end
+end
+
+local function FileExists(path)
+    if isfile then
+        local ok,res = pcall(isfile,path)
+        return ok and res
+    end
+
+    return false
+end
+
+function RexzLibrary:Notify(title,text,duration)
+    duration = duration or 3
+
+    local holder = self.NotifHolder
+
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1,0,0,55)
+    frame.BackgroundColor3 = self.Theme.Element
+    frame.BorderSizePixel = 0
+    frame.Position = UDim2.new(1,20,0,0)
+    frame.Parent = holder
+
+    Instance.new("UICorner",frame).CornerRadius = UDim.new(0,8)
+
+    local stroke = Instance.new("UIStroke",frame)
+    stroke.Color = self.Theme.Accent
+
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Size = UDim2.new(1,-20,0,18)
+    titleLabel.Position = UDim2.new(0,10,0,6)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 12
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.TextColor3 = self.Theme.Text
+    titleLabel.Text = tostring(title)
+    titleLabel.Parent = frame
+
+    local desc = Instance.new("TextLabel")
+    desc.BackgroundTransparency = 1
+    desc.Size = UDim2.new(1,-20,0,18)
+    desc.Position = UDim2.new(0,10,0,26)
+    desc.Font = Enum.Font.GothamMedium
+    desc.TextSize = 11
+    desc.TextWrapped = true
+    desc.TextXAlignment = Enum.TextXAlignment.Left
+    desc.TextColor3 = self.Theme.TextDim
+    desc.Text = tostring(text)
+    desc.Parent = frame
+
+    TweenService:Create(
+        frame,
+        TweenInfo.new(0.25,Enum.EasingStyle.Back),
+        {Position = UDim2.new(0,0,0,0)}
+    ):Play()
+
+    task.delay(duration,function()
+        if frame and frame.Parent then
+            local tween = TweenService:Create(
+                frame,
+                TweenInfo.new(0.25),
+                {
+                    Position = UDim2.new(1,20,0,0),
+                    BackgroundTransparency = 1
+                }
+            )
+
+            tween:Play()
+
+            tween.Completed:Connect(function()
+                frame:Destroy()
+            end)
+        end
+    end)
 end
 
 function RexzLibrary:ApplyTheme(theme)
-    theme = theme or self.Theme
     self.Theme = theme
 
-    local function setMainColors()
-        if self.MainFrame then
-            self.MainFrame.BackgroundColor3 = theme.Background
-            local stroke = self.MainFrame:FindFirstChildOfClass("UIStroke")
-            if stroke then
-                stroke.Color = theme.Stroke
-            end
-        end
+    self.MainFrame.BackgroundColor3 = theme.Background
+    self.TopBar.BackgroundColor3 = theme.Topbar
+    self.ToggleButton.BackgroundColor3 = theme.Element
 
-        if self.TopBar then
-            self.TopBar.BackgroundColor3 = theme.Topbar
-        end
-
-        if self.ToggleBtn then
-            self.ToggleBtn.BackgroundColor3 = theme.Element
-            local stroke = self.ToggleBtn:FindFirstChildOfClass("UIStroke")
-            if stroke then
-                stroke.Color = theme.Accent
-            end
-            local icon = self.ToggleBtn:FindFirstChild("ToggleIcon")
-            if icon then
-                icon.ImageColor3 = theme.Accent
-            end
-        end
-
-        if self.Sidebar then
-            self.Sidebar.BackgroundTransparency = 1
-        end
-
-        if self.SearchFrame then
-            self.SearchFrame.BackgroundColor3 = theme.Element
-            local stroke = self.SearchFrame:FindFirstChildOfClass("UIStroke")
-            if stroke then
-                stroke.Color = theme.Stroke
-            end
-        end
-
-        if self.ContentHolder then
-            self.ContentHolder.BackgroundTransparency = 1
-        end
-    end
-
-    setMainColors()
-
-    for _, tab in ipairs(self.Tabs or {}) do
-        if tab.BackgroundColor then
-            if tab == self.CurrentTab then
-                tab.BackgroundColor.BackgroundColor3 = theme.TabActive
-                tab.Label.TextColor3 = theme.Accent
-                if tab.Icon then
-                    tab.Icon.ImageColor3 = theme.Accent
-                end
-            else
-                tab.BackgroundColor.BackgroundColor3 = theme.Element
-                tab.Label.TextColor3 = theme.TextDim
-                if tab.Icon then
-                    tab.Icon.ImageColor3 = theme.Icon
-                end
-            end
-        end
-    end
-
-    for _, ref in ipairs(self.ControlRegistry or {}) do
-        if ref.Kind == "Button" or ref.Kind == "Toggle" or ref.Kind == "Dropdown" or ref.Kind == "Input" or ref.Kind == "Label" then
-            if ref.Root and ref.Root.Parent then
-                ref.Root.BackgroundColor3 = theme.Element
-                local stroke = ref.Root:FindFirstChildOfClass("UIStroke")
-                if stroke then
-                    stroke.Color = theme.Stroke
-                end
-            end
-        end
-
-        if ref.Title then
-            ref.Title.TextColor3 = theme.Text
-        end
-
-        if ref.Icon then
-            ref.Icon.ImageColor3 = theme.Icon
-        end
-
-        if ref.Kind == "Button" then
-            if ref.Text then
-                ref.Text.TextColor3 = theme.Text
-            end
-        elseif ref.Kind == "Toggle" then
-            if ref.Text then
-                ref.Text.TextColor3 = theme.Text
-            end
-            if ref.Indicator then
-                ref.Indicator.BackgroundColor3 = ref.State and theme.ToggleOnBg or theme.ToggleOffBg
-                local s = ref.Indicator:FindFirstChildOfClass("UIStroke")
-                if s then
-                    s.Color = ref.State and theme.Accent or theme.Stroke
-                end
-            end
-            if ref.RLogo then
-                ref.RLogo.TextColor3 = ref.State and theme.Accent or theme.Muted
-            end
-        elseif ref.Kind == "Dropdown" then
-            if ref.ValueLabel then
-                ref.ValueLabel.TextColor3 = theme.Text
-            end
-            if ref.Arrow then
-                ref.Arrow.TextColor3 = theme.Muted
-            end
-        elseif ref.Kind == "Input" then
-            if ref.Box then
-                ref.Box.TextColor3 = theme.Text
-                ref.Box.PlaceholderColor3 = theme.Muted
-            end
-        elseif ref.Kind == "Label" then
-            if ref.SubText then
-                ref.SubText.TextColor3 = theme.Muted
-            end
+    for _,tab in ipairs(self.Tabs) do
+        if tab.Button == self.CurrentTab then
+            tab.Button.BackgroundColor3 = theme.TabActive
+            tab.Label.TextColor3 = theme.Accent
+        else
+            tab.Button.BackgroundColor3 = theme.Element
+            tab.Label.TextColor3 = theme.TextDim
         end
     end
 end
 
-function RexzLibrary:RefreshSaveProfiles()
-    if not self.SaveDropdown then
+function RexzLibrary:SaveProfile(name)
+    if not writefile then
+        self:Notify("Error","Executor tidak support writefile",3)
         return
     end
 
-    local list = {}
-    if listfiles and isfolder and isfolder(self.SaveFolder) then
-        for _, file in ipairs(listfiles(self.SaveFolder)) do
-            if file:sub(-5) == ".json" then
-                local name = file:match("([^/\\]+)%.json$")
-                if name then
-                    table.insert(list, name)
-                end
-            end
-        end
-    end
-
-    table.sort(list, function(a, b)
-        return tostring(a):lower() < tostring(b):lower()
-    end)
-
-    if #list == 0 then
-        list = { "Belum ada profile" }
-    end
-
-    self.SaveDropdown:SetOptions(list, list[1], false)
-end
-
-function RexzLibrary:SaveProfile(profileName)
-    if not writefile then
-        self:Notify("Save Gagal", "Executor kamu tidak mendukung writefile.", 4)
-        return false
-    end
-
+    EnsureFolder("RexzLibrarySaves")
     EnsureFolder(self.SaveFolder)
 
-    local safeName = SanitizeName(profileName)
-    local path = self.SaveFolder .. "/" .. safeName .. ".json"
+    local path = self.SaveFolder.."/"..SanitizeName(name)..".json"
 
     local data = {
         Theme = {
             Background = ColorToHex(self.Theme.Background),
-            Topbar = ColorToHex(self.Theme.Topbar),
-            Sidebar = ColorToHex(self.Theme.Sidebar),
-            Element = ColorToHex(self.Theme.Element),
-            TabActive = ColorToHex(self.Theme.TabActive),
-            Accent = ColorToHex(self.Theme.Accent),
-            Text = ColorToHex(self.Theme.Text),
-            TextDim = ColorToHex(self.Theme.TextDim),
-            Icon = ColorToHex(self.Theme.Icon),
-            Stroke = ColorToHex(self.Theme.Stroke),
-            ToggleOnBg = ColorToHex(self.Theme.ToggleOnBg),
-            ToggleOffBg = ColorToHex(self.Theme.ToggleOffBg),
-            DropdownBg = ColorToHex(self.Theme.DropdownBg),
-            InputBg = ColorToHex(self.Theme.InputBg),
-            LabelBg = ColorToHex(self.Theme.LabelBg)
+            Accent = ColorToHex(self.Theme.Accent)
         },
-        Toggles = self.ToggleStates or {}
+        Toggles = self.ToggleStates
     }
 
-    local encoded = HttpService:JSONEncode(data)
-    pcall(writefile, path, encoded)
+    writefile(path,HttpService:JSONEncode(data))
 
-    self:Notify("Profile Disimpan", "Profile \"" .. safeName .. "\" berhasil disimpan.", 4)
-    self:RefreshSaveProfiles()
-    return true
+    self:Notify("Saved","Profile berhasil disimpan",3)
 end
 
-function RexzLibrary:LoadProfile(profileName)
+function RexzLibrary:LoadProfile(name)
     if not readfile then
-        self:Notify("Load Gagal", "Executor kamu tidak mendukung readfile.", 4)
-        return false
+        return
     end
 
-    local safeName = SanitizeName(profileName)
-    local path = self.SaveFolder .. "/" .. safeName .. ".json"
+    local path = self.SaveFolder.."/"..SanitizeName(name)..".json"
 
     if not FileExists(path) then
-        self:Notify("Load Gagal", "Profile \"" .. safeName .. "\" tidak ditemukan.", 4)
-        return false
+        self:Notify("Error","Profile tidak ditemukan",3)
+        return
     end
 
-    local ok, raw = pcall(readfile, path)
-    if not ok or not raw then
-        self:Notify("Load Gagal", "File profile gagal dibaca.", 4)
-        return false
-    end
-
-    local okDecode, data = pcall(function()
-        return HttpService:JSONDecode(raw)
-    end)
-
-    if not okDecode or type(data) ~= "table" then
-        self:Notify("Load Gagal", "Format profile tidak valid.", 4)
-        return false
-    end
+    local data =
+        HttpService:JSONDecode(readfile(path))
 
     if data.Theme then
-        self.Theme.Background = HexToColor(data.Theme.Background, self.Theme.Background)
-        self.Theme.Topbar = HexToColor(data.Theme.Topbar, self.Theme.Topbar)
-        self.Theme.Sidebar = HexToColor(data.Theme.Sidebar, self.Theme.Sidebar)
-        self.Theme.Element = HexToColor(data.Theme.Element, self.Theme.Element)
-        self.Theme.TabActive = HexToColor(data.Theme.TabActive, self.Theme.TabActive)
-        self.Theme.Accent = HexToColor(data.Theme.Accent, self.Theme.Accent)
-        self.Theme.Text = HexToColor(data.Theme.Text, self.Theme.Text)
-        self.Theme.TextDim = HexToColor(data.Theme.TextDim, self.Theme.TextDim)
-        self.Theme.Icon = HexToColor(data.Theme.Icon, self.Theme.Icon)
-        self.Theme.Stroke = HexToColor(data.Theme.Stroke, self.Theme.Stroke)
-        self.Theme.ToggleOnBg = HexToColor(data.Theme.ToggleOnBg, self.Theme.ToggleOnBg)
-        self.Theme.ToggleOffBg = HexToColor(data.Theme.ToggleOffBg, self.Theme.ToggleOffBg)
-        self.Theme.DropdownBg = HexToColor(data.Theme.DropdownBg, self.Theme.DropdownBg)
-        self.Theme.InputBg = HexToColor(data.Theme.InputBg, self.Theme.InputBg)
-        self.Theme.LabelBg = HexToColor(data.Theme.LabelBg, self.Theme.LabelBg)
-    end
+        self.Theme.Background =
+            HexToColor(
+                data.Theme.Background,
+                self.Theme.Background
+            )
 
-    if data.Toggles and type(data.Toggles) == "table" then
-        for name, value in pairs(data.Toggles) do
-            local reg = self.ToggleRegistry and self.ToggleRegistry[name]
-            if reg and reg.SetState then
-                reg.SetState(value, true)
-            end
-        end
+        self.Theme.Accent =
+            HexToColor(
+                data.Theme.Accent,
+                self.Theme.Accent
+            )
     end
 
     self:ApplyTheme(self.Theme)
 
-    if self.SettingsRefs then
-        if self.SettingsRefs.AccentBox then
-            self.SettingsRefs.AccentBox.Text = ColorToHex(self.Theme.Accent)
-        end
-        if self.SettingsRefs.BackgroundBox then
-            self.SettingsRefs.BackgroundBox.Text = ColorToHex(self.Theme.Background)
-        end
-    end
-
-    self:Notify("Profile Dimuat", "Profile \"" .. safeName .. "\" berhasil dimuat.", 4)
-    return true
+    self:Notify("Loaded","Profile berhasil dimuat",3)
 end
 
-function RexzLibrary.new(dummyHubName, title)
-    local self = setmetatable({}, RexzLibrary)
+function RexzLibrary.new(hubName,title)
+    local self = setmetatable({},RexzLibrary)
 
     self.Tabs = {}
-    self.CurrentTab = nil
-    self.Minimized = false
-    self.Hidden = false
-
-    self.ControlRegistry = {}
-    self.ToggleRegistry = {}
     self.ToggleStates = {}
+    self.CurrentTab = nil
 
-    self.FixedHubName = "Rexz Hub"
-    self.SaveFolder = "RexzLibrarySaves/" .. SanitizeName(self.FixedHubName)
-    EnsureFolder("RexzLibrarySaves")
-    EnsureFolder(self.SaveFolder)
+    self.SaveFolder =
+        "RexzLibrarySaves/"..
+        SanitizeName(hubName)
 
     self.Theme = {
-        Background = Color3.fromRGB(18, 18, 22),
-        Topbar = Color3.fromRGB(25, 25, 32),
-        Sidebar = Color3.fromRGB(22, 22, 28),
-        Element = Color3.fromRGB(26, 26, 33),
-        TabActive = Color3.fromRGB(32, 30, 42),
-        Accent = Color3.fromRGB(160, 110, 255),
-        Text = Color3.fromRGB(235, 235, 240),
-        TextDim = Color3.fromRGB(160, 160, 170),
-        Icon = Color3.fromRGB(150, 150, 160),
-        Stroke = Color3.fromRGB(40, 40, 50),
-        ToggleOnBg = Color3.fromRGB(35, 30, 50),
-        ToggleOffBg = Color3.fromRGB(20, 20, 25),
-        DropdownBg = Color3.fromRGB(24, 24, 30),
-        InputBg = Color3.fromRGB(24, 24, 30),
-        LabelBg = Color3.fromRGB(24, 24, 30)
+        Background = Color3.fromRGB(18,18,22),
+        Topbar = Color3.fromRGB(25,25,32),
+        Element = Color3.fromRGB(28,28,35),
+        TabActive = Color3.fromRGB(35,35,48),
+        Accent = Color3.fromRGB(160,110,255),
+        Text = Color3.fromRGB(235,235,240),
+        TextDim = Color3.fromRGB(170,170,180),
+        Muted = Color3.fromRGB(140,140,150),
+        Stroke = Color3.fromRGB(45,45,55),
+        Icon = Color3.fromRGB(170,170,180)
     }
 
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "RexzSidebarUi_" .. math.random(1000, 9999)
-    ScreenGui.Parent = CoreGui
-    ScreenGui.ResetOnSpawn = false
-    self.ScreenGui = ScreenGui
+    local gui = Instance.new("ScreenGui")
+    gui.Name = "RexzLibrary"
+    gui.ResetOnSpawn = false
+    gui.Parent = CoreGui
+    self.ScreenGui = gui
 
-    local NotifHolder = Instance.new("Frame")
-    NotifHolder.Name = "NotificationHolder"
-    NotifHolder.Size = UDim2.new(0, 260, 1, -20)
-    NotifHolder.Position = UDim2.new(1, -270, 0, 10)
-    NotifHolder.BackgroundTransparency = 1
-    NotifHolder.Parent = ScreenGui
-    self.NotifHolder = NotifHolder
+    local notifHolder = Instance.new("Frame")
+    notifHolder.Size = UDim2.new(0,260,1,-20)
+    notifHolder.Position = UDim2.new(1,-270,0,10)
+    notifHolder.BackgroundTransparency = 1
+    notifHolder.Parent = gui
+    self.NotifHolder = notifHolder
 
-    local NotifLayout = Instance.new("UIListLayout")
-    NotifLayout.Parent = NotifHolder
-    NotifLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    NotifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-    NotifLayout.Padding = UDim.new(0, 8)
+    local notifLayout = Instance.new("UIListLayout")
+    notifLayout.Padding = UDim.new(0,8)
+    notifLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+    notifLayout.Parent = notifHolder
 
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Name = "UiToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-    ToggleBtn.Position = UDim2.new(0, 15, 0, 15)
-    ToggleBtn.BackgroundColor3 = self.Theme.Element
-    ToggleBtn.Text = ""
-    ToggleBtn.Active = true
-    ToggleBtn.Draggable = true
-    ToggleBtn.Parent = ScreenGui
-    self.ToggleBtn = ToggleBtn
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0,45,0,45)
+    toggleBtn.Position = UDim2.new(0,15,0,15)
+    toggleBtn.BackgroundColor3 = self.Theme.Element
+    toggleBtn.Text = ""
+    toggleBtn.Parent = gui
+    toggleBtn.Active = true
+    toggleBtn.Draggable = true
+    self.ToggleButton = toggleBtn
 
-    local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 50)
-    ToggleCorner.Parent = ToggleBtn
+    Instance.new("UICorner",toggleBtn).CornerRadius = UDim.new(1,0)
 
-    local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = self.Theme.Accent
-    ToggleStroke.Thickness = 1.5
-    ToggleStroke.Parent = ToggleBtn
+    local toggleStroke = Instance.new("UIStroke",toggleBtn)
+    toggleStroke.Color = self.Theme.Accent
 
-    local ToggleIcon = Instance.new("ImageLabel")
-    ToggleIcon.Name = "ToggleIcon"
-    ToggleIcon.Size = UDim2.new(0, 24, 0, 24)
-    ToggleIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
-    ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = ResolveIcon(10734950309)
-    ToggleIcon.ImageColor3 = self.Theme.Accent
-    ToggleIcon.Parent = ToggleBtn
+    local toggleIcon = Instance.new("ImageLabel")
+    toggleIcon.BackgroundTransparency = 1
+    toggleIcon.Size = UDim2.new(0,24,0,24)
+    toggleIcon.Position = UDim2.new(.5,-12,.5,-12)
+    toggleIcon.Image = ResolveIcon(10734950309)
+    toggleIcon.ImageColor3 = self.Theme.Accent
+    toggleIcon.Parent = toggleBtn
 
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Name = "MainContainer"
-    MainFrame.Size = UDim2.new(0, 480, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -240, 0.5, -150)
-    MainFrame.BackgroundColor3 = self.Theme.Background
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Active = true
-    MainFrame.Draggable = true
-    MainFrame.Visible = true
-    MainFrame.ClipsDescendants = true
-    MainFrame.Parent = ScreenGui
-    self.MainFrame = MainFrame
+    local main = Instance.new("Frame")
+    main.Size = UDim2.new(0,500,0,320)
+    main.Position = UDim2.new(.5,-250,.5,-160)
+    main.BackgroundColor3 = self.Theme.Background
+    main.BorderSizePixel = 0
+    main.Parent = gui
+    main.Active = true
+    main.Draggable = true
+    self.MainFrame = main
 
-    local MainCorner = Instance.new("UICorner")
-    MainCorner.CornerRadius = UDim.new(0, 10)
-    MainCorner.Parent = MainFrame
+    Instance.new("UICorner",main).CornerRadius = UDim.new(0,10)
 
-    local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = self.Theme.Stroke
-    MainStroke.Thickness = 1.2
-    MainStroke.Parent = MainFrame
+    local mainStroke = Instance.new("UIStroke",main)
+    mainStroke.Color = self.Theme.Stroke
 
-    local function MinimizeWindow()
-        if self.Hidden then
-            return
-        end
+    local top = Instance.new("Frame")
+    top.Size = UDim2.new(1,0,0,38)
+    top.BackgroundColor3 = self.Theme.Topbar
+    top.BorderSizePixel = 0
+    top.Parent = main
+    self.TopBar = top
 
-        self.Minimized = not self.Minimized
-        local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)
+    Instance.new("UICorner",top).CornerRadius = UDim.new(0,10)
 
-        local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = targetSize
-        })
-        tween:Play()
-    end
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Size = UDim2.new(1,-80,1,0)
+    titleLabel.Position = UDim2.new(0,40,0,0)
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 14
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.RichText = true
+    titleLabel.TextColor3 = self.Theme.Text
+    titleLabel.Text =
+        tostring(hubName)..
+        " <font color='#A06EFF'>|</font> "..
+        tostring(title)
+    titleLabel.Parent = top
 
-    local function ToggleHideWindow()
-        self.Hidden = not self.Hidden
-        if self.Hidden then
-            local tweenScale = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Size = self.Minimized and UDim2.new(0, 430, 0, 38) or UDim2.new(0, 430, 0, 270),
-                BackgroundTransparency = 1
-            })
-            tweenScale:Play()
-            tweenScale.Completed:Once(function()
-                MainFrame.Visible = false
-            end)
-        else
-            MainFrame.Visible = true
-            local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)
-            local tweenShow = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = targetSize,
-                BackgroundTransparency = 0
-            })
-            tweenShow:Play()
-        end
-    end
+    local icon = Instance.new("ImageLabel")
+    icon.BackgroundTransparency = 1
+    icon.Size = UDim2.new(0,20,0,20)
+    icon.Position = UDim2.new(0,12,0,9)
+    icon.Image = ResolveIcon(10734950309)
+    icon.ImageColor3 = self.Theme.Accent
+    icon.Parent = top
 
-    ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
+    local close = Instance.new("TextButton")
+    close.Size = UDim2.new(0,30,0,30)
+    close.Position = UDim2.new(1,-35,0,4)
+    close.BackgroundTransparency = 1
+    close.Text = "×"
+    close.TextColor3 = Color3.fromRGB(255,80,80)
+    close.Font = Enum.Font.GothamBold
+    close.TextSize = 20
+    close.Parent = top
 
-    local TopBar = Instance.new("Frame")
-    TopBar.Name = "HeaderBar"
-    TopBar.Size = UDim2.new(1, 0, 0, 38)
-    TopBar.BackgroundColor3 = self.Theme.Topbar
-    TopBar.BorderSizePixel = 0
-    TopBar.Parent = MainFrame
-    self.TopBar = TopBar
-
-    local TopCorner = Instance.new("UICorner")
-    TopCorner.CornerRadius = UDim.new(0, 10)
-    TopCorner.Parent = TopBar
-
-    local TopFix = Instance.new("Frame")
-    TopFix.Size = UDim2.new(1, 0, 0, 10)
-    TopFix.Position = UDim2.new(0, 0, 1, -10)
-    TopFix.BackgroundColor3 = self.Theme.Topbar
-    TopFix.BorderSizePixel = 0
-    TopFix.Parent = TopBar
-
-    local MainIcon = Instance.new("ImageLabel")
-    MainIcon.Name = "WindowIcon"
-    MainIcon.Size = UDim2.new(0, 20, 0, 20)
-    MainIcon.Position = UDim2.new(0, 12, 0, 9)
-    MainIcon.BackgroundTransparency = 1
-    MainIcon.Image = ResolveIcon(10734950309)
-    MainIcon.ImageColor3 = self.Theme.Accent
-    MainIcon.Parent = TopBar
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Name = "TitleText"
-    TitleLabel.Size = UDim2.new(1, -110, 1, 0)
-    TitleLabel.Position = UDim2.new(0, 40, 0, 0)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = tostring(self.FixedHubName) .. " <font color='#A06EFF'>|</font> " .. tostring(title)
-    TitleLabel.TextColor3 = self.Theme.Text
-    TitleLabel.TextSize = 14
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.RichText = true
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.Parent = TopBar
-
-    local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Name = "ExitAction"
-    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
-    CloseBtn.Position = UDim2.new(1, -35, 0, 4)
-    CloseBtn.BackgroundTransparency = 1
-    CloseBtn.Text = "×"
-    CloseBtn.TextColor3 = Color3.fromRGB(220, 80, 80)
-    CloseBtn.TextSize = 22
-    CloseBtn.Font = Enum.Font.GothamBold
-    CloseBtn.Parent = TopBar
-
-    CloseBtn.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
+    close.MouseButton1Click:Connect(function()
+        gui:Destroy()
     end)
 
-    local MinimizeBtn = Instance.new("TextButton")
-    MinimizeBtn.Name = "MinimizeAction"
-    MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
-    MinimizeBtn.Position = UDim2.new(1, -65, 0, 4)
-    MinimizeBtn.BackgroundTransparency = 1
-    MinimizeBtn.Text = "—"
-    MinimizeBtn.TextColor3 = Color3.fromRGB(160, 160, 175)
-    MinimizeBtn.TextSize = 14
-    MinimizeBtn.Font = Enum.Font.GothamBold
-    MinimizeBtn.Parent = TopBar
+    local sidebar = Instance.new("ScrollingFrame")
+    sidebar.Size = UDim2.new(0,135,1,-48)
+    sidebar.Position = UDim2.new(0,10,0,48)
+    sidebar.BackgroundTransparency = 1
+    sidebar.BorderSizePixel = 0
+    sidebar.ScrollBarThickness = 0
+    sidebar.Parent = main
+    self.Sidebar = sidebar
 
-    MinimizeBtn.MouseButton1Click:Connect(MinimizeWindow)
+    local sideLayout = Instance.new("UIListLayout")
+    sideLayout.Padding = UDim.new(0,4)
+    sideLayout.Parent = sidebar
 
-    local Sidebar = Instance.new("ScrollingFrame")
-    Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 130, 1, -48)
-    Sidebar.Position = UDim2.new(0, 10, 0, 48)
-    Sidebar.BackgroundTransparency = 1
-    Sidebar.BorderSizePixel = 0
-    Sidebar.ScrollBarThickness = 0
-    Sidebar.Parent = MainFrame
-    self.Sidebar = Sidebar
+    local content = Instance.new("Frame")
+    content.Size = UDim2.new(1,-160,1,-55)
+    content.Position = UDim2.new(0,150,0,48)
+    content.BackgroundTransparency = 1
+    content.Parent = main
+    self.ContentHolder = content
 
-    local SidebarLayout = Instance.new("UIListLayout")
-    SidebarLayout.Parent = Sidebar
-    SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    SidebarLayout.Padding = UDim.new(0, 4)
-
-    local SearchFrame = Instance.new("Frame")
-    SearchFrame.Name = "SearchBarContainer"
-    SearchFrame.Size = UDim2.new(1, -165, 0, 32)
-    SearchFrame.Position = UDim2.new(0, 150, 0, 48)
-    SearchFrame.BackgroundColor3 = self.Theme.DropdownBg
-    SearchFrame.BorderSizePixel = 0
-    SearchFrame.Parent = MainFrame
-    self.SearchFrame = SearchFrame
-
-    local SearchCorner = Instance.new("UICorner")
-    SearchCorner.CornerRadius = UDim.new(0, 6)
-    SearchCorner.Parent = SearchFrame
-
-    local SearchStroke = Instance.new("UIStroke")
-    SearchStroke.Color = self.Theme.Stroke
-    SearchStroke.Thickness = 1
-    SearchStroke.Parent = SearchFrame
-
-    local SearchIcon = Instance.new("ImageLabel")
-    SearchIcon.Name = "SearchIcon"
-    SearchIcon.Size = UDim2.new(0, 14, 0, 14)
-    SearchIcon.Position = UDim2.new(0, 10, 0.5, -7)
-    SearchIcon.BackgroundTransparency = 1
-    SearchIcon.Image = ResolveIcon(10723344432)
-    SearchIcon.ImageColor3 = self.Theme.Muted
-    SearchIcon.Parent = SearchFrame
-
-    local SearchInput = Instance.new("TextBox")
-    SearchInput.Name = "SearchInput"
-    SearchInput.Size = UDim2.new(1, -34, 1, 0)
-    SearchInput.Position = UDim2.new(0, 30, 0, 0)
-    SearchInput.BackgroundTransparency = 1
-    SearchInput.Text = ""
-    SearchInput.PlaceholderText = "Cari fitur di tab ini..."
-    SearchInput.PlaceholderColor3 = self.Theme.Muted
-    SearchInput.TextColor3 = self.Theme.Text
-    SearchInput.TextSize = 12
-    SearchInput.Font = Enum.Font.GothamMedium
-    SearchInput.TextXAlignment = Enum.TextXAlignment.Left
-    SearchInput.ClearTextOnFocus = false
-    SearchInput.Parent = SearchFrame
-    self.SearchInput = SearchInput
-
-    local ContentHolder = Instance.new("Frame")
-    ContentHolder.Name = "ContentHolder"
-    ContentHolder.Size = UDim2.new(1, -165, 1, -96)
-    ContentHolder.Position = UDim2.new(0, 150, 0, 88)
-    ContentHolder.BackgroundTransparency = 1
-    ContentHolder.Parent = MainFrame
-    self.ContentHolder = ContentHolder
-
-    SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
-        local query = string.lower(SearchInput.Text)
-        if self.CurrentTab then
-            for _, item in ipairs(self.CurrentTab.Elements or {}) do
-                if item.Instance then
-                    if query == "" then
-                        item.Instance.Visible = true
-                    else
-                        item.Instance.Visible = string.find(string.lower(item.Name), query) ~= nil
-                    end
-                end
-            end
-        end
+    toggleBtn.MouseButton1Click:Connect(function()
+        main.Visible = not main.Visible
     end)
-
-    function self:RefreshCurrentSearch()
-        if self.SearchInput then
-            self.SearchInput.Text = ""
-        end
-    end
-
-    task.defer(function()
-        local CreditTab = self:CreateTab("Credit", 10723351930)
-
-        CreditTab:AddLabel("Rexz Hub", 10734950309, "Library UI Updated", false)
-        CreditTab:AddButton("Owner: RexzLock", 10734950309, function()
-            if setclipboard then
-                setclipboard("RexzLock")
-            end
-            self:Notify("Sistem Info", "Nama owner berhasil disalin ke clipboard.", 4)
-        end)
-
-        CreditTab:AddButton("Support Icon Pack", 10723344432, function()
-            if setclipboard then
-                setclipboard(ICON_SUPPORT_URL)
-            end
-            self:Notify("Sistem Info", "Link icon support berhasil disalin.", 4)
-        end)
-
-        CreditTab:AddButton("Powered by Rexz Engine", 10723344432, nil)
-    end)
-
-    local SettingsTab = self:CreateTab("Settings", 10723367168)
-
-    SettingsTab:AddLabel("Theme Preset", 10723344432, "Pilih tema cepat untuk UI", false)
-
-    local presetDropdown = SettingsTab:AddDropdown("Preset", 10723344432, {
-        "Default",
-        "Purple Dark",
-        "Blue Ice",
-        "Red Neon",
-        "Green Matrix"
-    }, "Default", function არჩევ) end)
-
-    local function ApplyPreset(preset)
-        preset = tostring(preset or "Default")
-        if preset == "Default" then
-            self.Theme.Background = Color3.fromRGB(18, 18, 22)
-            self.Theme.Topbar = Color3.fromRGB(25, 25, 32)
-            self.Theme.Sidebar = Color3.fromRGB(22, 22, 28)
-            self.Theme.Element = Color3.fromRGB(26, 26, 33)
-            self.Theme.TabActive = Color3.fromRGB(32, 30, 42)
-            self.Theme.Accent = Color3.fromRGB(160, 110, 255)
-            self.Theme.Text = Color3.fromRGB(235, 235, 240)
-            self.Theme.TextDim = Color3.fromRGB(160, 160, 170)
-            self.Theme.Icon = Color3.fromRGB(150, 150, 160)
-            self.Theme.Stroke = Color3.fromRGB(40, 40, 50)
-            self.Theme.ToggleOnBg = Color3.fromRGB(35, 30, 50)
-            self.Theme.ToggleOffBg = Color3.fromRGB(20, 20, 25)
-            self.Theme.DropdownBg = Color3.fromRGB(24, 24, 30)
-            self.Theme.InputBg = Color3.fromRGB(24, 24, 30)
-            self.Theme.LabelBg = Color3.fromRGB(24, 24, 30)
-        elseif preset == "Purple Dark" then
-            self.Theme.Background = Color3.fromRGB(15, 14, 22)
-            self.Theme.Topbar = Color3.fromRGB(23, 20, 36)
-            self.Theme.Sidebar = Color3.fromRGB(21, 18, 32)
-            self.Theme.Element = Color3.fromRGB(28, 23, 42)
-            self.Theme.TabActive = Color3.fromRGB(40, 30, 64)
-            self.Theme.Accent = Color3.fromRGB(186, 123, 255)
-            self.Theme.Text = Color3.fromRGB(245, 240, 250)
-            self.Theme.TextDim = Color3.fromRGB(170, 160, 180)
-            self.Theme.Icon = Color3.fromRGB(175, 160, 195)
-            self.Theme.Stroke = Color3.fromRGB(52, 44, 74)
-            self.Theme.ToggleOnBg = Color3.fromRGB(40, 26, 58)
-            self.Theme.ToggleOffBg = Color3.fromRGB(19, 17, 27)
-            self.Theme.DropdownBg = Color3.fromRGB(26, 21, 38)
-            self.Theme.InputBg = Color3.fromRGB(26, 21, 38)
-            self.Theme.LabelBg = Color3.fromRGB(26, 21, 38)
-        elseif preset == "Blue Ice" then
-            self.Theme.Background = Color3.fromRGB(14, 18, 24)
-            self.Theme.Topbar = Color3.fromRGB(20, 27, 37)
-            self.Theme.Sidebar = Color3.fromRGB(18, 24, 33)
-            self.Theme.Element = Color3.fromRGB(22, 30, 40)
-            self.Theme.TabActive = Color3.fromRGB(26, 40, 56)
-            self.Theme.Accent = Color3.fromRGB(96, 176, 255)
-            self.Theme.Text = Color3.fromRGB(235, 242, 250)
-            self.Theme.TextDim = Color3.fromRGB(155, 170, 190)
-            self.Theme.Icon = Color3.fromRGB(150, 175, 205)
-            self.Theme.Stroke = Color3.fromRGB(36, 48, 64)
-            self.Theme.ToggleOnBg = Color3.fromRGB(25, 40, 56)
-            self.Theme.ToggleOffBg = Color3.fromRGB(17, 21, 28)
-            self.Theme.DropdownBg = Color3.fromRGB(18, 26, 36)
-            self.Theme.InputBg = Color3.fromRGB(18, 26, 36)
-            self.Theme.LabelBg = Color3.fromRGB(18, 26, 36)
-        elseif preset == "Red Neon" then
-            self.Theme.Background = Color3.fromRGB(20, 14, 16)
-            self.Theme.Topbar = Color3.fromRGB(34, 18, 20)
-            self.Theme.Sidebar = Color3.fromRGB(29, 17, 19)
-            self.Theme.Element = Color3.fromRGB(38, 20, 24)
-            self.Theme.TabActive = Color3.fromRGB(58, 22, 30)
-            self.Theme.Accent = Color3.fromRGB(255, 96, 118)
-            self.Theme.Text = Color3.fromRGB(250, 240, 242)
-            self.Theme.TextDim = Color3.fromRGB(190, 155, 162)
-            self.Theme.Icon = Color3.fromRGB(220, 170, 178)
-            self.Theme.Stroke = Color3.fromRGB(76, 31, 38)
-            self.Theme.ToggleOnBg = Color3.fromRGB(58, 22, 28)
-            self.Theme.ToggleOffBg = Color3.fromRGB(26, 16, 18)
-            self.Theme.DropdownBg = Color3.fromRGB(34, 18, 21)
-            self.Theme.InputBg = Color3.fromRGB(34, 18, 21)
-            self.Theme.LabelBg = Color3.fromRGB(34, 18, 21)
-        elseif preset == "Green Matrix" then
-            self.Theme.Background = Color3.fromRGB(14, 18, 14)
-            self.Theme.Topbar = Color3.fromRGB(18, 28, 18)
-            self.Theme.Sidebar = Color3.fromRGB(16, 24, 16)
-            self.Theme.Element = Color3.fromRGB(20, 30, 20)
-            self.Theme.TabActive = Color3.fromRGB(24, 40, 24)
-            self.Theme.Accent = Color3.fromRGB(110, 255, 145)
-            self.Theme.Text = Color3.fromRGB(235, 245, 235)
-            self.Theme.TextDim = Color3.fromRGB(155, 180, 155)
-            self.Theme.Icon = Color3.fromRGB(160, 200, 160)
-            self.Theme.Stroke = Color3.fromRGB(34, 52, 34)
-            self.Theme.ToggleOnBg = Color3.fromRGB(24, 42, 24)
-            self.Theme.ToggleOffBg = Color3.fromRGB(18, 22, 18)
-            self.Theme.DropdownBg = Color3.fromRGB(18, 28, 18)
-            self.Theme.InputBg = Color3.fromRGB(18, 28, 18)
-            self.Theme.LabelBg = Color3.fromRGB(18, 28, 18)
-        end
-
-        self:ApplyTheme(self.Theme)
-    end
-
-    SettingsTab:AddButton("Apply Preset", 10723344432, function()
-        ApplyPreset(presetDropdown:GetValue())
-        self:Notify("Theme", "Preset berhasil diterapkan.", 3)
-    end)
-
-    SettingsTab:AddLabel("Custom Theme", 10723344432, "Masukkan HEX color untuk background dan accent", false)
-
-    local accentBox = SettingsTab:AddInput("Accent HEX", 10723344432, "#A06EFF", function() end)
-    local backgroundBox = SettingsTab:AddInput("Background HEX", 10723344432, "#121216", function() end)
-
-    self.SettingsRefs = {
-        AccentBox = accentBox.Box,
-        BackgroundBox = backgroundBox.Box
-    }
-
-    SettingsTab:AddButton("Apply Custom Theme", 10723344432, function()
-        local accent = HexToColor(accentBox:GetValue(), self.Theme.Accent)
-        local background = HexToColor(backgroundBox:GetValue(), self.Theme.Background)
-
-        self.Theme.Accent = accent
-        self.Theme.Background = background
-        self.Theme.Topbar = Color3.fromRGB(
-            math.floor(background.R * 255 * 0.95),
-            math.floor(background.G * 255 * 0.95),
-            math.floor(background.B * 255 * 0.95)
-        )
-        self.Theme.Sidebar = Color3.fromRGB(
-            math.floor(background.R * 255 * 0.90),
-            math.floor(background.G * 255 * 255 / 255 * 0.90),
-            math.floor(background.B * 255 * 0.90)
-        )
-        self.Theme.Element = Color3.fromRGB(
-            math.floor(background.R * 255 * 1.12),
-            math.floor(background.G * 255 * 1.12),
-            math.floor(background.B * 255 * 1.12)
-        )
-        self.Theme.TabActive = Color3.fromRGB(
-            math.floor(background.R * 255 * 1.25),
-            math.floor(background.G * 255 * 1.25),
-            math.floor(background.B * 255 * 1.25)
-        )
-
-        self:ApplyTheme(self.Theme)
-        self:Notify("Theme", "Custom theme berhasil diterapkan.", 3)
-    end)
-
-    SettingsTab:AddLabel("Multi Save", 10723344432, "Simpan dan load profile dengan nama custom", false)
-
-    local profileNameBox = SettingsTab:AddInput("Nama Profile", 10723344432, "contoh: setup_1", function() end)
-
-    local saveDropdown = SettingsTab:AddDropdown("Load Profile", 10723344432, { "Belum ada profile" }, "Belum ada profile", function() end)
-    self.SaveDropdown = saveDropdown
-
-    local function RefreshProfiles()
-        self:RefreshSaveProfiles()
-    end
-
-    SettingsTab:AddButton("Save Profile", 10723344432, function()
-        local name = profileNameBox:GetValue()
-        if name == "" then
-            name = "Profile"
-        end
-        self:SaveProfile(name)
-    end)
-
-    SettingsTab:AddButton("Load Selected", 10723344432, function()
-        local selected = saveDropdown:GetValue()
-        if not selected or selected == "" or selected == "Belum ada profile" then
-            self:Notify("Load Profile", "Tidak ada profile yang dipilih.", 3)
-            return
-        end
-        self:LoadProfile(selected)
-    end)
-
-    SettingsTab:AddButton("Refresh List", 10723344432, function()
-        RefreshProfiles()
-        self:Notify("Profile", "Daftar profile berhasil diperbarui.", 3)
-    end)
-
-    self:RefreshSaveProfiles()
-    self:ApplyTheme(self.Theme)
 
     return self
 end
 
-function RexzLibrary:Notify(notifTitle, notifText, duration)
-    local viewTime = duration or 3.5
+function RexzLibrary:CreateTab(name,iconId)
+    local tab = setmetatable({},TabClass)
 
-    local NotifBox = Instance.new("Frame")
-    NotifBox.Name = "RexzNotification"
-    NotifBox.Size = UDim2.new(1, 0, 0, 55)
-    NotifBox.Position = UDim2.new(1, 30, 0, 0)
-    NotifBox.BackgroundColor3 = self.Theme.Element
-    NotifBox.BackgroundTransparency = 0.1
-    NotifBox.BorderSizePixel = 0
-    NotifBox.Parent = self.NotifHolder
-
-    local NotifCorner = Instance.new("UICorner")
-    NotifCorner.CornerRadius = UDim.new(0, 6)
-    NotifCorner.Parent = NotifBox
-
-    local NotifStroke = Instance.new("UIStroke")
-    NotifStroke.Color = self.Theme.Accent
-    NotifStroke.Thickness = 1.2
-    NotifStroke.Parent = NotifBox
-
-    local NotifIcon = Instance.new("ImageLabel")
-    NotifIcon.Name = "NotifIcon"
-    NotifIcon.Size = UDim2.new(0, 18, 0, 18)
-    NotifIcon.Position = UDim2.new(0, 12, 0, 10)
-    NotifIcon.BackgroundTransparency = 1
-    NotifIcon.Image = ResolveIcon(10734950309)
-    NotifIcon.ImageColor3 = self.Theme.Accent
-    NotifIcon.Parent = NotifBox
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Name = "NotifTitle"
-    TitleLabel.Size = UDim2.new(1, -45, 0, 18)
-    TitleLabel.Position = UDim2.new(0, 36, 0, 10)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = tostring(notifTitle)
-    TitleLabel.TextColor3 = self.Theme.Text
-    TitleLabel.TextSize = 12
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.Parent = NotifBox
-
-    local DescLabel = Instance.new("TextLabel")
-    DescLabel.Name = "NotifDesc"
-    DescLabel.Size = UDim2.new(1, -24, 0, 22)
-    DescLabel.Position = UDim2.new(0, 12, 0, 28)
-    DescLabel.BackgroundTransparency = 1
-    DescLabel.Text = tostring(notifText)
-    DescLabel.TextColor3 = self.Theme.TextDim
-    DescLabel.TextSize = 11
-    DescLabel.Font = Enum.Font.GothamMedium
-    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
-    DescLabel.TextWrapped = true
-    DescLabel.Parent = NotifBox
-
-    TweenService:Create(NotifBox, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0, 0, 0, 0)
-    }):Play()
-
-    task.delay(viewTime, function()
-        if not NotifBox or not NotifBox.Parent then
-            return
-        end
-
-        local tweenOut = TweenService:Create(NotifBox, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 30, 0, 0),
-            BackgroundTransparency = 1
-        })
-        tweenOut:Play()
-        tweenOut.Completed:Connect(function()
-            if NotifBox then
-                NotifBox:Destroy()
-            end
-        end)
-    end)
-end
-
-function RexzLibrary:CreateTab(tabName, iconId)
-    local tab = setmetatable({}, TabClass)
+    tab.Parent = self
     tab.Elements = {}
-    tab.Links = {}
 
-    local TabButton = Instance.new("TextButton")
-    TabButton.Name = tabName .. "_TabBtn"
-    TabButton.Size = UDim2.new(1, -5, 0, 34)
-    TabButton.BackgroundColor3 = self.Theme.Element
-    TabButton.Text = ""
-    TabButton.BorderSizePixel = 0
-    TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
-    TabButton.Parent = self.Sidebar
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(1,-4,0,34)
+    button.BackgroundColor3 = self.Theme.Element
+    button.Text = ""
+    button.Parent = self.Sidebar
+    tab.Button = button
 
-    local TabBtnCorner = Instance.new("UICorner")
-    TabBtnCorner.CornerRadius = UDim.new(0, 6)
-    TabBtnCorner.Parent = TabButton
+    Instance.new("UICorner",button).CornerRadius = UDim.new(0,6)
 
-    if iconId then
-        local TabIcon = Instance.new("ImageLabel")
-        TabIcon.Name = "TabIcon"
-        TabIcon.Size = UDim2.new(0, 16, 0, 16)
-        TabIcon.Position = UDim2.new(0, 10, 0.5, -8)
-        TabIcon.BackgroundTransparency = 1
-        TabIcon.Image = ResolveIcon(iconId)
-        TabIcon.ImageColor3 = self.Theme.Icon
-        TabIcon.Parent = TabButton
-        tab.Icon = TabIcon
-    end
+    local icon = Instance.new("ImageLabel")
+    icon.BackgroundTransparency = 1
+    icon.Size = UDim2.new(0,16,0,16)
+    icon.Position = UDim2.new(0,10,.5,-8)
+    icon.Image = ResolveIcon(iconId)
+    icon.ImageColor3 = self.Theme.Icon
+    icon.Parent = button
 
-    local TabLabel = Instance.new("TextLabel")
-    TabLabel.Name = "TabLabel"
-    TabLabel.Size = UDim2.new(1, iconId and -36 or -16, 1, 0)
-    TabLabel.Position = UDim2.new(0, iconId and 32 or 12, 0, 0)
-    TabLabel.BackgroundTransparency = 1
-    TabLabel.Text = tabName
-    TabLabel.TextColor3 = self.Theme.TextDim
-    TabLabel.TextSize = 12
-    TabLabel.Font = Enum.Font.GothamMedium
-    TabLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TabLabel.Parent = TabButton
-    tab.Label = TabLabel
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1,-40,1,0)
+    label.Position = UDim2.new(0,34,0,0)
+    label.Text = tostring(name)
+    label.Font = Enum.Font.GothamMedium
+    label.TextSize = 12
+    label.TextColor3 = self.Theme.TextDim
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = button
+    tab.Label = label
 
-    local ScrollBox = Instance.new("ScrollingFrame")
-    ScrollBox.Name = tabName .. "_ContentScroll"
-    ScrollBox.Size = UDim2.new(1, 0, 1, 0)
-    ScrollBox.BackgroundTransparency = 1
-    ScrollBox.BorderSizePixel = 0
-    ScrollBox.ScrollBarThickness = 3
-    ScrollBox.ScrollBarImageColor3 = self.Theme.Icon
-    ScrollBox.CanvasSize = UDim2.new(0, 0, 0, 0)
-    ScrollBox.Visible = false
-    ScrollBox.Parent = self.ContentHolder
-    tab.ScrollBox = ScrollBox
+    local scroll = Instance.new("ScrollingFrame")
+    scroll.Size = UDim2.new(1,0,1,0)
+    scroll.BackgroundTransparency = 1
+    scroll.BorderSizePixel = 0
+    scroll.ScrollBarThickness = 3
+    scroll.Visible = false
+    scroll.Parent = self.ContentHolder
+    tab.Scroll = scroll
 
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.Parent = ScrollBox
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ListLayout.Padding = UDim.new(0, 6)
+    local layout = Instance.new("UIListLayout")
+    layout.Padding = UDim.new(0,6)
+    layout.Parent = scroll
 
-    ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        ScrollBox.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        scroll.CanvasSize =
+            UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
     end)
 
-    local function ActivateTab()
-        for _, t in ipairs(self.Tabs) do
-            if t.ScrollBox then
-                t.ScrollBox.Visible = false
-            end
-            if t.BackgroundColor then
-                t.BackgroundColor.BackgroundColor3 = self.Theme.Element
-            end
-            if t.Label then
-                t.Label.TextColor3 = self.Theme.TextDim
-            end
-            if t.Icon then
-                t.Icon.ImageColor3 = self.Theme.Icon
-            end
+    button.MouseButton1Click:Connect(function()
+        for _,t in ipairs(self.Tabs) do
+            t.Scroll.Visible = false
+            t.Button.BackgroundColor3 = self.Theme.Element
+            t.Label.TextColor3 = self.Theme.TextDim
         end
 
-        ScrollBox.Visible = true
-        TabButton.BackgroundColor3 = self.Theme.TabActive
-        TabLabel.TextColor3 = self.Theme.Accent
-        if tab.Icon then
-            tab.Icon.ImageColor3 = self.Theme.Accent
-        end
-        self.CurrentTab = tab
+        scroll.Visible = true
+        button.BackgroundColor3 = self.Theme.TabActive
+        label.TextColor3 = self.Theme.Accent
+
+        self.CurrentTab = button
+    end)
+
+    table.insert(self.Tabs,tab)
+
+    if #self.Tabs == 1 then
+        button:CaptureFocus()
+        scroll.Visible = true
+        button.BackgroundColor3 = self.Theme.TabActive
+        label.TextColor3 = self.Theme.Accent
     end
-
-    TabButton.MouseButton1Click:Connect(ActivateTab)
-
-    tab.BackgroundColor = TabButton
-    table.insert(self.Tabs, tab)
-
-    if #self.Tabs == 1 and tabName ~= "Credit" then
-        ActivateTab()
-    end
-
-    self:ApplyTheme(self.Theme)
 
     return tab
 end
 
-function TabClass:AddLabel(text, iconId, subtitle, clickable)
-    local LabelElement = Instance.new("Frame")
-    LabelElement.Name = text .. "_Label"
-    LabelElement.Size = UDim2.new(1, -4, 0, subtitle and 48 or 36)
-    LabelElement.BackgroundColor3 = self.Parent and self.Parent.Theme and self.Parent.Theme.LabelBg or Color3.fromRGB(24, 24, 30)
-    LabelElement.BorderSizePixel = 0
-    LabelElement.Parent = self.ScrollBox
+function TabClass:AddButton(text,iconId,callback)
+    callback = callback or function() end
 
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = LabelElement
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1,-4,0,36)
+    btn.BackgroundColor3 = self.Parent.Theme.Element
+    btn.Text = ""
+    btn.Parent = self.Scroll
 
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = self.Parent and self.Parent.Theme and self.Parent.Theme.Stroke or Color3.fromRGB(35, 35, 45)
-    Stroke.Thickness = 1
-    Stroke.Parent = LabelElement
+    Instance.new("UICorner",btn).CornerRadius = UDim.new(0,6)
 
-    local Icon = nil
-    if iconId then
-        Icon = Instance.new("ImageLabel")
-        Icon.Name = "LabelIcon"
-        Icon.Size = UDim2.new(0, 16, 0, 16)
-        Icon.Position = UDim2.new(0, 10, 0, 10)
-        Icon.BackgroundTransparency = 1
-        Icon.Image = ResolveIcon(iconId)
-        Icon.ImageColor3 = self.Parent and self.Parent.Theme and self.Parent.Theme.Icon or Color3.fromRGB(210, 210, 220)
-        Icon.Parent = LabelElement
-    end
+    local stroke = Instance.new("UIStroke",btn)
+    stroke.Color = self.Parent.Theme.Stroke
 
-    local Title = Instance.new("TextLabel")
-    Title.Name = "LabelTitle"
-    Title.Size = UDim2.new(1, iconId and -36 or -20, subtitle and 0, subtitle and 20 or 36)
-    Title.Position = UDim2.new(0, iconId and 34 or 12, 0, subtitle and 6 or 0)
-    Title.BackgroundTransparency = 1
-    Title.Text = text
-    Title.TextColor3 = self.Parent and self.Parent.Theme and self.Parent.Theme.Text or Color3.fromRGB(215, 215, 225)
-    Title.TextSize = 12
-    Title.Font = Enum.Font.GothamBold
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Title.Parent = LabelElement
+    local icon = Instance.new("ImageLabel")
+    icon.BackgroundTransparency = 1
+    icon.Size = UDim2.new(0,16,0,16)
+    icon.Position = UDim2.new(0,10,.5,-8)
+    icon.Image = ResolveIcon(iconId)
+    icon.ImageColor3 = self.Parent.Theme.Icon
+    icon.Parent = btn
 
-    local SubText = nil
-    if subtitle then
-        SubText = Instance.new("TextLabel")
-        SubText.Name = "LabelSubtitle"
-        SubText.Size = UDim2.new(1, -20, 0, 16)
-        SubText.Position = UDim2.new(0, 12, 0, 22)
-        SubText.BackgroundTransparency = 1
-        SubText.Text = subtitle
-        SubText.TextColor3 = self.Parent and self.Parent.Theme and self.Parent.Theme.TextDim or Color3.fromRGB(175, 175, 185)
-        SubText.TextSize = 10
-        SubText.Font = Enum.Font.GothamMedium
-        SubText.TextXAlignment = Enum.TextXAlignment.Left
-        SubText.Parent = LabelElement
-    end
+    local label = Instance.new("TextLabel")
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(1,-40,1,0)
+    label.Position = UDim2.new(0,34,0,0)
+    label.Font = Enum.Font.GothamMedium
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.TextColor3 = self.Parent.Theme.Text
+    label.Text = tostring(text)
+    label.Parent = btn
 
-    table.insert(self.Parent.ControlRegistry, {
-        Kind = "Label",
-        Root = LabelElement,
-        Title = Title,
-        SubText = SubText,
-        Icon = Icon
-    })
-
-    return LabelElement
-end
-
-function TabClass:AddButton(text, iconId, callback)
-    local action = callback or function() end
-
-    local ButtonElement = Instance.new("TextButton")
-    ButtonElement.Name = text .. "_Interaction"
-    ButtonElement.Size = UDim2.new(1, -4, 0, 36)
-    ButtonElement.BackgroundColor3 = self.Parent.Theme.Element
-    ButtonElement.BorderSizePixel = 0
-    ButtonElement.Text = ""
-    ButtonElement.AutoButtonColor = true
-    ButtonElement.Parent = self.ScrollBox
-
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 6)
-    BtnCorner.Parent = ButtonElement
-
-    local BtnStroke = Instance.new("UIStroke")
-    BtnStroke.Color = self.Parent.Theme.Stroke
-    BtnStroke.Thickness = 1
-    BtnStroke.Parent = ButtonElement
-
-    local IconSpec = nil
-    if iconId then
-        IconSpec = Instance.new("ImageLabel")
-        IconSpec.Name = "ButtonIcon"
-        IconSpec.Size = UDim2.new(0, 16, 0, 16)
-        IconSpec.Position = UDim2.new(0, 10, 0.5, -8)
-        IconSpec.BackgroundTransparency = 1
-        IconSpec.Image = ResolveIcon(iconId)
-        IconSpec.ImageColor3 = self.Parent.Theme.Icon
-        IconSpec.Parent = ButtonElement
-    end
-
-    local Label = Instance.new("TextLabel")
-    Label.Name = "ButtonLabel"
-    Label.Size = UDim2.new(1, iconId and -40 or -20, 1, 0)
-    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = self.Parent.Theme.Text
-    Label.TextSize = 12
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = ButtonElement
-
-    ButtonElement.MouseButton1Click:Connect(function()
-        ButtonElement.BackgroundColor3 = self.Parent.Theme.TabActive
-        task.wait(0.08)
-        ButtonElement.BackgroundColor3 = self.Parent.Theme.Element
-        pcall(action)
+    btn.MouseButton1Click:Connect(function()
+        pcall(callback)
     end)
-
-    table.insert(self.Parent.ControlRegistry, {
-        Kind = "Button",
-        Root = ButtonElement,
-        Title = Label,
-        Icon = IconSpec,
-        Text = Label
-    })
-
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = ButtonElement
-    })
-end
-
-function TabClass:AddToggle(text, iconId, defaultState, callback)
-    local state = defaultState or false
-    local action = callback or function() end
-
-    local ToggleElement = Instance.new("TextButton")
-    ToggleElement.Name = text .. "_Toggle"
-    ToggleElement.Size = UDim2.new(1, -4, 0, 38)
-    ToggleElement.BackgroundColor3 = self.Parent.Theme.Element
-    ToggleElement.BorderSizePixel = 0
-    ToggleElement.Text = ""
-    ToggleElement.AutoButtonColor = false
-    ToggleElement.Parent = self.ScrollBox
-
-    local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 6)
-    ToggleCorner.Parent = ToggleElement
-
-    local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = self.Parent.Theme.Stroke
-    ToggleStroke.Thickness = 1
-    ToggleStroke.Parent = ToggleElement
-
-    local ToggleIcon = nil
-    if iconId then
-        ToggleIcon = Instance.new("ImageLabel")
-        ToggleIcon.Name = "ToggleIcon"
-        ToggleIcon.Size = UDim2.new(0, 16, 0, 16)
-        ToggleIcon.Position = UDim2.new(0, 10, 0.5, -8)
-        ToggleIcon.BackgroundTransparency = 1
-        ToggleIcon.Image = ResolveIcon(iconId)
-        ToggleIcon.ImageColor3 = self.Parent.Theme.Icon
-        ToggleIcon.Parent = ToggleElement
-    end
-
-    local Label = Instance.new("TextLabel")
-    Label.Name = "ToggleLabel"
-    Label.Size = UDim2.new(1, iconId and -76 or -56, 1, 0)
-    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = self.Parent.Theme.Text
-    Label.TextSize = 12
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = ToggleElement
-
-    local IndicatorFrame = Instance.new("Frame")
-    IndicatorFrame.Name = "IndicatorFrame"
-    IndicatorFrame.Size = UDim2.new(0, 24, 0, 24)
-    IndicatorFrame.Position = UDim2.new(1, -36, 0.5, -12)
-    IndicatorFrame.BackgroundColor3 = state and self.Parent.Theme.ToggleOnBg or self.Parent.Theme.ToggleOffBg
-    IndicatorFrame.BorderSizePixel = 0
-    IndicatorFrame.Parent = ToggleElement
-
-    local IndicatorCorner = Instance.new("UICorner")
-    IndicatorCorner.CornerRadius = UDim.new(0, 6)
-    IndicatorCorner.Parent = IndicatorFrame
-
-    local IndicatorStroke = Instance.new("UIStroke")
-    IndicatorStroke.Color = state and self.Parent.Theme.Accent or self.Parent.Theme.Stroke
-    IndicatorStroke.Thickness = 1.2
-    IndicatorStroke.Parent = IndicatorFrame
-
-    local RLogo = Instance.new("TextLabel")
-    RLogo.Name = "RLogo"
-    RLogo.Size = UDim2.new(1, 0, 1, 0)
-    RLogo.BackgroundTransparency = 1
-    RLogo.Text = "R"
-    RLogo.TextColor3 = state and self.Parent.Theme.Accent or self.Parent.Theme.Muted
-    RLogo.TextSize = 14
-    RLogo.Font = Enum.Font.GothamBold
-    RLogo.TextXAlignment = Enum.TextXAlignment.Center
-    RLogo.TextYAlignment = Enum.TextYAlignment.Center
-    RLogo.Parent = IndicatorFrame
-
-    local function UpdateToggleVisual(animate)
-        local targetBg = state and self.Parent.Theme.ToggleOnBg or self.Parent.Theme.ToggleOffBg
-        local targetAccent = state and self.Parent.Theme.Accent or self.Parent.Theme.Stroke
-        local targetText = state and self.Parent.Theme.Accent or self.Parent.Theme.Muted
-
-        if animate then
-            TweenService:Create(IndicatorFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { BackgroundColor3 = targetBg }):Play()
-            TweenService:Create(IndicatorStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Color = targetAccent }):Play()
-            TweenService:Create(RLogo, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { TextColor3 = targetText }):Play()
-        else
-            IndicatorFrame.BackgroundColor3 = targetBg
-            IndicatorStroke.Color = targetAccent
-            RLogo.TextColor3 = targetText
-        end
-    end
-
-    UpdateToggleVisual(false)
-
-    ToggleElement.MouseButton1Click:Connect(function()
-        state = not state
-        self.Parent.ToggleStates[text] = state
-        UpdateToggleVisual(true)
-        pcall(action, state)
-    end)
-
-    self.Parent.ToggleStates[text] = state
-
-    self.Parent.ToggleRegistry[text] = {
-        SetState = function(newState, fire)
-            state = newState and true or false
-            self.Parent.ToggleStates[text] = state
-            UpdateToggleVisual(true)
-            if fire then
-                pcall(action, state)
-            end
-        end
-    }
-
-    table.insert(self.Parent.ControlRegistry, {
-        Kind = "Toggle",
-        Root = ToggleElement,
-        Title = Label,
-        Icon = ToggleIcon,
-        Text = Label,
-        Indicator = IndicatorFrame,
-        RLogo = RLogo,
-        State = state
-    })
-
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = ToggleElement
-    })
-end
-
-function TabClass:AddInput(text, iconId, placeholder, callback)
-    local action = callback or function() end
-    local currentValue = placeholder or ""
-
-    local InputElement = Instance.new("Frame")
-    InputElement.Name = text .. "_Input"
-    InputElement.Size = UDim2.new(1, -4, 0, 40)
-    InputElement.BackgroundColor3 = self.Parent.Theme.InputBg
-    InputElement.BorderSizePixel = 0
-    InputElement.Parent = self.ScrollBox
-
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = InputElement
-
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = self.Parent.Theme.Stroke
-    Stroke.Thickness = 1
-    Stroke.Parent = InputElement
-
-    local IconSpec = nil
-    if iconId then
-        IconSpec = Instance.new("ImageLabel")
-        IconSpec.Name = "InputIcon"
-        IconSpec.Size = UDim2.new(0, 16, 0, 16)
-        IconSpec.Position = UDim2.new(0, 10, 0.5, -8)
-        IconSpec.BackgroundTransparency = 1
-        IconSpec.Image = ResolveIcon(iconId)
-        IconSpec.ImageColor3 = self.Parent.Theme.Icon
-        IconSpec.Parent = InputElement
-    end
-
-    local Label = Instance.new("TextLabel")
-    Label.Name = "InputLabel"
-    Label.Size = UDim2.new(1, iconId and -80 or -60, 0, 16)
-    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 6)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = self.Parent.Theme.Text
-    Label.TextSize = 11
-    Label.Font = Enum.Font.GothamBold
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = InputElement
-
-    local Box = Instance.new("TextBox")
-    Box.Name = "InputBox"
-    Box.Size = UDim2.new(1, -24, 0, 16)
-    Box.Position = UDim2.new(0, 12, 0, 20)
-    Box.BackgroundTransparency = 1
-    Box.Text = placeholder or ""
-    Box.PlaceholderText = placeholder or ""
-    Box.PlaceholderColor3 = self.Parent.Theme.Muted
-    Box.TextColor3 = self.Parent.Theme.Text
-    Box.TextSize = 11
-    Box.Font = Enum.Font.GothamMedium
-    Box.TextXAlignment = Enum.TextXAlignment.Left
-    Box.ClearTextOnFocus = false
-    Box.Parent = InputElement
-
-    if iconId then
-        Box.Position = UDim2.new(0, 34, 0, 20)
-        Box.Size = UDim2.new(1, -46, 0, 16)
-    end
-
-    Box.FocusLost:Connect(function(enterPressed)
-        currentValue = Box.Text
-        pcall(action, currentValue, enterPressed)
-    end)
-
-    function self:GetValue()
-        return currentValue
-    end
-
-    local ref = {
-        Kind = "Input",
-        Root = InputElement,
-        Title = Label,
-        Icon = IconSpec,
-        Box = Box
-    }
-
-    table.insert(self.Parent.ControlRegistry, ref)
-
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = InputElement
-    })
-
-    return {
-        Box = Box,
-        GetValue = function()
-            return Box.Text
-        end,
-        SetValue = function(v)
-            Box.Text = tostring(v or "")
-            currentValue = Box.Text
-        end
-    }
-end
-
-function TabClass:AddDropdown(text, iconId, options, defaultValue, callback)
-    local action = callback or function() end
-    local open = false
-    local selected = defaultValue or (options and options[1]) or "None"
-    local listOptions = options or {}
-
-    local DropdownRoot = Instance.new("Frame")
-    DropdownRoot.Name = text .. "_Dropdown"
-    DropdownRoot.Size = UDim2.new(1, -4, 0, 38)
-    DropdownRoot.BackgroundColor3 = self.Parent.Theme.DropdownBg
-    DropdownRoot.BorderSizePixel = 0
-    DropdownRoot.ClipsDescendants = true
-    DropdownRoot.Parent = self.ScrollBox
-
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 6)
-    Corner.Parent = DropdownRoot
-
-    local Stroke = Instance.new("UIStroke")
-    Stroke.Color = self.Parent.Theme.Stroke
-    Stroke.Thickness = 1
-    Stroke.Parent = DropdownRoot
-
-    local IconSpec = nil
-    if iconId then
-        IconSpec = Instance.new("ImageLabel")
-        IconSpec.Name = "DropdownIcon"
-        IconSpec.Size = UDim2.new(0, 16, 0, 16)
-        IconSpec.Position = UDim2.new(0, 10, 0.5, -8)
-        IconSpec.BackgroundTransparency = 1
-        IconSpec.Image = ResolveIcon(iconId)
-        IconSpec.ImageColor3 = self.Parent.Theme.Icon
-        IconSpec.Parent = DropdownRoot
-    end
-
-    local Label = Instance.new("TextLabel")
-    Label.Name = "DropdownLabel"
-    Label.Size = UDim2.new(1, iconId and -110 or -90, 0, 16)
-    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 6)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = self.Parent.Theme.Text
-    Label.TextSize = 11
-    Label.Font = Enum.Font.GothamBold
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = DropdownRoot
-
-    local ValueLabel = Instance.new("TextLabel")
-    ValueLabel.Name = "ValueLabel"
-    ValueLabel.Size = UDim2.new(1, iconId and -110 or -90, 0, 14)
-    ValueLabel.Position = UDim2.new(0, iconId and 34 or 12, 0, 20)
-    ValueLabel.BackgroundTransparency = 1
-    ValueLabel.Text = tostring(selected)
-    ValueLabel.TextColor3 = self.Parent.Theme.TextDim
-    ValueLabel.TextSize = 10
-    ValueLabel.Font = Enum.Font.GothamMedium
-    ValueLabel.TextXAlignment = Enum.TextXAlignment.Left
-    ValueLabel.Parent = DropdownRoot
-
-    local Arrow = Instance.new("TextLabel")
-    Arrow.Name = "Arrow"
-    Arrow.Size = UDim2.new(0, 20, 0, 20)
-    Arrow.Position = UDim2.new(1, -28, 0.5, -10)
-    Arrow.BackgroundTransparency = 1
-    Arrow.Text = "⌄"
-    Arrow.TextColor3 = self.Parent.Theme.Muted
-    Arrow.TextSize = 16
-    Arrow.Font = Enum.Font.GothamBold
-    Arrow.TextXAlignment = Enum.TextXAlignment.Center
-    Arrow.Parent = DropdownRoot
-
-    local OptionHolder = Instance.new("Frame")
-    OptionHolder.Name = "OptionsHolder"
-    OptionHolder.Size = UDim2.new(1, 0, 0, 0)
-    OptionHolder.Position = UDim2.new(0, 0, 1, 4)
-    OptionHolder.BackgroundTransparency = 1
-    OptionHolder.ClipsDescendants = true
-    OptionHolder.Parent = DropdownRoot
-
-    local OptionScroll = Instance.new("ScrollingFrame")
-    OptionScroll.Name = "OptionsScroll"
-    OptionScroll.Size = UDim2.new(1, 0, 1, 0)
-    OptionScroll.BackgroundTransparency = 1
-    OptionScroll.BorderSizePixel = 0
-    OptionScroll.ScrollBarThickness = 3
-    OptionScroll.ScrollBarImageColor3 = self.Parent.Theme.Icon
-    OptionScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    OptionScroll.Parent = OptionHolder
-
-    local OptionLayout = Instance.new("UIListLayout")
-    OptionLayout.Parent = OptionScroll
-    OptionLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    OptionLayout.Padding = UDim.new(0, 4)
-
-    local function clearOptions()
-        for _, child in ipairs(OptionScroll:GetChildren()) do
-            if child:IsA("TextButton") then
-                child:Destroy()
-            end
-        end
-    end
-
-    local function setValue(v, fire)
-        selected = tostring(v)
-        ValueLabel.Text = selected
-        if fire then
-            pcall(action, selected)
-        end
-    end
-
-    local function rebuildOptions()
-        clearOptions()
-
-        for i, opt in ipairs(listOptions) do
-            local optBtn = Instance.new("TextButton")
-            optBtn.Name = "Option_" .. i
-            optBtn.Size = UDim2.new(1, -4, 0, 30)
-            optBtn.BackgroundColor3 = self.Parent.Theme.Element
-            optBtn.Text = ""
-            optBtn.BorderSizePixel = 0
-            optBtn.Parent = OptionScroll
-
-            local c = Instance.new("UICorner")
-            c.CornerRadius = UDim.new(0, 6)
-            c.Parent = optBtn
-
-            local s = Instance.new("UIStroke")
-            s.Color = self.Parent.Theme.Stroke
-            s.Thickness = 1
-            s.Parent = optBtn
-
-            local t = Instance.new("TextLabel")
-            t.Size = UDim2.new(1, -16, 1, 0)
-            t.Position = UDim2.new(0, 8, 0, 0)
-            t.BackgroundTransparency = 1
-            t.Text = tostring(opt)
-            t.TextColor3 = self.Parent.Theme.Text
-            t.TextSize = 11
-            t.Font = Enum.Font.GothamMedium
-            t.TextXAlignment = Enum.TextXAlignment.Left
-            t.Parent = optBtn
-
-            optBtn.MouseButton1Click:Connect(function()
-                setValue(opt, true)
-            end)
-        end
-
-        task.defer(function()
-            OptionScroll.CanvasSize = UDim2.new(0, 0, 0, OptionLayout.AbsoluteContentSize.Y + 6)
-            local desired = math.clamp(OptionLayout.AbsoluteContentSize.Y + 8, 0, 120)
-            OptionHolder.Size = UDim2.new(1, 0, 0, open and desired or 0)
-        end)
-    end
-
-    local function refreshVisual()
-        if open then
-            rebuildOptions()
-            local desired = math.clamp(OptionLayout.AbsoluteContentSize.Y + 8, 0, 120)
-            TweenService:Create(OptionHolder, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(1, 0, 0, desired)
-            }):Play()
-            Arrow.Text = "⌃"
-        else
-            TweenService:Create(OptionHolder, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(1, 0, 0, 0)
-            }):Play()
-            Arrow.Text = "⌄"
-        end
-    end
-
-    DropdownRoot.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            open = not open
-            refreshVisual()
-        end
-    end)
-
-    setValue(selected, false)
-    rebuildOptions()
-    refreshVisual()
-
-    local ref = {
-        Kind = "Dropdown",
-        Root = DropdownRoot,
-        Title = Label,
-        Icon = IconSpec,
-        ValueLabel = ValueLabel,
-        Arrow = Arrow
-    }
-
-    table.insert(self.Parent.ControlRegistry, ref)
-
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = DropdownRoot
-    })
-
-    local dropdownApi = {}
-
-    function dropdownApi:GetValue()
-        return selected
-    end
-
-    function dropdownApi:SetValue(v, fire)
-        setValue(v, fire)
-    end
-
-    function dropdownApi:SetOptions(newOptions, newDefault, fireDefault)
-        listOptions = newOptions or {}
-        if newDefault ~= nil then
-            selected = tostring(newDefault)
-            ValueLabel.Text = selected
-        end
-        rebuildOptions()
-        if fireDefault then
-            pcall(action, selected)
-        end
-    end
-
-    return dropdownApi
 end
 
 return RexzLibrary
