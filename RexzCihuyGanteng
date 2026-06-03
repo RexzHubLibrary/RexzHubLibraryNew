@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta
+--// Rexz Sedang Jatuh Cinta Sama ...
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -793,6 +793,8 @@ end)
 
     self:RefreshSaveProfiles()  
     self:ApplyTheme(self.Theme)  
+    
+    end)
 
     return self
 end
@@ -887,7 +889,7 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
         TabButton.Parent = self.MainFrame
     else
         TabButton.Size = UDim2.new(1, -5, 0, 34)
-        TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)  
+        TabButton.LayoutOrder = (tabName == "Credits") and 9999 or (#self.Tabs + 1)  
         TabButton.Parent = self.Sidebar  
     end
 
@@ -1511,7 +1513,5 @@ function TabClass:AddDropdown(text, iconId, options, defaultValue, callback)
 
     return dropdownApi
 end
-
-end)
 
 return RexzLibrary
