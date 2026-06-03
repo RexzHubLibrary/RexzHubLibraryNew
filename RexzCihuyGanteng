@@ -170,7 +170,7 @@ function RexzLibrary:RefreshSaveProfiles()
     if listfiles and isfolder and isfolder(self.SaveFolder) then  
         for _, file in ipairs(listfiles(self.SaveFolder)) do  
             if file:sub(-5) == ".json" then  
-                local name = file:match("([^/%\]+)%.json$")  
+                local name = file:match("([^/%\\]+)%.json$")  
                 if name then table.insert(list, name) end  
             end  
         end  
@@ -179,6 +179,13 @@ function RexzLibrary:RefreshSaveProfiles()
     table.sort(list, function(a, b)  
         return tostring(a):lower() < tostring(b):lower()  
     end)  
+    
+    if self.SaveDropdown.Refresh then
+        self.SaveDropdown:Refresh(list, true) -- Biasanya true digunakan untuk otomatis nge-clear opsi lama
+    elseif self.SaveDropdown.SetOptions then
+        self.SaveDropdown:SetOptions(list)
+    end
+end
 
     if #list == 0 then list = { "Belum ada profile" } end  
     self.SaveDropdown:SetOptions(list, list[1], false)
