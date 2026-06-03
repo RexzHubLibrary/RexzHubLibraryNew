@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta.
+--// Rexz Sedang Jatuh Cinta
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -607,10 +607,10 @@ function RexzLibrary.new(dummyHubName, title)
 task.defer(function()
 
     -- =======================================================
-    -- CREDITS TAB
+    -- CreditsS TAB
     -- =======================================================
 
-    local CreditTab = self:CreateTab("Credits", 124560466474914)
+    local CreditssTab = self:CreateTab("Creditss", 124560466474914)
 
     local OWNER_USERNAME = "rexzakun2"
     local OWNER_DISPLAY   = "Rexz"
@@ -620,7 +620,7 @@ task.defer(function()
     Profile.Size = UDim2.new(1, -4, 0, 125)
     Profile.BackgroundColor3 = self.Theme.Element
     Profile.BorderSizePixel = 0
-    Profile.Parent = CreditTab.ScrollBox
+    Profile.Parent = CreditsTab.ScrollBox
 
     local ProfileCorner = Instance.new("UICorner")
     ProfileCorner.CornerRadius = UDim.new(0, 8)
@@ -708,35 +708,35 @@ task.defer(function()
     BadgeCorner.CornerRadius = UDim.new(0, 5)
     BadgeCorner.Parent = Badge
 
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━", 0, "", false)
+    CreditsTab:AddLabel("━━━━━━━━━━━━━━━━━━━━", 0, "", false)
 
-    CreditTab:AddLabel("👑 Owner", 0, OWNER_DISPLAY, false)
-    CreditTab:AddLabel("🧷 Username", 0, OWNER_USERNAME, false)
-    CreditTab:AddLabel("⚡ Version", 0, "V2.5.0 Stable", false)
-    CreditTab:AddLabel("🛠 Build", 0, "Rexz Licence", false)
-    CreditTab:AddLabel("💖 Status", 0, "Rexz Sedang Jatuh Cinta", false)
+    CreditsTab:AddLabel("👑 Owner", 0, OWNER_DISPLAY, false)
+    CreditsTab:AddLabel("🧷 Username", 0, OWNER_USERNAME, false)
+    CreditsTab:AddLabel("⚡ Version", 0, "V2.5.0 Stable", false)
+    CreditsTab:AddLabel("🛠 Build", 0, "Rexz Licence", false)
+    CreditsTab:AddLabel("💖 Status", 0, "Rexz Sedang Jatuh Cinta", false)
 
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━", 0, "", false)
+    CreditsTab:AddLabel("━━━━━━━━━━━━━━━━━━━━", 0, "", false)
 
-    CreditTab:AddButton("Copy Owner", 10734934585, function()
+    CreditsTab:AddButton("Copy Owner", 10734934585, function()
         if setclipboard then
             setclipboard(OWNER_DISPLAY)
-            self:Notify("Credits", "Nama owner berhasil disalin.", 3)
+            self:Notify("Creditss", "Nama owner berhasil disalin.", 3)
         end
     end)
 
-    CreditTab:AddButton("Copy Username", 10734934585, function()
+    CreditsTab:AddButton("Copy Username", 10734934585, function()
         if setclipboard then
             setclipboard(OWNER_USERNAME)
-            self:Notify("Credits", "Username owner berhasil disalin.", 3)
+            self:Notify("Creditss", "Username owner berhasil disalin.", 3)
         end
     end)
 
-    CreditTab:AddButton("Check Status", 10723344432, function()
+    CreditsTab:AddButton("Check Status", 10723344432, function()
         self:Notify("Status", "Rexz Hub berjalan normal.", 3)
     end)
 
-    CreditTab:AddLabel("© 2026 Rexz Hub", 0, "All Rights Reserved", false)
+    CreditsTab:AddLabel("© 2026 Rexz Hub", 0, "All Rights Reserved", false)
 
     -- =======================================================
     -- SETTINGS TAB
@@ -1018,7 +1018,7 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
         TabButton.Parent = self.MainFrame
     else
         TabButton.Size = UDim2.new(1, -5, 0, 34)
-        TabButton.LayoutOrder = (tabName == "Credits") and 9999 or (#self.Tabs + 1)  
+        TabButton.LayoutOrder = (tabName == "Creditss") and 9999 or (#self.Tabs + 1)  
         TabButton.Parent = self.Sidebar  
     end
 
@@ -1091,7 +1091,7 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
     tab.BackgroundColor = TabButton  
     table.insert(self.Tabs, tab)  
 
-    if #self.Tabs == 1 and tabName ~= "Credit" then ActivateTab() end  
+    if #self.Tabs == 1 and tabName ~= "Credits" then ActivateTab() end  
     self:ApplyTheme(self.Theme)  
 
     return tab
