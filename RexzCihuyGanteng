@@ -1,4 +1,15 @@
--- [[ LIBRARY UI REXZ (UPDATED: FIXED BOTTOM SETTINGS TAB) ]] --
+-- ██████╗ ███████╗██╗  ██╗███████╗ --
+-- ██╔══██╗██╔════╝╚██╗██╔╝╚══███╔╝ --
+-- ██████╔╝█████╗   ╚███╔╝   ███╔╝  --
+-- ██╔══██╗██╔══╝   ██╔██╗  ███╔╝   --
+-- ██║  ██║███████╗██╔╝ ██╗███████╗ --
+-- ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝ --
+
+--// LIBRARY UI REXZ
+--// UPDATED : Gok Gok
+--// STATUS  : Enak
+--// OWNER   : RexzCihuy
+
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
 
