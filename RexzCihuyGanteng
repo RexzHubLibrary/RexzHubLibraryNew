@@ -9,6 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
+--// Rexz Sedang Jatuh Cinta
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -720,7 +721,7 @@ end)
             self.Theme.LabelBg = Color3.fromRGB(18, 28, 18)  
         end  
         self:ApplyTheme(self.Theme)  
-    end)  
+    end  
 
     SettingsTab:AddButton("Apply Preset", 10723344432, function()  
         ApplyPreset(presetDropdown:GetValue())  
@@ -1510,5 +1511,7 @@ function TabClass:AddDropdown(text, iconId, options, defaultValue, callback)
 
     return dropdownApi
 end
+
+end)
 
 return RexzLibrary
