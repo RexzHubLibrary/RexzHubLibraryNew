@@ -594,7 +594,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     task.defer(function()  
         -- --- [ REVISED CREDIT TAB - TANPA ICON PACK LINK ] ---
-local CreditTab = self:CreateTab("Credits", info) 
+local CreditTab = self:CreateTab("Credits", 124560466474914) 
 
 CreditTab:AddLabel("Rexz Hub Information", 10723344432, "Informasi mengenai Library & Developer", false)
 
@@ -607,14 +607,14 @@ CreditTab:AddButton("Owner: Rexz", 10734934585, function()
 end)
 
 -- Bagian Engine Details
-CreditTab:AddLabel("Engine Details", 10723344432, "Versi: V29 | Powered by Rexz Engine", false)
+CreditTab:AddLabel("Engine Details", 10723344432, "Versi: V2.5 | Powered by Rexz Cihuy", false)
 
 -- Tombol statis (hanya untuk informasi, tidak ada aksi salin link eksternal)
 CreditTab:AddButton("Status: Private Build", 10723344432, function()
-    self:Notify("Info", "Rexz Engine saat ini berjalan di versi V29.", 3)
+    self:Notify("Info", "Rexz Engine saat ini berjalan di versi V2.5.", 3)
 end)
 
-    local SettingsTab = self:CreateTab("Settings", settings, true)  
+    local SettingsTab = self:CreateTab("Settings", 80758916183665, true)  
     SettingsTab:AddLabel("Theme Preset", 10723344432, "Pilih tema cepat untuk UI", false)  
 
     local presetDropdown = SettingsTab:AddDropdown("Preset", 10723344432, {  
