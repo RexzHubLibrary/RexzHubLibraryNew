@@ -1,8 +1,7 @@
 -- [[
 --     LIBRARY UI REXZ (VERSION 2.5 - SIDEBAR CATEGORY & PREMIUM PROFILE UPDATE)
---     Bahasa: Indonesia Profesional
+--     Status: BUG FIXED (Resize & Settings fully functional)
 --     Pengembang: RexzLock / RexzCihuy
---     Status: STABLE & FULLY OPTIMIZED
 -- ]]
 
 local RexzLibrary = {}
@@ -16,7 +15,8 @@ TabClass.__index = TabClass
 
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local Mouse = game:GetService("Players").LocalPlayer:GetMouse()
+local Players = game:GetService("Players")
+local Mouse = Players.LocalPlayer:GetMouse()
 
 function RexzLibrary.new(dummyHubName, title)
     local self = setmetatable({}, RexzLibrary)
@@ -28,7 +28,7 @@ function RexzLibrary.new(dummyHubName, title)
     self.AccentColor = Color3.fromRGB(160, 110, 255) -- Default Ungu Rexz
     
     local fixedHubName = "Rexz Hub"
-    local baseSize = UDim2.new(0, 520, 0, 360) -- Sedikit disesuaikan agar kategori lebih lega
+    local currentSize = UDim2.new(0, 520, 0, 360) -- Variabel ukuran dinamis yang aktif
 
     -- Main ScreenGui
     local ScreenGui = Instance.new("ScreenGui")
@@ -84,7 +84,7 @@ function RexzLibrary.new(dummyHubName, title)
     -- MAIN CONTAINER WINDOW
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainContainer"
-    MainFrame.Size = baseSize
+    MainFrame.Size = currentSize
     MainFrame.Position = UDim2.new(0.5, -260, 0.5, -180)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
     MainFrame.BorderSizePixel = 0
@@ -104,11 +104,11 @@ function RexzLibrary.new(dummyHubName, title)
     MainStroke.Thickness = 1.2
     MainStroke.Parent = MainFrame
 
-    -- SISTEM DYNAMIC RESIZE
+    -- FIXED: SISTEM RESIZE YANG SEKARANG SEJAJAR DENGAN MOUSE
     local ResizeGrip = Instance.new("TextButton")
     ResizeGrip.Name = "ResizeGrip"
-    ResizeGrip.Size = UDim2.new(0, 16, 0, 16)
-    ResizeGrip.Position = UDim2.new(1, -16, 1, -16)
+    ResizeGrip.Size = UDim2.new(0, 18, 0, 18)
+    ResizeGrip.Position = UDim2.new(1, -18, 1, -18)
     ResizeGrip.BackgroundTransparency = 1
     ResizeGrip.Text = "◢"
     ResizeGrip.TextColor3 = Color3.fromRGB(80, 80, 95)
@@ -118,22 +118,32 @@ function RexzLibrary.new(dummyHubName, title)
     ResizeGrip.Parent = MainFrame
 
     local Resizing = false
-    ResizeGrip.MouseButton1Down:Connect(function() Resizing = true end)
+    local DragStartPos, FrameStartSize
+
+    ResizeGrip.MouseButton1Down:Connect(function()
+        Resizing = true
+        DragStartPos = Vector2.new(Mouse.X, Mouse.Y)
+        FrameStartSize = Vector2.new(MainFrame.AbsoluteSize.X, MainFrame.AbsoluteSize.Y)
+    end)
 
     UserInputService.InputChanged:Connect(function(input)
         if Resizing and input.UserInputType == Enum.UserInputType.MouseMovement then
             if self.Minimized or self.Hidden then return end
-            local mousePos = UserInputService:GetMouseLocation()
-            local newWidth = math.max(450, mousePos.X - MainFrame.AbsolutePosition.X)
-            local newHeight = math.max(300, mousePos.Y - MainFrame.AbsolutePosition.Y - 36)
+            local currentMousePos = Vector2.new(Mouse.X, Mouse.Y)
+            local delta = currentMousePos - DragStartPos
             
-            baseSize = UDim2.new(0, newWidth, 0, newHeight)
-            MainFrame.Size = baseSize
+            local newWidth = math.clamp(FrameStartSize.X + delta.X, 460, 800)
+            local newHeight = math.clamp(FrameStartSize.Y + delta.Y, 280, 600)
+            
+            currentSize = UDim2.new(0, newWidth, 0, newHeight)
+            MainFrame.Size = currentSize
         end
     end)
 
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then Resizing = false end
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then 
+            Resizing = false 
+        end
     end)
 
     local function MinimizeWindow()
@@ -146,7 +156,7 @@ function RexzLibrary.new(dummyHubName, title)
             }):Play()
         else
             ResizeGrip.Visible = true
-            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = baseSize }):Play()
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = currentSize }):Play()
         end
     end
 
@@ -155,7 +165,7 @@ function RexzLibrary.new(dummyHubName, title)
         if self.Hidden then
             ResizeGrip.Visible = false
             local tweenScale = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Size = self.Minimized and UDim2.new(0, baseSize.X.Offset - 50, 0, 38) or UDim2.new(0, baseSize.X.Offset - 50, 0, baseSize.Y.Offset - 30),
+                Size = self.Minimized and UDim2.new(0, currentSize.X.Offset - 50, 0, 38) or UDim2.new(0, currentSize.X.Offset - 50, 0, currentSize.Y.Offset - 30),
                 BackgroundTransparency = 1
             })
             tweenScale:Play()
@@ -164,7 +174,7 @@ function RexzLibrary.new(dummyHubName, title)
             MainFrame.Visible = true
             ResizeGrip.Visible = not self.Minimized
             TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = self.Minimized and UDim2.new(0, baseSize.X.Offset, 0, 38) or baseSize,
+                Size = self.Minimized and UDim2.new(0, currentSize.X.Offset, 0, 38) or currentSize,
                 BackgroundTransparency = 0
             }):Play()
         end
@@ -310,46 +320,6 @@ function RexzLibrary.new(dummyHubName, title)
     ContentHolder.Parent = MainFrame
     self.ContentHolder = ContentHolder
 
-    local function ApplyGlobalAccent(newColor)
-        self.AccentColor = newColor
-        ToggleStroke.Color = newColor
-        ToggleIcon.ImageColor3 = newColor
-        MainIcon.ImageColor3 = newColor
-        
-        local hexStr = newColor:ToHex()
-        TitleLabel.Text = fixedHubName .. " <font color='#" .. hexStr .. "'>|</font> " .. title
-        
-        for _, t in ipairs(self.Tabs) do
-            if self.CurrentTab == t then
-                t.Label.TextColor3 = newColor
-                if t.Icon then t.Icon.ImageColor3 = newColor end
-            end
-            for _, element in ipairs(t.Elements) do
-                if element.UpdateTheme then element.UpdateTheme() end
-            end
-        end
-        if ConfigTab then
-            for _, element in ipairs(ConfigTab.Elements) do
-                if element.UpdateTheme then element.UpdateTheme() end
-            end
-        end
-    end
-
-    SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
-        local query = string.lower(SearchInput.Text)
-        if self.CurrentTab then
-            for _, item in ipairs(self.CurrentTab.Elements) do
-                if item.Instance then
-                    if query == "" then
-                        item.Instance.Visible = true
-                    else
-                        item.Instance.Visible = string.find(string.lower(item.Name), query) and true or false
-                    end
-                end
-            end
-        end
-    end)
-
     -- SETTINGS/CONFIGURATION TAB
     local ConfigBtn = Instance.new("TextButton")
     ConfigBtn.Name = "Config_FixedBtn"
@@ -416,6 +386,7 @@ function RexzLibrary.new(dummyHubName, title)
         ConfigScrollBox.CanvasSize = UDim2.new(0, 0, 0, ConfigListLayout.AbsoluteContentSize.Y + 10)
     end)
 
+    -- FIXED: FUNGSI TOMBOL SETTING AKTIF TOTAL & MATIIN TAB LAIN NYA JALAN CEPAT
     ConfigBtn.MouseButton1Click:Connect(function()
         for _, t in ipairs(self.Tabs) do
             t.ScrollBox.Visible = false
@@ -430,11 +401,53 @@ function RexzLibrary.new(dummyHubName, title)
         self.CurrentTab = ConfigTab
     end)
 
+    local function ApplyGlobalAccent(newColor)
+        self.AccentColor = newColor
+        ToggleStroke.Color = newColor
+        ToggleIcon.ImageColor3 = newColor
+        MainIcon.ImageColor3 = newColor
+        
+        local hexStr = newColor:ToHex()
+        TitleLabel.Text = fixedHubName .. " <font color='#" .. hexStr .. "'>|</font> " .. title
+        
+        for _, t in ipairs(self.Tabs) do
+            if self.CurrentTab == t then
+                t.Label.TextColor3 = newColor
+                if t.Icon then t.Icon.ImageColor3 = newColor end
+            end
+            for _, element in ipairs(t.Elements) do
+                if element.UpdateTheme then element.UpdateTheme() end
+            end
+        end
+        if self.CurrentTab == ConfigTab then
+            ConfigLabel.TextColor3 = newColor
+            ConfigIcon.ImageColor3 = newColor
+        end
+        for _, element in ipairs(ConfigTab.Elements) do
+            if element.UpdateTheme then element.UpdateTheme() end
+        end
+    end
+
+    SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
+        local query = string.lower(SearchInput.Text)
+        if self.CurrentTab then
+            for _, item in ipairs(self.CurrentTab.Elements) do
+                if item.Instance then
+                    if query == "" then
+                        item.Instance.Visible = true
+                    else
+                        item.Instance.Visible = string.find(string.lower(item.Name), query) and true or false
+                    end
+                end
+            end
+        end
+    end)
+
     SidebarLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         Sidebar.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y)
     end)
 
-    -- COLOR PICKER IN INJECTED SETTINGS
+    -- COLOR PICKER UTAMA DI DALAM SETTING
     local PickerFrame = Instance.new("Frame")
     PickerFrame.Name = "Dynamic_ColorPicker"
     PickerFrame.Size = UDim2.new(1, -4, 0, 50)
@@ -518,11 +531,10 @@ function RexzLibrary.new(dummyHubName, title)
 
     table.insert(ConfigTab.Elements, { Name = "Custom Aksen Warna", Instance = PickerFrame })
 
-    -- INJECT CUSTOM PREMIUM CREDIT TAB
+    -- PREMIUM CREDIT TAB GENERATOR
     task.spawn(function()
         local CreditTab = self:CreateTab("Credit Hub", 10734950309)
         
-        -- PREMIUM CHARACTER/OWNER PROFILE COMPONENT
         local ProfileFrame = Instance.new("Frame")
         ProfileFrame.Name = "PremiumProfileCard"
         ProfileFrame.Size = UDim2.new(1, -4, 0, 90)
@@ -533,13 +545,11 @@ function RexzLibrary.new(dummyHubName, title)
         PStroke.Color = self.AccentColor
         PStroke.Thickness = 1.2
 
-        -- AVATAR / IMAGE POSITION
         local AvatarImage = Instance.new("ImageLabel")
         AvatarImage.Name = "AvatarImage"
         AvatarImage.Size = UDim2.new(0, 66, 0, 66)
         AvatarImage.Position = UDim2.new(0, 12, 0.5, -33)
         AvatarImage.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-        -- !! SILAHKAN GANTI ID DI BAWAH INI DENGAN ID FOTO KAMU !!
         AvatarImage.Image = "rbxassetid://10734950309" 
         AvatarImage.Parent = ProfileFrame
         Instance.new("UICorner", AvatarImage).CornerRadius = UDim.new(0, 8)
@@ -572,13 +582,13 @@ function RexzLibrary.new(dummyHubName, title)
         DescLabel.Position = UDim2.new(0, 90, 0, 56)
         DescLabel.BackgroundTransparency = 1
         DescLabel.Text = "Developing premium utility for robust optimization."
-        DescLabel.TextColor3 = Color3.fromRGB(140, 140, 150)
+        DescLabel.TextColor3 = Color3.fromRGB(140, 140, 155)
         DescLabel.TextSize = 11
         DescLabel.Font = Enum.Font.Gotham
         DescLabel.TextXAlignment = Enum.TextXAlignment.Left
         DescLabel.Parent = ProfileFrame
 
-        table.insert(CreditTab.Elements, { Name = "Profile Card", Instance = ProfileFrame })
+        table.insert(CreditTab.Elements, { Name = "Profile Card", Instance = ProfileFrame, UpdateTheme = function() PStroke.Color = self.AccentColor RoleLabel.TextColor3 = self.AccentColor end })
 
         CreditTab:AddButton("Copy Owner Username", 10734950309, function()
             setclipboard("RexzLock")
@@ -590,7 +600,7 @@ function RexzLibrary.new(dummyHubName, title)
 end
 
 -- ==========================================
--- NEW SISTEM CATEGORY (COLLAPSIBLE)
+-- SISTEM CATEGORY (COLLAPSIBLE)
 -- ==========================================
 function RexzLibrary:CreateCategory(categoryName)
     local category = setmetatable({}, CategoryClass)
@@ -719,7 +729,6 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     end)
 end
 
--- METHOD UNTUK MEMBUAT TAB DI DALAM KATEGORI ATAU JUGA LANGSUNG DI SIDEBAR UTAMA
 function RexzLibrary:CreateTab(tabName, iconId, optionalCategory)
     local tab = setmetatable({}, TabClass)
     tab.Elements = {}
@@ -731,7 +740,6 @@ function RexzLibrary:CreateTab(tabName, iconId, optionalCategory)
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
     
-    -- Menentukan parent tab (Kategori atau Sidebar langsung)
     if optionalCategory and optionalCategory.Container then
         TabButton.Parent = optionalCategory.Container
         table.insert(optionalCategory.Tabs, tab)
@@ -789,7 +797,18 @@ function RexzLibrary:CreateTab(tabName, iconId, optionalCategory)
     end)
 
     local function ActivateTab()
-        if self.ConfigBtn then self.ConfigBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 30) end
+        if self.ConfigBtn then 
+            self.ConfigBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 30) 
+            local fixedLabel = self.ConfigBtn:FindFirstChild("ConfigLabel")
+            local fixedIcon = self.ConfigBtn:FindFirstChild("ConfigIcon")
+            if fixedLabel then fixedLabel.TextColor3 = Color3.fromRGB(160, 160, 170) end
+            if fixedIcon then fixedIcon.ImageColor3 = Color3.fromRGB(150, 150, 160) end
+        end
+        
+        -- Sembunyikan setting box & tab lain
+        local mainConfigBox = self.ContentHolder:FindFirstChild("Settings_ContentScroll")
+        if mainConfigBox then mainConfigBox.Visible = false end
+
         for _, t in ipairs(self.Tabs) do
             t.ScrollBox.Visible = false
             t.BackgroundColor.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
@@ -959,10 +978,10 @@ function TabClass:AddSlider(text, min, max, default, callback)
     SliderElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
     SliderElement.Parent = self.ScrollBox
 
-    local SCorn = Instance.new("UICorner") or Instance.new("UICorner", SliderElement)
+    local SCorn = Instance.new("UICorner", SliderElement)
     SCorn.CornerRadius = UDim.new(0, 6)
 
-    local SStroke = Instance.new("UIStroke") or Instance.new("UIStroke", SliderElement)
+    local SStroke = Instance.new("UIStroke", SliderElement)
     SStroke.Color = Color3.fromRGB(35, 35, 45)
 
     local Label = Instance.new("TextLabel")
