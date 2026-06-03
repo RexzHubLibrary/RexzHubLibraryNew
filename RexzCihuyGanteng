@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta
+--// Rexz Sedang Jatuh Cinta.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -607,10 +607,10 @@ function RexzLibrary.new(dummyHubName, title)
 task.defer(function()
 
     -- =======================================================
-    -- CreditsS TAB
+    -- Credits TAB (SUDAH DI-FIX)
     -- =======================================================
 
-    local CreditssTab = self:CreateTab("Creditss", 124560466474914)
+    local CreditsTab = self:CreateTab("Creditss", 124560466474914)
 
     local OWNER_USERNAME = "rexzakun2"
     local OWNER_DISPLAY   = "Rexz"
@@ -927,6 +927,7 @@ task.defer(function()
     self:ApplyTheme(self.Theme)
 
 end)
+
 
 function RexzLibrary:Notify(notifTitle, notifText, duration)
     local viewTime = duration or 3.5
