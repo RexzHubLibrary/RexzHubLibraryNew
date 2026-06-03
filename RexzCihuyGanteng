@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta
+--// Rexz Sedang Jatuh Cinta.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -604,26 +604,206 @@ function RexzLibrary.new(dummyHubName, title)
         if self.SearchInput then self.SearchInput.Text = "" end  
     end  
 
-    task.defer(function()  
-        -- --- [ REVISED CREDIT TAB - TANPA ICON PACK LINK ] ---
-local CreditTab = self:CreateTab("Credits", 124560466474914) 
+task.defer(function()
 
-CreditTab:AddLabel("Rexz Hub Information", 10723344432, "Informasi mengenai Library & Developer", false)
+    -- =======================================================
+    -- CREDITS TAB
+    -- =======================================================
 
--- Bagian Owner
-CreditTab:AddButton("Owner: Rexz", 10734934585, function()  
-    if setclipboard then 
-        setclipboard("Rexz") 
-        self:Notify("Credits", "Nama owner telah disalin ke clipboard!", 3) 
-    end
-end)
+    local CreditTab = self:CreateTab("Credits", 124560466474914)
 
--- Bagian Engine Details
-CreditTab:AddLabel("Engine Details", 10723344432, "Versi: V2.5 | Powered by Rexz Cihuy", false)
+    -- PROFILE CARD
 
--- Tombol statis (hanya untuk informasi, tidak ada aksi salin link eksternal)
-CreditTab:AddButton("Status: Private Build", 10723344432, function()
-    self:Notify("Info", "Rexz Engine saat ini berjalan di versi V2.5.", 3)
+    local Profile = Instance.new("Frame")
+    Profile.Size = UDim2.new(1,-4,0,120)
+    Profile.BackgroundColor3 = self.Theme.Element
+    Profile.BorderSizePixel = 0
+    Profile.Parent = CreditTab.ScrollBox
+
+    local ProfileCorner = Instance.new("UICorner")
+    ProfileCorner.CornerRadius = UDim.new(0,8)
+    ProfileCorner.Parent = Profile
+
+    local ProfileStroke = Instance.new("UIStroke")
+    ProfileStroke.Color = self.Theme.Accent
+    ProfileStroke.Thickness = 1.2
+    ProfileStroke.Parent = Profile
+
+    -- Banner
+
+    local Banner = Instance.new("Frame")
+    Banner.Size = UDim2.new(1,0,0,35)
+    Banner.BackgroundColor3 = self.Theme.Accent
+    Banner.BorderSizePixel = 0
+    Banner.Parent = Profile
+
+    local BannerCorner = Instance.new("UICorner")
+    BannerCorner.CornerRadius = UDim.new(0,8)
+    BannerCorner.Parent = Banner
+
+    -- Avatar
+
+    local Avatar = Instance.new("ImageLabel")
+    Avatar.Size = UDim2.new(0,70,0,70)
+    Avatar.Position = UDim2.new(0,12,0,25)
+    Avatar.BackgroundTransparency = 1
+    Avatar.Parent = Profile
+
+    local AvatarCorner = Instance.new("UICorner")
+    AvatarCorner.CornerRadius = UDim.new(1,0)
+    AvatarCorner.Parent = Avatar
+
+    pcall(function()
+
+        local UserId = Players:GetUserIdFromNameAsync("rexzakun2")
+
+        local Content = Players:GetUserThumbnailAsync(
+            UserId,
+            Enum.ThumbnailType.HeadShot,
+            Enum.ThumbnailSize.Size420x420
+        )
+
+        Avatar.Image = Content
+
+    end)
+
+    -- Username
+
+    local Name = Instance.new("TextLabel")
+    Name.Size = UDim2.new(1,-100,0,24)
+    Name.Position = UDim2.new(0,90,0,42)
+    Name.BackgroundTransparency = 1
+    Name.Text = "Rexz"
+    Name.TextColor3 = self.Theme.Text
+    Name.TextSize = 18
+    Name.Font = Enum.Font.GothamBold
+    Name.TextXAlignment = Enum.TextXAlignment.Left
+    Name.Parent = Profile
+
+    -- Role
+
+    local Role = Instance.new("TextLabel")
+    Role.Size = UDim2.new(1,-100,0,18)
+    Role.Position = UDim2.new(0,90,0,64)
+    Role.BackgroundTransparency = 1
+    Role.Text = "Owner & Developer"
+    Role.TextColor3 = self.Theme.Accent
+    Role.TextSize = 12
+    Role.Font = Enum.Font.GothamMedium
+    Role.TextXAlignment = Enum.TextXAlignment.Left
+    Role.Parent = Profile
+
+    -- Bio
+
+    local Bio = Instance.new("TextLabel")
+    Bio.Size = UDim2.new(1,-100,0,18)
+    Bio.Position = UDim2.new(0,90,0,82)
+    Bio.BackgroundTransparency = 1
+    Bio.Text = "Creator of Rexz Hub Library"
+    Bio.TextColor3 = self.Theme.TextDim
+    Bio.TextSize = 11
+    Bio.Font = Enum.Font.Gotham
+    Bio.TextXAlignment = Enum.TextXAlignment.Left
+    Bio.Parent = Profile
+
+    -- OWNER BADGE
+
+    local Badge = Instance.new("TextLabel")
+    Badge.Size = UDim2.new(0,60,0,20)
+    Badge.Position = UDim2.new(1,-75,0,42)
+    Badge.BackgroundColor3 = self.Theme.Accent
+    Badge.Text = "OWNER"
+    Badge.TextColor3 = Color3.new(1,1,1)
+    Badge.TextSize = 10
+    Badge.Font = Enum.Font.GothamBold
+    Badge.Parent = Profile
+
+    local BadgeCorner = Instance.new("UICorner")
+    BadgeCorner.CornerRadius = UDim.new(0,5)
+    BadgeCorner.Parent = Badge
+
+    -- INFO
+
+    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━",0,"",false)
+
+    CreditTab:AddLabel(
+        "👑 Owner",
+        0,
+        "Rexz",
+        false
+    )
+
+    CreditTab:AddLabel(
+        "⚡ Version",
+        0,
+        "V2.5.0 Stable",
+        false
+    )
+
+    CreditTab:AddLabel(
+        "🛠 Build",
+        0,
+        "Rexz Licence",
+        false
+    )
+
+    CreditTab:AddLabel(
+        "💖 Status",
+        0,
+        "Rexz Sedang Jatuh Cinta",
+        false
+    )
+
+    CreditTab:AddLabel(
+        "📦 Executor",
+        0,
+        "Delta • KRNL • Synapse",
+        false
+    )
+
+    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━",0,"",false)
+
+    -- BUTTONS
+
+    CreditTab:AddButton(
+        "Copy Owner",
+        10734934585,
+        function()
+
+            if setclipboard then
+                setclipboard("Rexz")
+
+                self:Notify(
+                    "Credits",
+                    "Nama owner berhasil disalin.",
+                    3
+                )
+            end
+
+        end
+    )
+
+    CreditTab:AddButton(
+        "Check Status",
+        10723344432,
+        function()
+
+            self:Notify(
+                "Status",
+                "Rexz Hub berjalan normal.",
+                3
+            )
+
+        end
+    )
+
+    CreditTab:AddLabel(
+        "© 2026 Rexz Hub",
+        0,
+        "All Rights Reserved",
+        false
+    )
+
 end)
 
     local SettingsTab = self:CreateTab("Settings", 80758916183665, true)  
@@ -1314,6 +1494,116 @@ function TabClass:AddInput(text, iconId, placeholder, callback)
             currentValue = Box.Text  
         end  
     }
+end
+
+function TabClass:AddSlider(text, iconId, min, max, default, callback)
+    local lib = self.Library
+    local value = default or min
+    local action = callback or function() end
+
+    local SliderFrame = Instance.new("Frame")
+    SliderFrame.Size = UDim2.new(1, -4, 0, 50)
+    SliderFrame.BackgroundColor3 = lib.Theme.Element
+    SliderFrame.BorderSizePixel = 0
+    SliderFrame.Parent = self.ScrollBox
+
+    Instance.new("UICorner", SliderFrame).CornerRadius = UDim.new(0,6)
+
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Color = lib.Theme.Stroke
+    Stroke.Parent = SliderFrame
+
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1,-60,0,18)
+    Label.Position = UDim2.new(0,10,0,5)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = lib.Theme.Text
+    Label.Font = Enum.Font.GothamBold
+    Label.TextSize = 12
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = SliderFrame
+
+    local ValueLabel = Instance.new("TextLabel")
+    ValueLabel.Size = UDim2.new(0,40,0,18)
+    ValueLabel.Position = UDim2.new(1,-50,0,5)
+    ValueLabel.BackgroundTransparency = 1
+    ValueLabel.Text = tostring(value)
+    ValueLabel.TextColor3 = lib.Theme.Accent
+    ValueLabel.Font = Enum.Font.GothamBold
+    ValueLabel.TextSize = 12
+    ValueLabel.Parent = SliderFrame
+
+    local Bar = Instance.new("Frame")
+    Bar.Size = UDim2.new(1,-20,0,6)
+    Bar.Position = UDim2.new(0,10,0,32)
+    Bar.BackgroundColor3 = lib.Theme.ToggleOffBg
+    Bar.Parent = SliderFrame
+
+    Instance.new("UICorner", Bar).CornerRadius = UDim.new(1,0)
+
+    local Fill = Instance.new("Frame")
+    Fill.Size = UDim2.new((value-min)/(max-min),0,1,0)
+    Fill.BackgroundColor3 = lib.Theme.Accent
+    Fill.Parent = Bar
+
+    Instance.new("UICorner", Fill).CornerRadius = UDim.new(1,0)
+
+    local dragging = false
+
+    local function Update(input)
+        local percent = math.clamp(
+            (input.Position.X - Bar.AbsolutePosition.X)
+            / Bar.AbsoluteSize.X,
+            0,1
+        )
+
+        value = math.floor(min + ((max-min)*percent))
+
+        Fill.Size = UDim2.new(percent,0,1,0)
+        ValueLabel.Text = tostring(value)
+
+        pcall(action,value)
+    end
+
+    Bar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true
+            Update(input)
+        end
+    end)
+
+    game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            Update(input)
+        end
+    end)
+
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    table.insert(self.Elements,{
+        Name = text,
+        Instance = SliderFrame
+    })
+
+    return {
+        GetValue = function()
+            return value
+        end
+    }
+end
+
+function TabClass:AddTextbox(text, iconId, placeholder, callback)
+    return self:AddInput(
+        text,
+        iconId,
+        placeholder,
+        callback
+    )
 end
 
 function TabClass:AddDropdown(text, iconId, options, defaultValue, callback)
