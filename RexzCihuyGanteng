@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta Sama ...
+--// Rexz Sedang Jatuh Cinta
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -476,7 +476,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainIcon.Size = UDim2.new(0, 20, 0, 20)  
     MainIcon.Position = UDim2.new(0, 12, 0, 9)  
     MainIcon.BackgroundTransparency = 1  
-    MainIcon.Image = ResolveIcon(10734950309)  
+    MainIcon.Image = ResolveIcon(98755624629571)  
     MainIcon.ImageColor3 = self.Theme.Accent  
     MainIcon.Parent = TopBar  
 
