@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta.
+--// Rexz Sedang Jatuh Cinta
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -605,50 +605,25 @@ function RexzLibrary.new(dummyHubName, title)
     end  
 
     task.defer(function()  
-    -- =======================================================
-    -- CREDITS TAB 
-    -- =======================================================
-    local CreditTab = self:CreateTab("Credits", 124560466474914) 
+        -- --- [ REVISED CREDIT TAB - TANPA ICON PACK LINK ] ---
+local CreditTab = self:CreateTab("Credits", 124560466474914) 
 
-    -- HEADER
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 0, "", false)
-    CreditTab:AddLabel("    REXZ HUB    ", 10734950309, "Script Hub for Roblox", false)
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 0, "", false)
-    CreditTab:AddLabel("", 0, "", false)
+CreditTab:AddLabel("Rexz Hub Information", 10723344432, "Informasi mengenai Library & Developer", false)
 
-    -- DEVELOPER SECTION
-    CreditTab:AddLabel("◆ DEVELOPER ◆", 10723344432, "", false)
-    CreditTab:AddButton("Owner: Rexz", 10734934585, function()  
-        if setclipboard then 
-            setclipboard("Rexz") 
-            self:Notify("Credits", "✓ Nama owner disalin!", 2) 
-        end
-    end)
-    
-    -- ENGINE SECTION
-    CreditTab:AddLabel("◆ Rexz Hub SPECS ◆", 10723344432, "", false)
-    CreditTab:AddLabel("Version: V2.5.0", 0, "stable release", false)
-    CreditTab:AddLabel("Build: Only Rexz", 0, "Rexz Licence", false)
-    CreditTab:AddLabel("Executor: Delta / Synapse / Krnl", 0, "100% compatible", false)
-    CreditTab:AddLabel("", 0, "", false)
+-- Bagian Owner
+CreditTab:AddButton("Owner: Rexz", 10734934585, function()  
+    if setclipboard then 
+        setclipboard("Rexz") 
+        self:Notify("Credits", "Nama owner telah disalin ke clipboard!", 3) 
+    end
+end)
 
-    -- FEATURES SECTION
-    CreditTab:AddLabel("◆ FEATURES ◆", 10723344432, "", false)
-    CreditTab:AddLabel("• Multi Profile Save", 0, "Simpan tema & setting", false)
-    CreditTab:AddLabel("• Custom Theme", 0, "6 tema + custom HEX", false)
-    CreditTab:AddLabel("", 0, "", false)
+-- Bagian Engine Details
+CreditTab:AddLabel("Engine Details", 10723344432, "Versi: V2.5 | Powered by Rexz Cihuy", false)
 
-    -- STATUS
-    CreditTab:AddLabel("◆ STATUS ◆", 10723344432, "", false)
-    CreditTab:AddButton("Check Status", 10723344432, function()
-        self:Notify("Status", "✓ Rexz Hub V2.5 berjalan normal!", 3)
-    end)
-    CreditTab:AddLabel("", 0, "", false)
-
-    -- FOOTER
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 0, "", false)
-    CreditTab:AddLabel("  © 2026 Rexz Hub | All Rights Reserved  ", 0, "", false)
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━", 0, "", false)
+-- Tombol statis (hanya untuk informasi, tidak ada aksi salin link eksternal)
+CreditTab:AddButton("Status: Private Build", 10723344432, function()
+    self:Notify("Info", "Rexz Engine saat ini berjalan di versi V2.5.", 3)
 end)
 
     local SettingsTab = self:CreateTab("Settings", 80758916183665, true)  
