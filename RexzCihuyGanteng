@@ -11,15 +11,95 @@ local TabClass = {}
 TabClass.__index = TabClass
 
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local UserInputService = game:GetService("UserInputService")
 
 function RexzLibrary.new(dummyHubName, title)
     local self = setmetatable({}, RexzLibrary)
     self.Tabs = {}
     self.CurrentTab = nil
-    self.Minimized = false -- Status untuk melacak perkecilan Window (Hanya sisa Header)
-    self.Hidden = false    -- Status untuk melacak sembunyi total Window (Hide/Show)
+    self.Minimized = false
+    self.Hidden = false
+    self.CurrentTheme = "dark" -- dark, light, purple, ocean, sunset
+    self.Configs = {}
+    self.CurrentConfigName = nil
+    
+    -- Theme Color Palettes
+    self.Themes = {
+        dark = {
+            bg = Color3.fromRGB(18, 18, 22),
+            surface = Color3.fromRGB(25, 25, 32),
+            card = Color3.fromRGB(26, 26, 33),
+            border = Color3.fromRGB(40, 40, 50),
+            text = Color3.fromRGB(235, 235, 240),
+            textSec = Color3.fromRGB(160, 160, 175),
+            accent = Color3.fromRGB(160, 110, 255),
+            accentDark = Color3.fromRGB(130, 80, 220),
+            success = Color3.fromRGB(80, 200, 120),
+            error = Color3.fromRGB(220, 80, 80)
+        },
+        light = {
+            bg = Color3.fromRGB(245, 245, 250),
+            surface = Color3.fromRGB(235, 235, 242),
+            card = Color3.fromRGB(240, 240, 248),
+            border = Color3.fromRGB(210, 210, 220),
+            text = Color3.fromRGB(30, 30, 40),
+            textSec = Color3.fromRGB(100, 100, 115),
+            accent = Color3.fromRGB(160, 110, 255),
+            accentDark = Color3.fromRGB(130, 80, 220),
+            success = Color3.fromRGB(60, 160, 100),
+            error = Color3.fromRGB(200, 70, 70)
+        },
+        purple = {
+            bg = Color3.fromRGB(20, 15, 35),
+            surface = Color3.fromRGB(28, 22, 45),
+            card = Color3.fromRGB(32, 26, 50),
+            border = Color3.fromRGB(55, 45, 80),
+            text = Color3.fromRGB(230, 225, 255),
+            textSec = Color3.fromRGB(170, 160, 210),
+            accent = Color3.fromRGB(180, 80, 220),
+            accentDark = Color3.fromRGB(150, 50, 190),
+            success = Color3.fromRGB(100, 200, 140),
+            error = Color3.fromRGB(230, 90, 90)
+        },
+        ocean = {
+            bg = Color3.fromRGB(10, 25, 40),
+            surface = Color3.fromRGB(18, 38, 55),
+            card = Color3.fromRGB(22, 45, 65),
+            border = Color3.fromRGB(40, 70, 95),
+            text = Color3.fromRGB(220, 240, 255),
+            textSec = Color3.fromRGB(140, 180, 210),
+            accent = Color3.fromRGB(50, 180, 230),
+            accentDark = Color3.fromRGB(30, 150, 200),
+            success = Color3.fromRGB(70, 210, 150),
+            error = Color3.fromRGB(240, 100, 100)
+        },
+        sunset = {
+            bg = Color3.fromRGB(30, 18, 25),
+            surface = Color3.fromRGB(45, 28, 38),
+            card = Color3.fromRGB(55, 35, 48),
+            border = Color3.fromRGB(80, 55, 70),
+            text = Color3.fromRGB(255, 235, 220),
+            textSec = Color3.fromRGB(200, 170, 160),
+            accent = Color3.fromRGB(255, 120, 80),
+            accentDark = Color3.fromRGB(220, 90, 50),
+            success = Color3.fromRGB(80, 210, 130),
+            error = Color3.fromRGB(255, 100, 100)
+        }
+    }
     
     local fixedHubName = "Rexz Hub"
+    
+    -- Create config folder
+    if not isfolder then
+        local function ensureFolder(path)
+            if not isfolder(path) then
+                makefolder(path)
+            end
+        end
+        ensureFolder("RexzLibrary")
+        ensureFolder("RexzLibrary/Configs")
+    end
 
     -- Main ScreenGui
     local ScreenGui = Instance.new("ScreenGui")
@@ -27,12 +107,68 @@ function RexzLibrary.new(dummyHubName, title)
     ScreenGui.Parent = game:GetService("CoreGui")
     ScreenGui.ResetOnSpawn = false
     self.ScreenGui = ScreenGui
+    
+    -- Apply Theme Function
+    local function applyTheme()
+        local theme = self.Themes[self.CurrentTheme] or self.Themes.dark
+        
+        if self.MainFrame then
+            self.MainFrame.BackgroundColor3 = theme.bg
+            if self.MainStroke then self.MainStroke.Color = theme.border end
+        end
+        if self.TopBar then 
+            self.TopBar.BackgroundColor3 = theme.surface
+            if self.TopFix then self.TopFix.BackgroundColor3 = theme.surface end
+        end
+        if self.SearchFrame then 
+            self.SearchFrame.BackgroundColor3 = theme.card
+            if self.SearchStroke then self.SearchStroke.Color = theme.border end
+        end
+        
+        -- Update all tabs
+        for _, tab in ipairs(self.Tabs) do
+            if tab.BackgroundColor then
+                if tab == self.CurrentTab then
+                    tab.BackgroundColor.BackgroundColor3 = Color3.fromRGB(
+                        theme.card.R * 255 + 10,
+                        theme.card.G * 255 + 8,
+                        theme.card.B * 255 + 12
+                    )
+                else
+                    tab.BackgroundColor.BackgroundColor3 = theme.card
+                end
+            end
+            if tab.Label then
+                tab.Label.TextColor3 = tab == self.CurrentTab and theme.accent or theme.textSec
+            end
+            if tab.Icon then
+                tab.Icon.ImageColor3 = tab == self.CurrentTab and theme.accent or theme.textSec
+            end
+        end
+        
+        -- Update Toggle Button
+        if self.ToggleBtn then
+            self.ToggleBtn.BackgroundColor3 = theme.surface
+            if self.ToggleStroke then self.ToggleStroke.Color = theme.accent end
+            if self.ToggleIcon then self.ToggleIcon.ImageColor3 = theme.accent end
+        end
+        
+        -- Update Title
+        if self.TitleLabel then
+            self.TitleLabel.TextColor3 = theme.text
+        end
+        if self.MainIcon then
+            self.MainIcon.ImageColor3 = theme.accent
+        end
+    end
+    
+    self.applyTheme = applyTheme
 
     -- NOTIFICATION HOLDER
     local NotifHolder = Instance.new("Frame")
     NotifHolder.Name = "NotificationHolder"
-    NotifHolder.Size = UDim2.new(0, 260, 1, -20)
-    NotifHolder.Position = UDim2.new(1, -270, 0, 10)
+    NotifHolder.Size = UDim2.new(0, 280, 1, -20)
+    NotifHolder.Position = UDim2.new(1, -290, 0, 10)
     NotifHolder.BackgroundTransparency = 1
     NotifHolder.Parent = ScreenGui
 
@@ -43,25 +179,27 @@ function RexzLibrary.new(dummyHubName, title)
     NotifLayout.Padding = UDim.new(0, 8)
     self.NotifHolder = NotifHolder
 
-    -- FLOATING TOGGLE BUTTON (Fungsinya Murni untuk HIDE / SHOW TOTAL)
+    -- FLOATING TOGGLE BUTTON
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "UiToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
     ToggleBtn.Position = UDim2.new(0, 15, 0, 15)
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+    ToggleBtn.BackgroundColor3 = self.Themes.dark.surface
     ToggleBtn.Text = ""
     ToggleBtn.Active = true
     ToggleBtn.Draggable = true
     ToggleBtn.Parent = ScreenGui
+    self.ToggleBtn = ToggleBtn
 
     local ToggleCorner = Instance.new("UICorner")
     ToggleCorner.CornerRadius = UDim.new(0, 50)
     ToggleCorner.Parent = ToggleBtn
 
     local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = Color3.fromRGB(160, 110, 255)
+    ToggleStroke.Color = self.Themes.dark.accent
     ToggleStroke.Thickness = 1.5
     ToggleStroke.Parent = ToggleBtn
+    self.ToggleStroke = ToggleStroke
 
     local ToggleIcon = Instance.new("ImageLabel")
     ToggleIcon.Name = "ToggleIcon"
@@ -69,15 +207,16 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
     ToggleIcon.BackgroundTransparency = 1
     ToggleIcon.Image = "rbxassetid://10734950309"
-    ToggleIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    ToggleIcon.ImageColor3 = self.Themes.dark.accent
     ToggleIcon.Parent = ToggleBtn
+    self.ToggleIcon = ToggleIcon
 
     -- MAIN CONTAINER WINDOW
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainContainer"
-    MainFrame.Size = UDim2.new(0, 480, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -240, 0.5, -150)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
+    MainFrame.Size = UDim2.new(0, 520, 0, 350)
+    MainFrame.Position = UDim2.new(0.5, -260, 0.5, -175)
+    MainFrame.BackgroundColor3 = self.Themes.dark.bg
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
     MainFrame.Draggable = true
@@ -91,70 +230,19 @@ function RexzLibrary.new(dummyHubName, title)
     MainCorner.Parent = MainFrame
 
     local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Color3.fromRGB(40, 40, 50)
+    MainStroke.Color = self.Themes.dark.border
     MainStroke.Thickness = 1.2
     MainStroke.Parent = MainFrame
-
-    -- =======================================================
-    -- LOGIKA PEMISAHAN: MINIMIZE VS TOGGLE HIDE
-    -- =======================================================
-
-    -- 1. Fungsi Murni Minimize (Mengecilkan ukuran Frame, menyisakan TopBar)
-    local function MinimizeWindow()
-        if self.Hidden then return end -- Jika sedang sembunyi total, abaikan fungsi ini
-        
-        self.Minimized = not self.Minimized
-        if self.Minimized then
-            -- Ciutkan ukuran frame hanya setinggi TopBar (38px)
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 38)
-            })
-            tween:Play()
-        else
-            -- Kembalikan ke ukuran penuh semula (300px)
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 300)
-            })
-            tween:Play()
-        end
-    end
-
-    -- 2. Fungsi Murni Toggle Hide (Menghilangkan & Memunculkan UI secara total dengan Fade)
-    local function ToggleHideWindow()
-        self.Hidden = not self.Hidden
-        if self.Hidden then
-            -- Efek mengecil tipis sambil menghilang total (Sembunyi)
-            local tweenScale = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-                Size = self.Minimized and UDim2.new(0, 430, 0, 38) or UDim2.new(0, 430, 0, 270),
-                BackgroundTransparency = 1
-            })
-            tweenScale:Play()
-            tweenScale.Completed:Connect(function()
-                MainFrame.Visible = false
-            end)
-        else
-            -- Tampilkan kembali UI ke ukuran yang seharusnya (Penuh / Sesuai kondisi minimize sebelumnya)
-            MainFrame.Visible = true
-            local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)
-            
-            local tweenShow = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-                Size = targetSize,
-                BackgroundTransparency = 0
-            })
-            tweenShow:Play()
-        end
-    end
-
-    -- Hubungkan Tombol Floating ke fungsi Toggle Hide
-    ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
+    self.MainStroke = MainStroke
 
     -- Header Bar
     local TopBar = Instance.new("Frame")
     TopBar.Name = "HeaderBar"
     TopBar.Size = UDim2.new(1, 0, 0, 38)
-    TopBar.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+    TopBar.BackgroundColor3 = self.Themes.dark.surface
     TopBar.BorderSizePixel = 0
     TopBar.Parent = MainFrame
+    self.TopBar = TopBar
 
     local TopCorner = Instance.new("UICorner")
     TopCorner.CornerRadius = UDim.new(0, 10)
@@ -163,9 +251,10 @@ function RexzLibrary.new(dummyHubName, title)
     local TopFix = Instance.new("Frame")
     TopFix.Size = UDim2.new(1, 0, 0, 10)
     TopFix.Position = UDim2.new(0, 0, 1, -10)
-    TopFix.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
+    TopFix.BackgroundColor3 = self.Themes.dark.surface
     TopFix.BorderSizePixel = 0
     TopFix.Parent = TopBar
+    self.TopFix = TopFix
 
     local MainIcon = Instance.new("ImageLabel")
     MainIcon.Name = "WindowIcon"
@@ -173,8 +262,9 @@ function RexzLibrary.new(dummyHubName, title)
     MainIcon.Position = UDim2.new(0, 12, 0, 9)
     MainIcon.BackgroundTransparency = 1
     MainIcon.Image = "rbxassetid://10734950309"
-    MainIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    MainIcon.ImageColor3 = self.Themes.dark.accent
     MainIcon.Parent = TopBar
+    self.MainIcon = MainIcon
 
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Name = "TitleText"
@@ -182,12 +272,13 @@ function RexzLibrary.new(dummyHubName, title)
     TitleLabel.Position = UDim2.new(0, 40, 0, 0)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = tostring(fixedHubName) .. " <font color='#A06EFF'>|</font> " .. tostring(title)
-    TitleLabel.TextColor3 = Color3.fromRGB(235, 235, 240)
+    TitleLabel.TextColor3 = self.Themes.dark.text
     TitleLabel.TextSize = 14
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.RichText = true
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = TopBar
+    self.TitleLabel = TitleLabel
 
     -- TOMBOL CLOSE (X)
     local CloseBtn = Instance.new("TextButton")
@@ -196,33 +287,102 @@ function RexzLibrary.new(dummyHubName, title)
     CloseBtn.Position = UDim2.new(1, -35, 0, 4)
     CloseBtn.BackgroundTransparency = 1
     CloseBtn.Text = "×"
-    CloseBtn.TextColor3 = Color3.fromRGB(220, 80, 80)
+    CloseBtn.TextColor3 = self.Themes.dark.error
     CloseBtn.TextSize = 22
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = TopBar
 
     CloseBtn.MouseButton1Click:Connect(function()
+        if self.OnCloseCallback then self.OnCloseCallback() end
         ScreenGui:Destroy()
     end)
 
-    -- TOMBOL MINIMIZE (-) -> Murni Pengecilan Vertikal
+    -- TOMBOL MINIMIZE (-)
     local MinimizeBtn = Instance.new("TextButton")
     MinimizeBtn.Name = "MinimizeAction"
     MinimizeBtn.Size = UDim2.new(0, 30, 0, 30)
     MinimizeBtn.Position = UDim2.new(1, -65, 0, 4) 
     MinimizeBtn.BackgroundTransparency = 1
     MinimizeBtn.Text = "—"
-    MinimizeBtn.TextColor3 = Color3.fromRGB(160, 160, 175)
+    MinimizeBtn.TextColor3 = self.Themes.dark.textSec
     MinimizeBtn.TextSize = 14
     MinimizeBtn.Font = Enum.Font.GothamBold
     MinimizeBtn.Parent = TopBar
 
+    local function MinimizeWindow()
+        if self.Hidden then return end
+        self.Minimized = not self.Minimized
+        if self.Minimized then
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 520, 0, 38)
+            })
+            tween:Play()
+        else
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+                Size = UDim2.new(0, 520, 0, 350)
+            })
+            tween:Play()
+        end
+    end
     MinimizeBtn.MouseButton1Click:Connect(MinimizeWindow)
+
+    -- TOMBOL THEME CHANGER 🎨
+    local ThemeBtn = Instance.new("TextButton")
+    ThemeBtn.Name = "ThemeAction"
+    ThemeBtn.Size = UDim2.new(0, 30, 0, 30)
+    ThemeBtn.Position = UDim2.new(1, -100, 0, 4)
+    ThemeBtn.BackgroundTransparency = 1
+    ThemeBtn.Text = "🎨"
+    ThemeBtn.TextColor3 = self.Themes.dark.accent
+    ThemeBtn.TextSize = 16
+    ThemeBtn.Font = Enum.Font.GothamBold
+    ThemeBtn.Parent = TopBar
+
+    local function CycleTheme()
+        local themes = {"dark", "light", "purple", "ocean", "sunset"}
+        local currentIndex = nil
+        for i, t in ipairs(themes) do
+            if t == self.CurrentTheme then
+                currentIndex = i
+                break
+            end
+        end
+        local nextIndex = (currentIndex % #themes) + 1
+        self.CurrentTheme = themes[nextIndex]
+        self.applyTheme()
+        self:Notify("Theme Changer", "Theme changed to: " .. self.CurrentTheme:upper(), 2.5)
+        self:SaveConfig(self.CurrentConfigName or "default")
+    end
+    ThemeBtn.MouseButton1Click:Connect(CycleTheme)
+
+    local function ToggleHideWindow()
+        self.Hidden = not self.Hidden
+        if self.Hidden then
+            local targetSize = self.Minimized and UDim2.new(0, 470, 0, 38) or UDim2.new(0, 470, 0, 320)
+            local tweenScale = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+                Size = targetSize,
+                BackgroundTransparency = 1
+            })
+            tweenScale:Play()
+            tweenScale.Completed:Connect(function()
+                MainFrame.Visible = false
+            end)
+        else
+            MainFrame.Visible = true
+            local targetSize = self.Minimized and UDim2.new(0, 520, 0, 38) or UDim2.new(0, 520, 0, 350)
+            local tweenShow = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+                Size = targetSize,
+                BackgroundTransparency = 0
+            })
+            tweenShow:Play()
+        end
+    end
+    ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
 
     -- SIDEBAR NAVIGATION CONTAINER
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 130, 1, -48)
+    Sidebar.Size = UDim2.new(0, 140, 1, -48)
     Sidebar.Position = UDim2.new(0, 10, 0, 48)
     Sidebar.BackgroundTransparency = 1
     Sidebar.BorderSizePixel = 0
@@ -237,20 +397,22 @@ function RexzLibrary.new(dummyHubName, title)
     -- SEARCH BAR COMPONENT
     local SearchFrame = Instance.new("Frame")
     SearchFrame.Name = "SearchBarContainer"
-    SearchFrame.Size = UDim2.new(1, -165, 0, 32)
-    SearchFrame.Position = UDim2.new(0, 150, 0, 48)
-    SearchFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+    SearchFrame.Size = UDim2.new(1, -180, 0, 32)
+    SearchFrame.Position = UDim2.new(0, 160, 0, 48)
+    SearchFrame.BackgroundColor3 = self.Themes.dark.card
     SearchFrame.BorderSizePixel = 0
     SearchFrame.Parent = MainFrame
+    self.SearchFrame = SearchFrame
 
     local SearchCorner = Instance.new("UICorner")
     SearchCorner.CornerRadius = UDim.new(0, 6)
     SearchCorner.Parent = SearchFrame
 
     local SearchStroke = Instance.new("UIStroke")
-    SearchStroke.Color = Color3.fromRGB(35, 35, 45)
+    SearchStroke.Color = self.Themes.dark.border
     SearchStroke.Thickness = 1
     SearchStroke.Parent = SearchFrame
+    self.SearchStroke = SearchStroke
 
     local SearchIcon = Instance.new("ImageLabel")
     SearchIcon.Name = "SearchIcon"
@@ -258,7 +420,7 @@ function RexzLibrary.new(dummyHubName, title)
     SearchIcon.Position = UDim2.new(0, 10, 0.5, -7)
     SearchIcon.BackgroundTransparency = 1
     SearchIcon.Image = "rbxassetid://10723344432"
-    SearchIcon.ImageColor3 = Color3.fromRGB(100, 100, 120)
+    SearchIcon.ImageColor3 = self.Themes.dark.textSec
     SearchIcon.Parent = SearchFrame
 
     local SearchInput = Instance.new("TextBox")
@@ -268,8 +430,8 @@ function RexzLibrary.new(dummyHubName, title)
     SearchInput.BackgroundTransparency = 1
     SearchInput.Text = ""
     SearchInput.PlaceholderText = "Cari fitur di tab ini..."
-    SearchInput.PlaceholderColor3 = Color3.fromRGB(90, 90, 105)
-    SearchInput.TextColor3 = Color3.fromRGB(220, 220, 230)
+    SearchInput.PlaceholderColor3 = self.Themes.dark.textSec
+    SearchInput.TextColor3 = self.Themes.dark.text
     SearchInput.TextSize = 12
     SearchInput.Font = Enum.Font.GothamMedium
     SearchInput.TextXAlignment = Enum.TextXAlignment.Left
@@ -278,13 +440,13 @@ function RexzLibrary.new(dummyHubName, title)
     -- TABS CONTAINER HOLDER
     local ContentHolder = Instance.new("Frame")
     ContentHolder.Name = "ContentHolder"
-    ContentHolder.Size = UDim2.new(1, -165, 1, -96)
-    ContentHolder.Position = UDim2.new(0, 150, 0, 88)
+    ContentHolder.Size = UDim2.new(1, -180, 1, -96)
+    ContentHolder.Position = UDim2.new(0, 160, 0, 88)
     ContentHolder.BackgroundTransparency = 1
     ContentHolder.Parent = MainFrame
     self.ContentHolder = ContentHolder
 
-    -- REALTIME GLOBAL SEARCH ENGINE
+    -- SEARCH ENGINE
     SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local query = string.lower(SearchInput.Text)
         if self.CurrentTab then
@@ -292,30 +454,197 @@ function RexzLibrary.new(dummyHubName, title)
                 if query == "" then
                     item.Instance.Visible = true
                 else
-                    if string.find(string.lower(item.Name), query) then
-                        item.Instance.Visible = true
-                    else
-                        item.Instance.Visible = false
-                    end
+                    item.Instance.Visible = string.find(string.lower(item.Name), query) ~= nil
                 end
             end
         end
     end)
 
     -- =======================================================
-    -- AUTO-INJECT SYSTEM: TAB CREDIT 😈
+    -- MULTI SAVE CONFIG SYSTEM
     -- =======================================================
+    
+    function self:SaveConfig(configName)
+        if not configName or configName == "" then
+            self:Notify("Config Error", "Nama config tidak boleh kosong!", 3)
+            return false
+        end
+        
+        local configData = {
+            name = configName,
+            theme = self.CurrentTheme,
+            savedAt = os.date("%Y-%m-%d %H:%M:%S"),
+            tabs = {}
+        }
+        
+        -- Save all toggle states
+        for tabIndex, tab in ipairs(self.Tabs) do
+            local tabData = {name = tab.TabName or "Tab " .. tabIndex, toggles = {}}
+            for _, element in ipairs(tab.Elements) do
+                if element.Type == "toggle" and element.GetValue then
+                    tabData.toggles[element.Name] = element.GetValue()
+                end
+            end
+            table.insert(configData.tabs, tabData)
+        end
+        
+        local success, err = pcall(function()
+            local json = HttpService:JSONEncode(configData)
+            if writefile then
+                writefile("RexzLibrary/Configs/" .. configName .. ".json", json)
+            end
+        end)
+        
+        if success then
+            self.CurrentConfigName = configName
+            self:Notify("Config Saved", "Config '" .. configName .. "' berhasil disimpan!", 3)
+            return true
+        else
+            self:Notify("Config Error", "Gagal menyimpan config: " .. tostring(err), 3)
+            return false
+        end
+    end
+    
+    function self:LoadConfig(configName)
+        if not configName then
+            local configs = self:ListConfigs()
+            if #configs == 0 then
+                self:Notify("Config Error", "Tidak ada config yang tersedia!", 3)
+                return false
+            end
+            configName = configs[1]
+        end
+        
+        local success, data = pcall(function()
+            if isfile then
+                local content = readfile("RexzLibrary/Configs/" .. configName .. ".json")
+                return HttpService:JSONDecode(content)
+            end
+            return nil
+        end)
+        
+        if success and data then
+            -- Apply theme
+            if data.theme and self.Themes[data.theme] then
+                self.CurrentTheme = data.theme
+                self.applyTheme()
+            end
+            
+            -- Restore toggle states
+            for tabIndex, tabData in ipairs(data.tabs) do
+                local tab = self.Tabs[tabIndex]
+                if tab then
+                    for toggleName, toggleValue in pairs(tabData.toggles) do
+                        for _, element in ipairs(tab.Elements) do
+                            if element.Type == "toggle" and element.Name == toggleName and element.SetValue then
+                                element.SetValue(toggleValue)
+                            end
+                        end
+                    end
+                end
+            end
+            
+            self.CurrentConfigName = configName
+            self:Notify("Config Loaded", "Config '" .. configName .. "' berhasil dimuat!", 3)
+            return true
+        else
+            self:Notify("Config Error", "Gagal memuat config!", 3)
+            return false
+        end
+    end
+    
+    function self:ListConfigs()
+        local configs = {}
+        if listfiles then
+            local success, files = pcall(listfiles, "RexzLibrary/Configs/")
+            if success and files then
+                for _, file in ipairs(files) do
+                    local name = file:match("([^/]+)%.json$")
+                    if name then
+                        table.insert(configs, name)
+                    end
+                end
+            end
+        end
+        return configs
+    end
+    
+    function self:DeleteConfig(configName)
+        if not configName then
+            self:Notify("Config Error", "Nama config tidak boleh kosong!", 3)
+            return false
+        end
+        
+        local success, err = pcall(function()
+            if delfile then
+                delfile("RexzLibrary/Configs/" .. configName .. ".json")
+            end
+        end)
+        
+        if success then
+            if self.CurrentConfigName == configName then
+                self.CurrentConfigName = nil
+            end
+            self:Notify("Config Deleted", "Config '" .. configName .. "' berhasil dihapus!", 3)
+            return true
+        else
+            self:Notify("Config Error", "Gagal menghapus config!", 3)
+            return false
+        end
+    end
+    
+    function self:GetCurrentConfig()
+        return self.CurrentConfigName
+    end
+
+    -- AUTO-CREDIT TAB
     task.spawn(function()
         local CreditTab = self:CreateTab("Credit", 10723351930)
+        CreditTab.TabName = "Credit"
         
         CreditTab:AddButton("Owner: RexzLock", 10734950309, function()
-            setclipboard("RexzLock")
+            if setclipboard then
+                setclipboard("RexzLock")
+            end
             self:Notify("Sistem Info", "Nama owner berhasil disalin ke clipboard!", 4)
         end)
         
-        CreditTab:AddButton("Powered by Rexz Engine", 10723344432, nil)
+        -- Settings Tab for Config Management
+        local SettingsTab = self:CreateTab("Settings", 10723344432)
+        SettingsTab.TabName = "Settings"
+        
+        local configNames = self:ListConfigs()
+        local selectedConfig = configNames[1] or "default"
+        
+        SettingsTab:AddDropdown("Select Config", configNames, selectedConfig, function(value)
+            selectedConfig = value
+        end)
+        
+        SettingsTab:AddButton("Save Current Config", 10734950309, function()
+            self:SaveConfig(selectedConfig)
+        end)
+        
+        SettingsTab:AddButton("Load Selected Config", 10723344432, function()
+            self:LoadConfig(selectedConfig)
+        end)
+        
+        SettingsTab:AddButton("Refresh Config List", 10723344432, function()
+            local newList = self:ListConfigs()
+            self:Notify("Config", "Found " .. #newList .. " config(s)", 2)
+        end)
+        
+        SettingsTab:AddButton("Delete Selected Config", 10723351930, function()
+            self:DeleteConfig(selectedConfig)
+            task.wait(0.5)
+            local newList = self:ListConfigs()
+            selectedConfig = newList[1] or "default"
+            self:Notify("Config", "Config deleted!", 2)
+        end)
+        
+        SettingsTab:AddButton("Powered by Rexz Engine", 10723344432, nil)
     end)
 
+    applyTheme()
     return self
 end
 
@@ -327,8 +656,8 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifBox.Name = "RexzNotification"
     NotifBox.Size = UDim2.new(1, 0, 0, 55)
     NotifBox.Position = UDim2.new(1, 30, 0, 0)
-    NotifBox.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
-    NotifBox.BackgroundTransparency = 0.1
+    NotifBox.BackgroundColor3 = self.Themes[self.CurrentTheme].card
+    NotifBox.BackgroundTransparency = 0.05
     NotifBox.BorderSizePixel = 0
     NotifBox.Parent = self.NotifHolder
 
@@ -337,7 +666,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifCorner.Parent = NotifBox
 
     local NotifStroke = Instance.new("UIStroke")
-    NotifStroke.Color = Color3.fromRGB(160, 110, 255)
+    NotifStroke.Color = self.Themes[self.CurrentTheme].accent
     NotifStroke.Thickness = 1.2
     NotifStroke.Parent = NotifBox
 
@@ -347,7 +676,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifIcon.Position = UDim2.new(0, 12, 0, 10)
     NotifIcon.BackgroundTransparency = 1
     NotifIcon.Image = "rbxassetid://10734950309"
-    NotifIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    NotifIcon.ImageColor3 = self.Themes[self.CurrentTheme].accent
     NotifIcon.Parent = NotifBox
 
     local TitleLabel = Instance.new("TextLabel")
@@ -356,7 +685,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     TitleLabel.Position = UDim2.new(0, 36, 0, 10)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = tostring(notifTitle)
-    TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 245)
+    TitleLabel.TextColor3 = self.Themes[self.CurrentTheme].text
     TitleLabel.TextSize = 12
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -368,7 +697,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     DescLabel.Position = UDim2.new(0, 12, 0, 28)
     DescLabel.BackgroundTransparency = 1
     DescLabel.Text = tostring(notifText)
-    DescLabel.TextColor3 = Color3.fromRGB(175, 175, 185)
+    DescLabel.TextColor3 = self.Themes[self.CurrentTheme].textSec
     DescLabel.TextSize = 11
     DescLabel.Font = Enum.Font.GothamMedium
     DescLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -396,14 +725,16 @@ end
 function RexzLibrary:CreateTab(tabName, iconId)
     local tab = setmetatable({}, TabClass)
     tab.Elements = {}
+    tab.TabName = tabName
+    local theme = self.Themes[self.CurrentTheme]
     
     local TabButton = Instance.new("TextButton")
     TabButton.Name = tabName .. "_TabBtn"
     TabButton.Size = UDim2.new(1, -5, 0, 34)
-    TabButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+    TabButton.BackgroundColor3 = theme.card
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
-    TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
+    TabButton.LayoutOrder = (tabName == "Credit" or tabName == "Settings") and 9999 or (#self.Tabs + 1)
     TabButton.Parent = self.MainFrame.Sidebar
 
     local TabBtnCorner = Instance.new("UICorner")
@@ -417,7 +748,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
         TabIcon.Position = UDim2.new(0, 10, 0.5, -8)
         TabIcon.BackgroundTransparency = 1
         TabIcon.Image = "rbxassetid://" .. tostring(iconId)
-        TabIcon.ImageColor3 = Color3.fromRGB(150, 150, 160)
+        TabIcon.ImageColor3 = theme.textSec
         TabIcon.Parent = TabButton
         tab.Icon = TabIcon
     end
@@ -428,7 +759,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     TabLabel.Position = UDim2.new(0, iconId and 32 or 12, 0, 0)
     TabLabel.BackgroundTransparency = 1
     TabLabel.Text = tabName
-    TabLabel.TextColor3 = Color3.fromRGB(160, 160, 170)
+    TabLabel.TextColor3 = theme.textSec
     TabLabel.TextSize = 12
     TabLabel.Font = Enum.Font.GothamMedium
     TabLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -441,7 +772,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     ScrollBox.BackgroundTransparency = 1
     ScrollBox.BorderSizePixel = 0
     ScrollBox.ScrollBarThickness = 3
-    ScrollBox.ScrollBarImageColor3 = Color3.fromRGB(50, 50, 60)
+    ScrollBox.ScrollBarImageColor3 = self.Themes[self.CurrentTheme].border
     ScrollBox.CanvasSize = UDim2.new(0, 0, 0, 0)
     ScrollBox.Visible = false
     ScrollBox.Parent = self.ContentHolder
@@ -459,15 +790,21 @@ function RexzLibrary:CreateTab(tabName, iconId)
     local function ActivateTab()
         for _, t in ipairs(self.Tabs) do
             t.ScrollBox.Visible = false
-            t.BackgroundColor.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-            t.Label.TextColor3 = Color3.fromRGB(160, 160, 170)
-            if t.Icon then t.Icon.ImageColor3 = Color3.fromRGB(150, 150, 160) end
-        end
-        ScrollBox.Visible = true 
-        TabButton.BackgroundColor3 = Color3.fromRGB(32, 30, 42)
-        TabLabel.TextColor3 = Color3.fromRGB(160, 110, 255)
-        if tab.Icon then tab.Icon.ImageColor3 = Color3.fromRGB(160, 110, 255) end
+            t.BackgroundColor.BackgroundColor3 = self.Themes[self.CurrentTheme].card
+            t.Label.TextColor3 = self.Themes[self.CurrentTheme].textSec
+            if t.Icon then t.Icon.ImageColor3 = self.Themes[self.CurrentTheme].textSec end
+        end        ScrollBox.Visible = true 
+        TabButton.BackgroundColor3 = Color3.fromRGB(
+            self.Themes[self.CurrentTheme].card.R * 255 + 10,
+            self.Themes[self.CurrentTheme].card.G * 255 + 8,
+            self.Themes[self.CurrentTheme].card.B * 255 + 12
+        )
+        TabLabel.TextColor3 = self.Themes[self.CurrentTheme].accent
+        if tab.Icon then tab.Icon.ImageColor3 = self.Themes[self.CurrentTheme].accent end
         self.CurrentTab = tab
+        
+        -- Reset search
+        self.MainFrame.SearchBarContainer.SearchInput.Text = ""
     end
 
     TabButton.MouseButton1Click:Connect(ActivateTab)
@@ -475,7 +812,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     tab.BackgroundColor = TabButton
     table.insert(self.Tabs, tab)
 
-    if #self.Tabs == 1 and tabName ~= "Credit" then
+    if #self.Tabs == 1 and tabName ~= "Credit" and tabName ~= "Settings" then
         ActivateTab()
     end
 
@@ -485,11 +822,12 @@ end
 -- METHOD: ADD BUTTON
 function TabClass:AddButton(text, iconId, callback)
     local action = callback or function() end
+    local theme = self.ParentTab and self.ParentTab.ParentTab and self.ParentTab.ParentTab.Themes[self.ParentTab.ParentTab.CurrentTheme] or RexzLibrary.Themes.dark
     
     local ButtonElement = Instance.new("TextButton")
     ButtonElement.Name = text .. "_Interaction"
     ButtonElement.Size = UDim2.new(1, -4, 0, 36)
-    ButtonElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+    ButtonElement.BackgroundColor3 = theme.card
     ButtonElement.BorderSizePixel = 0
     ButtonElement.Text = ""
     ButtonElement.AutoButtonColor = true
@@ -500,7 +838,7 @@ function TabClass:AddButton(text, iconId, callback)
     BtnCorner.Parent = ButtonElement
 
     local BtnStroke = Instance.new("UIStroke")
-    BtnStroke.Color = Color3.fromRGB(35, 35, 45)
+    BtnStroke.Color = theme.border
     BtnStroke.Thickness = 1
     BtnStroke.Parent = ButtonElement
 
@@ -511,7 +849,7 @@ function TabClass:AddButton(text, iconId, callback)
         IconSpec.Position = UDim2.new(0, 10, 0.5, -8)
         IconSpec.BackgroundTransparency = 1
         IconSpec.Image = "rbxassetid://" .. tostring(iconId)
-        IconSpec.ImageColor3 = Color3.fromRGB(210, 210, 220)
+        IconSpec.ImageColor3 = theme.textSec
         IconSpec.Parent = ButtonElement
     end
 
@@ -521,34 +859,42 @@ function TabClass:AddButton(text, iconId, callback)
     Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(215, 215, 225)
+    Label.TextColor3 = theme.text
     Label.TextSize = 12
     Label.Font = Enum.Font.GothamMedium
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = ButtonElement
 
     ButtonElement.MouseButton1Click:Connect(function()
-        ButtonElement.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
+        local originalColor = ButtonElement.BackgroundColor3
+        ButtonElement.BackgroundColor3 = Color3.fromRGB(
+            originalColor.R * 255 - 10,
+            originalColor.G * 255 - 8,
+            originalColor.B * 255 - 6
+        )
         task.wait(0.08)
-        ButtonElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+        ButtonElement.BackgroundColor3 = originalColor
         pcall(action)
     end)
 
     table.insert(self.Elements, {
         Name = text,
-        Instance = ButtonElement
+        Instance = ButtonElement,
+        Type = "button"
     })
 end
 
--- METHOD: ADD TOGGLE
+-- METHOD: ADD TOGGLE (with get/set value)
 function TabClass:AddToggle(text, iconId, defaultState, callback)
     local state = defaultState or false
     local action = callback or function() end
+    local theme = self.ParentTab and self.ParentTab.ParentTab and self.ParentTab.ParentTab.Themes[self.ParentTab.ParentTab.CurrentTheme] or RexzLibrary.Themes.dark
+    local selfTab = self
 
     local ToggleElement = Instance.new("TextButton")
     ToggleElement.Name = text .. "_Toggle"
     ToggleElement.Size = UDim2.new(1, -4, 0, 38)
-    ToggleElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+    ToggleElement.BackgroundColor3 = theme.card
     ToggleElement.BorderSizePixel = 0
     ToggleElement.Text = ""
     ToggleElement.AutoButtonColor = false
@@ -559,7 +905,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     ToggleCorner.Parent = ToggleElement
 
     local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = Color3.fromRGB(35, 35, 45)
+    ToggleStroke.Color = theme.border
     ToggleStroke.Thickness = 1
     ToggleStroke.Parent = ToggleElement
 
@@ -570,7 +916,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
         ToggleIcon.Position = UDim2.new(0, 10, 0.5, -8)
         ToggleIcon.BackgroundTransparency = 1
         ToggleIcon.Image = "rbxassetid://" .. tostring(iconId)
-        ToggleIcon.ImageColor3 = Color3.fromRGB(210, 210, 220)
+        ToggleIcon.ImageColor3 = theme.textSec
         ToggleIcon.Parent = ToggleElement
     end
 
@@ -580,7 +926,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(215, 215, 225)
+    Label.TextColor3 = theme.text
     Label.TextSize = 12
     Label.Font = Enum.Font.GothamMedium
     Label.TextXAlignment = Enum.TextXAlignment.Left
@@ -599,7 +945,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     IndicatorCorner.Parent = IndicatorFrame
 
     local IndicatorStroke = Instance.new("UIStroke")
-    IndicatorStroke.Color = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(45, 45, 55)
+    IndicatorStroke.Color = state and theme.accent or Color3.fromRGB(45, 45, 55)
     IndicatorStroke.Thickness = 1.2
     IndicatorStroke.Parent = IndicatorFrame
 
@@ -608,7 +954,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     RLogo.Size = UDim2.new(1, 0, 1, 0)
     RLogo.BackgroundTransparency = 1
     RLogo.Text = "R"
-    RLogo.TextColor3 = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(90, 90, 100)
+    RLogo.TextColor3 = state and theme.accent or Color3.fromRGB(90, 90, 100)
     RLogo.TextSize = 14
     RLogo.Font = Enum.Font.GothamBold
     RLogo.TextXAlignment = Enum.TextXAlignment.Center
@@ -617,8 +963,8 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
 
     local function UpdateToggleVisual(animate)
         local targetBg = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
-        local targetAccent = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(45, 45, 55)
-        local targetText = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(90, 90, 100)
+        local targetAccent = state and theme.accent or Color3.fromRGB(45, 45, 55)
+        local targetText = state and theme.accent or Color3.fromRGB(90, 90, 100)
         
         if animate then
             TweenService:Create(IndicatorFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetBg}):Play()
@@ -639,9 +985,134 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
         pcall(action, state)
     end)
 
+    local toggleData = {
+        Name = text,
+        Instance = ToggleElement,
+        Type = "toggle",
+        GetValue = function() return state end,
+        SetValue = function(newState)
+            state = newState
+            UpdateToggleVisual(true)
+            pcall(action, state)
+        end
+    }
+    table.insert(self.Elements, toggleData)
+    
+    return toggleData
+end
+
+-- METHOD: ADD DROPDOWN
+function TabClass:AddDropdown(text, options, defaultOption, callback)
+    local theme = self.ParentTab and self.ParentTab.ParentTab and self.ParentTab.ParentTab.Themes[self.ParentTab.ParentTab.CurrentTheme] or RexzLibrary.Themes.dark
+    local selectedValue = defaultOption or options[1]
+    local dropdownOpen = false
+    
+    local DropdownFrame = Instance.new("Frame")
+    DropdownFrame.Name = text .. "_Dropdown"
+    DropdownFrame.Size = UDim2.new(1, -4, 0, 38)
+    DropdownFrame.BackgroundColor3 = theme.card
+    DropdownFrame.BorderSizePixel = 0
+    DropdownFrame.Parent = self.ScrollBox
+    
+    local DropdownCorner = Instance.new("UICorner")
+    DropdownCorner.CornerRadius = UDim.new(0, 6)
+    DropdownCorner.Parent = DropdownFrame
+    
+    local DropdownStroke = Instance.new("UIStroke")
+    DropdownStroke.Color = theme.border
+    DropdownStroke.Thickness = 1
+    DropdownStroke.Parent = DropdownFrame
+    
+    local Label = Instance.new("TextLabel")
+    Label.Size = UDim2.new(1, -60, 1, 0)
+    Label.Position = UDim2.new(0, 12, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text .. ": " .. tostring(selectedValue)
+    Label.TextColor3 = theme.text
+    Label.TextSize = 12
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = DropdownFrame
+    
+    local DropdownIcon = Instance.new("TextLabel")
+    DropdownIcon.Size = UDim2.new(0, 36, 1, 0)
+    DropdownIcon.Position = UDim2.new(1, -36, 0, 0)
+    DropdownIcon.BackgroundTransparency = 1
+    DropdownIcon.Text = "▼"
+    DropdownIcon.TextColor3 = theme.accent
+    DropdownIcon.TextSize = 12
+    DropdownIcon.Font = Enum.Font.GothamBold
+    DropdownIcon.Parent = DropdownFrame
+    
+    local OptionsFrame = Instance.new("ScrollingFrame")
+    OptionsFrame.Size = UDim2.new(1, 0, 0, 0)
+    OptionsFrame.Position = UDim2.new(0, 0, 0, 38)
+    OptionsFrame.BackgroundColor3 = theme.surface
+    OptionsFrame.BorderSizePixel = 0
+    OptionsFrame.Visible = false
+    OptionsFrame.ClipsDescendants = true
+    OptionsFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+    OptionsFrame.ScrollBarThickness = 3
+    OptionsFrame.Parent = DropdownFrame
+    
+    local OptionsCorner = Instance.new("UICorner")
+    OptionsCorner.CornerRadius = UDim.new(0, 6)
+    OptionsCorner.Parent = OptionsFrame
+    
+    local OptionsList = Instance.new("UIListLayout")
+    OptionsList.Padding = UDim.new(0, 2)
+    OptionsList.Parent = OptionsFrame
+    
+    local function UpdateOptionsHeight()
+        local count = #options
+        local height = math.min(count * 32, 150)
+        OptionsFrame.Size = UDim2.new(1, 0, 0, height)
+        DropdownFrame.Size = UDim2.new(1, -4, 0, 38 + height)
+        OptionsFrame.CanvasSize = UDim2.new(0, 0, 0, OptionsList.AbsoluteContentSize.Y)
+    end
+    
+    for _, option in ipairs(options) do
+        local OptionBtn = Instance.new("TextButton")
+        OptionBtn.Size = UDim2.new(1, -8, 0, 30)
+        OptionBtn.Position = UDim2.new(0, 4, 0, 0)
+        OptionBtn.BackgroundColor3 = theme.card
+        OptionBtn.Text = "  " .. option
+        OptionBtn.TextColor3 = theme.textSec
+        OptionBtn.TextSize = 12
+        OptionBtn.TextXAlignment = Enum.TextXAlignment.Left
+        OptionBtn.Font = Enum.Font.Gotham
+        OptionBtn.BorderSizePixel = 0
+        OptionBtn.Parent = OptionsFrame
+        
+        local OptionCorner = Instance.new("UICorner")
+        OptionCorner.CornerRadius = UDim.new(0, 4)
+        OptionCorner.Parent = OptionBtn
+        
+        OptionBtn.MouseButton1Click:Connect(function()
+            selectedValue = option
+            Label.Text = text .. ": " .. tostring(selectedValue)
+            dropdownOpen = false
+            OptionsFrame.Visible = false
+            DropdownFrame.Size = UDim2.new(1, -4, 0, 38)
+            if callback then pcall(callback, selectedValue) end
+        end)
+    end
+    
+    DropdownIcon.MouseButton1Click:Connect(function()
+        dropdownOpen = not dropdownOpen
+        OptionsFrame.Visible = dropdownOpen
+        if dropdownOpen then
+            UpdateOptionsHeight()
+        else
+            DropdownFrame.Size = UDim2.new(1, -4, 0, 38)
+        end
+    end)
+    
     table.insert(self.Elements, {
         Name = text,
-        Instance = ToggleElement
+        Instance = DropdownFrame,
+        Type = "dropdown",
+        GetValue = function() return selectedValue end
     })
 end
 
