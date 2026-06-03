@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta
+--// Rexz Sedang Jatuh Cinta.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
