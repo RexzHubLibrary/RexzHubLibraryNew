@@ -1,6 +1,7 @@
 -- [[
---     LIBRARY UI REXZ (INTEGRATED VERSION)
+--     LIBRARY UI REXZ (PREMIUM INTEGRATED VERSION)
 --     File: RexzCihuyGanteng
+--     Fitur Baru: Auto-Inject Settings, Real-time Theme Switcher & Multi Save Config
 --     Pengembang: RexzLock / RexzCihuy
 -- ]]
 
@@ -11,6 +12,15 @@ local TabClass = {}
 TabClass.__index = TabClass
 
 local TweenService = game:GetService("TweenService")
+
+-- [ PRESET TEMA PREMIUM ]
+local Themes = {
+    {Name = "Rexz Purple", Color = Color3.fromRGB(160, 110, 255)},
+    {Name = "Ruby Red", Color = Color3.fromRGB(220, 80, 80)},
+    {Name = "Aqua Blue", Color = Color3.fromRGB(80, 160, 255)},
+    {Name = "Emerald Green", Color = Color3.fromRGB(80, 220, 140)},
+    {Name = "Gold Edition", Color = Color3.fromRGB(255, 185, 60)}
+}
 
 -- [ AUTO-SYNC ]: Menghubungkan library langsung ke repositori ikon kamu
 local ICONS_URL = "https://raw.githubusercontent.com/RexzHubLibrary/RexzHubIconSupport/refs/heads/main/Icon"
@@ -54,6 +64,8 @@ function RexzLibrary.new(dummyHubName, title)
     self.CurrentTab = nil
     self.Minimized = false 
     self.Hidden = false    
+    self.CurrentTheme = 1 -- Default ke Rexz Purple
+    self.ToggleRegistry = {} -- Melacak seluruh toggle untuk sistem Multi-Save
     
     local fixedHubName = "Rexz Hub"
 
@@ -96,7 +108,7 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleCorner.Parent = ToggleBtn
 
     local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = Color3.fromRGB(160, 110, 255)
+    ToggleStroke.Color = Themes[self.CurrentTheme].Color
     ToggleStroke.Thickness = 1.5
     ToggleStroke.Parent = ToggleBtn
 
@@ -106,7 +118,7 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
     ToggleIcon.BackgroundTransparency = 1
     ToggleIcon.Image = FormatIcon("Combat") or "rbxassetid://10734950309"
-    ToggleIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    ToggleIcon.ImageColor3 = Themes[self.CurrentTheme].Color
     ToggleIcon.Parent = ToggleBtn
 
     -- MAIN CONTAINER WINDOW (PREMIUM GLASSMORPHIC)
@@ -129,7 +141,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainCorner.Parent = MainFrame
 
     local MainStroke = Instance.new("UIStroke")
-    MainStroke.Color = Color3.fromRGB(50, 50, 65)
+    MainStroke.Color = Themes[self.CurrentTheme].Color
     MainStroke.Thickness = 1.2
     MainStroke.Parent = MainFrame
 
@@ -189,7 +201,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainIcon.Position = UDim2.new(0, 12, 0, 9)
     MainIcon.BackgroundTransparency = 1
     MainIcon.Image = FormatIcon("Combat") or "rbxassetid://10734950309"
-    MainIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    MainIcon.ImageColor3 = Themes[self.CurrentTheme].Color
     MainIcon.Parent = TopBar
 
     local TitleLabel = Instance.new("TextLabel")
@@ -307,17 +319,145 @@ function RexzLibrary.new(dummyHubName, title)
         end
     end)
 
+    -- [ AUTO-INJECT: SETTINGS TAB ]
+    task.spawn(function()
+        local SettingsTab = self:CreateTab("Settings", "Settings")
+        local selectedSlot = 1
+        
+        -- Bagian 1: Ganti Tema
+        local ThemeBtn
+        ThemeBtn = SettingsTab:AddButton("Tema Saat Ini: " .. Themes[self.CurrentTheme].Name, "Visuals", function()
+            local nextTheme = self.CurrentTheme + 1
+            if nextTheme > #Themes then nextTheme = 1 end
+            self:SetTheme(nextTheme)
+            ThemeBtn.SetText("Tema Saat Ini: " .. Themes[self.CurrentTheme].Name)
+        end)
+        
+        -- Bagian 2: Multi Save Slot Selector
+        local SlotBtn
+        SlotBtn = SettingsTab:AddButton("Slot Terpilih: Slot " .. selectedSlot, "Misc", function()
+            selectedSlot = selectedSlot + 1
+            if selectedSlot > 3 then selectedSlot = 1 end
+            SlotBtn.SetText("Slot Terpilih: Slot " .. selectedSlot)
+        end)
+
+        -- Tombol Aksi Simpan Config
+        SettingsTab:AddButton("Simpan Konfigurasi", "Chest", function()
+            self:SaveConfig(selectedSlot)
+        end)
+
+        -- Tombol Aksi Muat/Load Config
+        SettingsTab:AddButton("Muat Konfigurasi", "Respawn", function()
+            self:LoadConfig(selectedSlot)
+        end)
+    end)
+
     -- AUTO-INJECT CREDIT TAB
     task.spawn(function()
         local CreditTab = self:CreateTab("Credit", "Credit")
         CreditTab:AddButton("Owner: RexzLock", "Combat", function()
-            setclipboard("RexzLock")
+            if setclipboard then setclipboard("RexzLock") end
             self:Notify("Sistem Info", "Nama owner berhasil disalin ke clipboard!", 4)
         end)
         CreditTab:AddButton("Powered by Rexz Engine", "Search", nil)
     end)
 
     return self
+end
+
+-- METHOD: LIVE PRESET THEME UPDATER
+function RexzLibrary:SetTheme(index)
+    self.CurrentTheme = index
+    local theme = Themes[index]
+    if not theme then return end
+    local color = theme.Color
+    
+    -- Ganti warna stroke utama window dan tombol floating
+    if self.MainFrame then
+        local stroke = self.MainFrame:FindFirstChildOfClass("UIStroke")
+        if stroke then stroke.Color = color end
+    end
+    if self.ScreenGui then
+        local toggleBtn = self.ScreenGui:FindFirstChild("UiToggleBtn")
+        if toggleBtn then
+            local stroke = toggleBtn:FindFirstChildOfClass("UIStroke")
+            if stroke then stroke.Color = color end
+            local icon = toggleBtn:FindFirstChild("ToggleIcon")
+            if icon then icon.ImageColor3 = color end
+        end
+    end
+    
+    -- Segarkan visual seluruh Tab & Isinya
+    for _, t in ipairs(self.Tabs) do
+        if self.CurrentTab == t then
+            t.Label.TextColor3 = color
+            if t.Icon then t.Icon.ImageColor3 = color end
+        else
+            t.Label.TextColor3 = Color3.fromRGB(160, 160, 170)
+            if t.Icon then t.Icon.ImageColor3 = Color3.fromRGB(150, 150, 160) end
+        end
+        
+        -- Update warna untuk seluruh Toggle yang sedang menyala aktif
+        for _, el in ipairs(t.Elements) do
+            if el.Type == "Toggle" then
+                el.UpdateVisual(false)
+            end
+        end
+    end
+end
+
+-- METHOD: MULTI SAVE - SIMPAN KE JSON FILE
+function RexzLibrary:SaveConfig(slot)
+    if not writefile then 
+        self:Notify("Error", "Eksekutor kamu tidak mendukung penyimpanan file!", 3)
+        return 
+    end
+    local configData = {}
+    for key, toggle in pairs(self.ToggleRegistry) do
+        configData[key] = toggle.GetState()
+    end
+    -- Ikut simpan tema aktif ke dalam slot config
+    configData["__RexzThemeIndex"] = self.CurrentTheme
+
+    local success, err = pcall(function()
+        writefile("RexzHub_Config_Slot" .. slot .. ".json", game:GetService("HttpService"):JSONEncode(configData))
+    end)
+    if success then
+        self:Notify("Multi Save", "Konfigurasi disimpan sukses di Slot " .. slot, 3)
+    else
+        self:Notify("Error Save", "Gagal menyimpan: " .. tostring(err), 3)
+    end
+end
+
+-- METHOD: MULTI SAVE - MUAT DARI JSON FILE
+function RexzLibrary:LoadConfig(slot)
+    if not readfile or not isfile then 
+        self:Notify("Error", "Eksekutor kamu tidak mendukung pembacaan file!", 3)
+        return 
+    end
+    local filename = "RexzHub_Config_Slot" .. slot .. ".json"
+    if not isfile(filename) then
+        self:Notify("Multi Save", "File konfigurasi Slot " .. slot .. " tidak ditemukan!", 3)
+        return
+    end
+
+    local success, data = pcall(function()
+        return game:GetService("HttpService"):JSONDecode(readfile(filename))
+    end)
+    
+    if success and type(data) == "table" then
+        for key, state in pairs(data) do
+            if self.ToggleRegistry[key] then
+                self.ToggleRegistry[key].SetState(state)
+            end
+        end
+        if data["__RexzThemeIndex"] then
+            self:SetTheme(data["__RexzThemeIndex"])
+        end
+        self:Notify("Multi Save", "Berhasil menerapkan konfigurasi Slot " .. slot, 3)
+    else
+        self:Notify("Error Load", "Gagal memuat file konfigurasi!", 3)
+    end
 end
 
 -- METHOD: NOTIFY
@@ -337,7 +477,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifCorner.Parent = NotifBox
 
     local NotifStroke = Instance.new("UIStroke")
-    NotifStroke.Color = Color3.fromRGB(160, 110, 255)
+    NotifStroke.Color = Themes[self.CurrentTheme].Color
     NotifStroke.Thickness = 1.2
     NotifStroke.Parent = NotifBox
 
@@ -347,7 +487,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifIcon.Position = UDim2.new(0, 12, 0, 10)
     NotifIcon.BackgroundTransparency = 1
     NotifIcon.Image = FormatIcon("Combat") or "rbxassetid://10734950309"
-    NotifIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
+    NotifIcon.ImageColor3 = Themes[self.CurrentTheme].Color
     NotifIcon.Parent = NotifBox
 
     local TitleLabel = Instance.new("TextLabel")
@@ -390,6 +530,8 @@ end
 -- METHOD: CREATE TAB
 function RexzLibrary:CreateTab(tabName, iconId)
     local tab = setmetatable({}, TabClass)
+    tab.Library = self
+    tab.Name = tabName
     tab.Elements = {}
     
     local parsedIcon = FormatIcon(iconId)
@@ -401,7 +543,16 @@ function RexzLibrary:CreateTab(tabName, iconId)
     TabButton.BackgroundTransparency = 0.3
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
-    TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
+    
+    -- Kunci Layout Order di paling bawah sidebar
+    if tabName == "Credit" then
+        TabButton.LayoutOrder = 9999
+    elseif tabName == "Settings" then
+        TabButton.LayoutOrder = 9998
+    else
+        TabButton.LayoutOrder = #self.Tabs + 1
+    end
+    
     TabButton.Parent = self.MainFrame.Sidebar
 
     local TabBtnCorner = Instance.new("UICorner")
@@ -455,6 +606,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     end)
 
     local function ActivateTab()
+        local currentAccent = Themes[self.CurrentTheme].Color
         for _, t in ipairs(self.Tabs) do
             t.ScrollBox.Visible = false
             t.BackgroundColor.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
@@ -465,8 +617,8 @@ function RexzLibrary:CreateTab(tabName, iconId)
         ScrollBox.Visible = true 
         TabButton.BackgroundColor3 = Color3.fromRGB(32, 30, 42)
         TabButton.BackgroundTransparency = 0.1
-        TabLabel.TextColor3 = Color3.fromRGB(160, 110, 255)
-        if tab.Icon then tab.Icon.ImageColor3 = Color3.fromRGB(160, 110, 255) end
+        TabLabel.TextColor3 = currentAccent
+        if tab.Icon then tab.Icon.ImageColor3 = currentAccent end
         self.CurrentTab = tab
     end
 
@@ -475,7 +627,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     tab.BackgroundColor = TabButton
     table.insert(self.Tabs, tab)
 
-    if #self.Tabs == 1 and tabName ~= "Credit" then
+    if #self.Tabs == 1 and tabName ~= "Credit" and tabName ~= "Settings" then
         ActivateTab()
     end
 
@@ -536,14 +688,22 @@ function TabClass:AddButton(text, iconId, callback)
         pcall(action)
     end)
 
-    table.insert(self.Elements, {Name = text, Instance = ButtonElement})
+    table.insert(self.Elements, {Name = text, Instance = ButtonElement, Type = "Button"})
+    
+    -- Mengembalikan controller agar teks tombol bisa diubah dinamis (Berguna untuk sistem menu)
+    return {
+        SetText = function(newText)
+            Label.Text = newText
+        end
+    }
 end
 
--- METHOD: ADD TOGGLE
+-- METHOD: ADD TOGGLE (SUPPORTED MULTI-SAVE CONTROLLER)
 function TabClass:AddToggle(text, iconId, defaultState, callback)
     local state = defaultState or false
     local action = callback or function() end
     local parsedIcon = FormatIcon(iconId)
+    local configKey = self.Name .. "_" .. text -- Unik ID untuk identifikasi data save berkas
 
     local ToggleElement = Instance.new("TextButton")
     ToggleElement.Name = text .. "_Toggle"
@@ -591,7 +751,6 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     IndicatorFrame.Name = "IndicatorFrame"
     IndicatorFrame.Size = UDim2.new(0, 24, 0, 24)
     IndicatorFrame.Position = UDim2.new(1, -36, 0.5, -12)
-    IndicatorFrame.BackgroundColor3 = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
     IndicatorFrame.BorderSizePixel = 0
     IndicatorFrame.Parent = ToggleElement
 
@@ -600,7 +759,6 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     IndicatorCorner.Parent = IndicatorFrame
 
     local IndicatorStroke = Instance.new("UIStroke")
-    IndicatorStroke.Color = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(45, 45, 55)
     IndicatorStroke.Thickness = 1.2
     IndicatorStroke.Parent = IndicatorFrame
 
@@ -609,7 +767,6 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     RLogo.Size = UDim2.new(1, 0, 1, 0)
     RLogo.BackgroundTransparency = 1
     RLogo.Text = "R"
-    RLogo.TextColor3 = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(90, 90, 100)
     RLogo.TextSize = 14
     RLogo.Font = Enum.Font.GothamBold
     RLogo.TextXAlignment = Enum.TextXAlignment.Center
@@ -617,9 +774,10 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     RLogo.Parent = IndicatorFrame
 
     local function UpdateToggleVisual(animate)
-        local targetBg = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
-        local targetAccent = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(45, 45, 55)
-        local targetText = state and Color3.fromRGB(160, 110, 255) or Color3.fromRGB(90, 90, 100)
+        local currentAccent = Themes[self.Library.CurrentTheme or 1].Color
+        local targetBg = state and currentAccent:Lerp(Color3.fromRGB(0, 0, 0), 0.6) or Color3.fromRGB(20, 20, 25)
+        local targetAccent = state and currentAccent or Color3.fromRGB(45, 45, 55)
+        local targetText = state and currentAccent or Color3.fromRGB(90, 90, 100)
         
         if animate then
             TweenService:Create(IndicatorFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetBg}):Play()
@@ -640,7 +798,17 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
         pcall(action, state)
     end)
 
-    table.insert(self.Elements, {Name = text, Instance = ToggleElement})
+    -- Mendaftarkan controller ke dalam sistem registry Multi-Save
+    self.Library.ToggleRegistry[configKey] = {
+        SetState = function(newState)
+            state = newState
+            UpdateToggleVisual(true)
+            pcall(action, state)
+        end,
+        GetState = function() return state end
+    }
+
+    table.insert(self.Elements, {Name = text, Instance = ToggleElement, Type = "Toggle", UpdateVisual = UpdateToggleVisual})
 end
 
 return RexzLibrary
