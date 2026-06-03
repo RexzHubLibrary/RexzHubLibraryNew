@@ -1,606 +1,283 @@
 -- [[ 
---   REXZ UI LIBRARY V2.5 - MOBILE FINAL EDITION
---   Khas Rexz: Ringan, Smooth, Jempol-Friendly
+--   REXZ UI LIBRARY V3 - PREMIUM MOBILE EDITION
+--   Features: Tween Animations, UIStroke, Sections, Smooth Toggles
 -- ]]
+
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
 
--- KATALOG TEMPLATE ICON (Tinggal panggil namanya, otomatis convert ke ID)
+-- KATALOG TEMPLATE ICON PREMIUM
 RexzLibrary.Icons = {
-    ["Sword"]      = 10723344432, -- Icon Pedang (Combat/PVP)
-    ["Crown"]      = 10734950309, -- Icon Mahkota (Premium/Main)
-    ["Farm"]       = 10747372931, -- Icon Sabit/Gandum (Auto Farm)
-    ["Teleport"]   = 10723374244, -- Icon Kompas/Peta (Teleport)
-    ["Settings"]   = 10734963250, -- Icon Roda Gigi (Pengaturan)
-    ["Stats"]      = 10747361223, -- Icon Grafik (Status/Stats)
-    ["Shop"]       = 10747384912, -- Icon Keranjang (Shop/Store)
-    ["Home"]       = 10723351943, -- Icon Rumah (Main Menu)
-    ["Misc"]       = 10734971021  -- Icon Titik Tiga (Lain-lain)
+    ["Sword"]      = "rbxassetid://10723344432", 
+    ["Crown"]      = "rbxassetid://10734950309", 
+    ["Farm"]       = "rbxassetid://10747372931", 
+    ["Teleport"]   = "rbxassetid://10723374244", 
+    ["Settings"]   = "rbxassetid://10734963250", 
+    ["User"]       = "rbxassetid://10747383286"
 }
 
--- Fungsi internal untuk cek apakah input itu Nama Icon atau ID angka asli
-local function getIconId(input)
-    if type(input) == "string" and RexzLibrary.Icons[input] then
-        return "rbxassetid://" .. tostring(RexzLibrary.Icons[input])
-    elseif type(input) == "number" then
-        return "rbxassetid://" .. tostring(input)
-    elseif type(input) == "string" and input:match("^%d+$") then
-        return "rbxassetid://" .. input
-    end
-    return "rbxassetid://10723351943" -- Default Home Icon jika kosong
+-- Fungsi Animasi Transisi
+local function Tween(instance, properties, duration)
+    local tweenInfo = TweenInfo.new(duration or 0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+    local tween = TweenService:Create(instance, tweenInfo, properties)
+    tween:Play()
+    return tween
 end
 
--- [ CORE LIBRARY METHODS ]
 function RexzLibrary.new(hubName, subTitle)
     local self = setmetatable({}, RexzLibrary)
     
-    -- Membuat ScreenGui Utama
-    local CoreGui = game:GetService("CoreGui")
-    if CoreGui:FindFirstChild("RexzUiMobile") then
-        CoreGui.RexzUiMobile:Destroy()
+    if CoreGui:FindFirstChild("RexzPremiumUI") then
+        CoreGui.RexzPremiumUI:Destroy()
     end
     
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "RexzUiMobile"
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.Name = "RexzPremiumUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.Parent = CoreGui
     
-    -- Main Frame (Ukuran disesuaikan agar proporsional di HP)
+    -- MAIN FRAME (Background Hitam Transparan Mewah)
     local MainFrame = Instance.new("Frame")
-    MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 480, 0, 280) -- Pas untuk resolusi HP landscape
-    MainFrame.Position = UDim2.new(0.5, -240, 0.5, -140)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    MainFrame.Size = UDim2.new(0, 500, 0, 280)
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -140)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+    MainFrame.BackgroundTransparency = 0.05
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
-    MainFrame.Draggable = true -- Biar bisa digeser pakai jempol
+    MainFrame.Draggable = true
+    MainFrame.ClipsDescendants = true
     MainFrame.Parent = ScreenGui
     
-    -- UI Corner untuk sudut melengkung halus khas Rexz
-    local Corner = Instance.new("UICorner")
-    Corner.CornerRadius = UDim.new(0, 10)
-    Corner.Parent = MainFrame
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
     
-    -- Sidebar Container (Tempat Tab)
-    local Sidebar = Instance.new("ScrollingFrame")
-    Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 140, 1, -40)
-    Sidebar.Position = UDim2.new(0, 0, 0, 40)
-    Sidebar.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
-    Sidebar.BorderSizePixel = 0
-    Sidebar.CanvasSize = UDim2.new(0, 0, 0, 0)
-    Sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    Sidebar.ScrollBarThickness = 2
-    Sidebar.Parent = MainFrame
+    -- Efek Glow/Garis Tepi Premium
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = Color3.fromRGB(80, 120, 255)
+    MainStroke.Thickness = 1.5
+    MainStroke.Transparency = 0.5
+    MainStroke.Parent = MainFrame
     
-    local SidebarLayout = Instance.new("UIListLayout")
-    SidebarLayout.Padding = UDim.new(0, 6)
-    SidebarLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-    SidebarLayout.Parent = Sidebar
-    
-    -- Container Tempat Fitur/Isi Tab
-    local Container = Instance.new("Frame")
-    Container.Name = "Container"
-    Container.Size = UDim2.new(1, -150, 1, -50)
-    Container.Position = UDim2.new(0, 145, 0, 45)
-    Container.BackgroundTransparency = 1
-    Container.Parent = MainFrame
-    
-    -- Title Bar
+    -- TOPBAR
+    local TopBar = Instance.new("Frame")
+    TopBar.Size = UDim2.new(1, 0, 0, 40)
+    TopBar.BackgroundTransparency = 1
+    TopBar.Parent = MainFrame
+
     local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, -20, 0, 35)
-    Title.Position = UDim2.new(0, 15, 0, 5)
-    Title.Text = hubName .. " | " .. subTitle
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 16
+    Title.Size = UDim2.new(1, -50, 1, 0)
+    Title.Position = UDim2.new(0, 15, 0, 0)
+    Title.Text = "<font color='rgb(80,120,255)'>"..hubName.."</font> | "..subTitle
+    Title.RichText = true
+    Title.TextColor3 = Color3.fromRGB(240, 240, 240)
+    Title.TextSize = 14
     Title.Font = Enum.Font.GothamBold
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.BackgroundTransparency = 1
-    Title.Parent = MainFrame
+    Title.Parent = TopBar
+    
+    -- GARIS PEMISAH
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.new(1, 0, 0, 1)
+    Line.Position = UDim2.new(0, 0, 1, 0)
+    Line.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+    Line.BorderSizePixel = 0
+    Line.Parent = TopBar
+
+    -- SIDEBAR
+    local Sidebar = Instance.new("ScrollingFrame")
+    Sidebar.Size = UDim2.new(0, 130, 1, -45)
+    Sidebar.Position = UDim2.new(0, 10, 0, 45)
+    Sidebar.BackgroundTransparency = 1
+    Sidebar.ScrollBarThickness = 0
+    Sidebar.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    Sidebar.Parent = MainFrame
+    
+    local SidebarLayout = Instance.new("UIListLayout")
+    SidebarLayout.Padding = UDim.new(0, 5)
+    SidebarLayout.Parent = Sidebar
+
+    -- CONTAINER TABS
+    local Container = Instance.new("Frame")
+    Container.Size = UDim2.new(1, -155, 1, -55)
+    Container.Position = UDim2.new(0, 145, 0, 45)
+    Container.BackgroundTransparency = 1
+    Container.Parent = MainFrame
 
     self.MainFrame = MainFrame
     self.Sidebar = Sidebar
     self.Container = Container
+    self.Tabs = {}
+    
     return self
 end
 
-function RexzLibrary:CreateCategory(categoryName)
-    -- Indikator Kategori teks kecil di sidebar HP
-    local CatLabel = Instance.new("TextLabel")
-    CatLabel.Size = UDim2.new(0, 120, 0, 20)
-    CatLabel.Text = string.upper(categoryName)
-    CatLabel.TextColor3 = Color3.fromRGB(100, 100, 110)
-    CatLabel.TextSize = 10
-    CatLabel.Font = Enum.Font.GothamBold
-    CatLabel.BackgroundTransparency = 1
-    CatLabel.Parent = self.Sidebar
-    return CatLabel
-end
-
-function RexzLibrary:CreateTab(tabName, iconInput, categoryRef)
+function RexzLibrary:CreateTab(tabName, iconName)
     local TabPage = Instance.new("ScrollingFrame")
     TabPage.Size = UDim2.new(1, 0, 1, 0)
     TabPage.BackgroundTransparency = 1
     TabPage.Visible = false
-    TabPage.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabPage.ScrollBarThickness = 2
     TabPage.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    TabPage.ScrollBarThickness = 4
     TabPage.Parent = self.Container
     
-    local PageLayout = Instance.new("UIListLayout")
-    PageLayout.Padding = UDim.new(0, 8)
-    PageLayout.Parent = TabPage
+    Instance.new("UIListLayout", TabPage).Padding = UDim.new(0, 10)
 
-    -- Tombol Tab di Sidebar
-    local TabButton = Instance.new("TextButton")
-    TabButton.Size = UDim2.new(0, 120, 0, 35) -- Tinggi 35px pas untuk jempol HP
-    TabButton.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-    TabButton.Text = "      " .. tabName -- Spasi untuk jarak dari Icon
-    TabButton.TextColor3 = Color3.fromRGB(180, 180, 180)
-    TabButton.TextSize = 12
-    TabButton.Font = Enum.Font.GothamMedium
-    TabButton.TextXAlignment = Enum.TextXAlignment.Left
-    TabButton.Parent = self.Sidebar
+    local TabBtn = Instance.new("TextButton")
+    TabBtn.Size = UDim2.new(1, 0, 0, 32)
+    TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    TabBtn.Text = "       " .. tabName
+    TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+    TabBtn.Font = Enum.Font.GothamMedium
+    TabBtn.TextSize = 12
+    TabBtn.TextXAlignment = Enum.TextXAlignment.Left
+    TabBtn.Parent = self.Sidebar
     
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 6)
-    BtnCorner.Parent = TabButton
+    Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 6)
     
-    -- Icon Tab (Otomatis mendeteksi Template nama atau ID)
-    local TabIcon = Instance.new("ImageLabel")
-    TabIcon.Size = UDim2.new(0, 18, 0, 18)
-    TabIcon.Position = UDim2.new(0, 8, 0.5, -9)
-    TabIcon.Image = getIconId(iconInput)
-    TabIcon.BackgroundTransparency = 1
-    TabIcon.ImageColor3 = Color3.fromRGB(200, 200, 200)
-    TabIcon.Parent = TabButton
+    local Icon = Instance.new("ImageLabel")
+    Icon.Size = UDim2.new(0, 16, 0, 16)
+    Icon.Position = UDim2.new(0, 8, 0.5, -8)
+    Icon.BackgroundTransparency = 1
+    Icon.Image = RexzLibrary.Icons[iconName] or RexzLibrary.Icons["Settings"]
+    Icon.ImageColor3 = Color3.fromRGB(150, 150, 150)
+    Icon.Parent = TabBtn
 
-    -- Logika Ganti Tab saat di-klik
-    TabButton.MouseButton1Click:Connect(function()
+    TabBtn.MouseButton1Click:Connect(function()
         for _, page in pairs(self.Container:GetChildren()) do
-            if page:IsA("ScrollingFrame") then page.Visible = false end
+            page.Visible = false
         end
         for _, btn in pairs(self.Sidebar:GetChildren()) do
-            if btn:IsA("TextButton") then 
-                btn.BackgroundColor3 = Color3.fromRGB(25, 25, 30) 
-                btn.TextColor3 = Color3.fromRGB(180, 180, 180)
+            if btn:IsA("TextButton") then
+                Tween(btn, {BackgroundColor3 = Color3.fromRGB(20, 20, 25)})
+                Tween(btn, {TextColor3 = Color3.fromRGB(150, 150, 150)})
+                Tween(btn:FindFirstChildOfClass("ImageLabel"), {ImageColor3 = Color3.fromRGB(150, 150, 150)})
             end
         end
         TabPage.Visible = true
-        TabButton.BackgroundColor3 = Color3.fromRGB(60, 100, 250) -- Efek highlight khas Rexz Blue
-        TabButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Tween(TabBtn, {BackgroundColor3 = Color3.fromRGB(80, 120, 255)})
+        Tween(TabBtn, {TextColor3 = Color3.fromRGB(255, 255, 255)})
+        Tween(Icon, {ImageColor3 = Color3.fromRGB(255, 255, 255)})
     end)
+    
+    if #self.Sidebar:GetChildren() == 2 then
+        TabPage.Visible = true
+        TabBtn.BackgroundColor3 = Color3.fromRGB(80, 120, 255)
+        TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Icon.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    end
 
-    -- Return object helper untuk isi komponen dalam tab
     local TabMethods = {}
-    
-    function TabMethods:AddLabel(text)
-        local Label = Instance.new("TextLabel")
-        Label.Size = UDim2.new(1, -10, 0, 25)
-        Label.Text = text
-        Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-        Label.TextSize = 12
-        Label.Font = Enum.Font.GothamSemibold
-        Label.BackgroundTransparency = 1
-        Label.Parent = TabPage
-    end
 
-    function TabMethods:AddToggle(text, icon, default, callback)
-        local ToggleBtn = Instance.new("TextButton")
-        ToggleBtn.Size = UDim2.new(1, -10, 0, 38) -- Tinggi diperluas untuk kenyamanan touchscreen HP
-        ToggleBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 35)
-        ToggleBtn.Text = "      " .. text
-        ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        ToggleBtn.TextSize = 12
-        ToggleBtn.Font = Enum.Font.Gotham
-        ToggleBtn.TextXAlignment = Enum.TextXAlignment.Left
-        ToggleBtn.Parent = TabPage
+    -- FITUR PREMIUM: SECTION (Grup/Kategori dalam Tab)
+    function TabMethods:AddSection(secTitle)
+        local Section = Instance.new("Frame")
+        Section.Size = UDim2.new(1, -10, 0, 30)
+        Section.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+        Section.AutomaticSize = Enum.AutomaticSize.Y
+        Section.Parent = TabPage
         
-        local TglCorner = Instance.new("UICorner")
-        TglCorner.CornerRadius = UDim.new(0, 6)
-        TglCorner.Parent = ToggleBtn
+        Instance.new("UICorner", Section).CornerRadius = UDim.new(0, 6)
+        local SecStroke = Instance.new("UIStroke")
+        SecStroke.Color = Color3.fromRGB(50, 50, 60)
+        SecStroke.Parent = Section
 
-        -- Status Indicator (Kotak On/Off di kanan)
-        local Indicator = Instance.new("Frame")
-        Indicator.Size = UDim2.new(0, 30, 0, 16)
-        Indicator.Position = UDim2.new(1, -40, 0.5, -8)
-        Indicator.BackgroundColor3 = default and Color3.fromRGB(60, 100, 250) or Color3.fromRGB(50, 50, 55)
-        Indicator.Parent = ToggleBtn
-        
-        local IndCorner = Instance.new("UICorner")
-        IndCorner.CornerRadius = UDim.new(1, 0)
-        IndCorner.Parent = Indicator
+        local SecLayout = Instance.new("UIListLayout")
+        SecLayout.Padding = UDim.new(0, 6)
+        SecLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+        SecLayout.Parent = Section
 
-        local state = default
-        ToggleBtn.MouseButton1Click:Connect(function()
-            state = not state
-            Indicator.BackgroundColor3 = state and Color3.fromRGB(60, 100, 250) or Color3.fromRGB(50, 50, 55)
-            callback(state)
-        end)
-    end
-    
-    -- (Komponen lain seperti Button, Slider, dll. otomatis masuk ke TabPage ini)
-    function TabMethods:AddButton(text, icon, callback)
-        local Button = Instance.new("TextButton")
-        Button.Size = UDim2.new(1, -10, 0, 38)
-        Button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-        Button.Text = text
-        Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Button.TextSize = 12
-        Button.Font = Enum.Font.GothamBold
-        Button.Parent = TabPage
-        
-        local BtnC = Instance.new("UICorner")
-        BtnC.CornerRadius = UDim.new(0, 6)
-        BtnC.Parent = Button
-        
-        Button.MouseButton1Click:Connect(callback)
-    end
+        local SecPadding = Instance.new("UIPadding")
+        SecPadding.PaddingTop = UDim.new(0, 35)
+        SecPadding.PaddingBottom = UDim.new(0, 10)
+        SecPadding.Parent = Section
 
-    function TabMethods:AddParagraph(title, desc)
-        local Box = Instance.new("Frame")
-        Box.Size = UDim2.new(1, -10, 0, 50)
-        Box.BackgroundColor3 = Color3.fromRGB(24, 24, 28)
-        Box.Parent = TabPage
-        
-        local BoxC = Instance.new("UICorner")
-        BoxC.CornerRadius = UDim.new(0, 6)
-        BoxC.Parent = Box
-        
-        local Ttl = Instance.new("TextLabel")
-        Ttl.Size = UDim2.new(1, -10, 0, 20)
-        Ttl.Position = UDim2.new(0, 8, 0, 4)
-        Ttl.Text = title
-        Ttl.TextColor3 = Color3.fromRGB(255, 255, 255)
-        Ttl.TextSize = 11
-        Ttl.Font = Enum.Font.GothamBold
-        Ttl.TextXAlignment = Enum.TextXAlignment.Left
-        Ttl.BackgroundTransparency = 1
-        Ttl.Parent = Box
-        
-        local Dsc = Instance.new("TextLabel")
-        Dsc.Size = UDim2.new(1, -10, 0, 20)
-        Dsc.Position = UDim2.new(0, 8, 0, 22)
-        Dsc.Text = desc
-        Dsc.TextColor3 = Color3.fromRGB(150, 150, 150)
-        Dsc.TextSize = 10
-        Dsc.Font = Enum.Font.Gotham
-        Dsc.TextXAlignment = Enum.TextXAlignment.Left
-        Dsc.BackgroundTransparency = 1
-        Dsc.Parent = Box
+        local SecTitle = Instance.new("TextLabel")
+        SecTitle.Size = UDim2.new(1, -20, 0, 20)
+        SecTitle.Position = UDim2.new(0, 10, 0, 8)
+        SecTitle.Text = secTitle
+        SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        SecTitle.Font = Enum.Font.GothamBold
+        SecTitle.TextSize = 12
+        SecTitle.TextXAlignment = Enum.TextXAlignment.Left
+        SecTitle.BackgroundTransparency = 1
+        SecTitle.Parent = Section
+
+        local SecMethods = {}
+
+        -- PREMIUM TOGGLE (Animasi Slider/Pill)
+        function SecMethods:AddToggle(text, default, callback)
+            local ToggleFrame = Instance.new("TextButton")
+            ToggleFrame.Size = UDim2.new(1, -20, 0, 35)
+            ToggleFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+            ToggleFrame.Text = "   " .. text
+            ToggleFrame.TextColor3 = Color3.fromRGB(220, 220, 220)
+            ToggleFrame.Font = Enum.Font.Gotham
+            ToggleFrame.TextSize = 12
+            ToggleFrame.TextXAlignment = Enum.TextXAlignment.Left
+            ToggleFrame.Parent = Section
+            Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 6)
+
+            local Pill = Instance.new("Frame")
+            Pill.Size = UDim2.new(0, 34, 0, 18)
+            Pill.Position = UDim2.new(1, -44, 0.5, -9)
+            Pill.BackgroundColor3 = default and Color3.fromRGB(80, 120, 255) or Color3.fromRGB(50, 50, 55)
+            Pill.Parent = ToggleFrame
+            Instance.new("UICorner", Pill).CornerRadius = UDim.new(1, 0)
+
+            local Circle = Instance.new("Frame")
+            Circle.Size = UDim2.new(0, 14, 0, 14)
+            Circle.Position = default and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
+            Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            Circle.Parent = Pill
+            Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
+
+            local state = default
+            ToggleFrame.MouseButton1Click:Connect(function()
+                state = not state
+                if state then
+                    Tween(Pill, {BackgroundColor3 = Color3.fromRGB(80, 120, 255)}, 0.2)
+                    Tween(Circle, {Position = UDim2.new(1, -16, 0.5, -7)}, 0.2)
+                else
+                    Tween(Pill, {BackgroundColor3 = Color3.fromRGB(50, 50, 55)}, 0.2)
+                    Tween(Circle, {Position = UDim2.new(0, 2, 0.5, -7)}, 0.2)
+                end
+                callback(state)
+            end)
+        end
+
+        -- PREMIUM BUTTON (Animasi klik)
+        function SecMethods:AddButton(text, callback)
+            local Button = Instance.new("TextButton")
+            Button.Size = UDim2.new(1, -20, 0, 35)
+            Button.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
+            Button.Text = text
+            Button.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Button.Font = Enum.Font.GothamBold
+            Button.TextSize = 12
+            Button.Parent = Section
+            Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 6)
+            
+            -- UIStroke untuk Button
+            local BtnStroke = Instance.new("UIStroke")
+            BtnStroke.Color = Color3.fromRGB(60, 60, 75)
+            BtnStroke.Parent = Button
+
+            Button.MouseButton1Down:Connect(function()
+                Tween(Button, {BackgroundColor3 = Color3.fromRGB(80, 120, 255)}, 0.1)
+            end)
+            Button.MouseButton1Up:Connect(function()
+                Tween(Button, {BackgroundColor3 = Color3.fromRGB(35, 35, 45)}, 0.3)
+                callback()
+            end)
+        end
+
+        return SecMethods
     end
 
     return TabMethods
-end
-
--- METHOD: NOTIFY
-function RexzLibrary:Notify(notifTitle, notifText, duration)
-    local viewTime = duration or 3.5
-    
-    local NotifBox = Instance.new("Frame")
-    NotifBox.Name = "RexzNotification"
-    NotifBox.Size = UDim2.new(1, 0, 0, 55)
-    NotifBox.Position = UDim2.new(1, 30, 0, 0)
-    NotifBox.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
-    NotifBox.BackgroundTransparency = 0.1
-    NotifBox.BorderSizePixel = 0
-    NotifBox.Parent = self.NotifHolder
-
-    local NotifCorner = Instance.new("UICorner")
-    NotifCorner.CornerRadius = UDim.new(0, 6)
-    NotifCorner.Parent = NotifBox
-
-    local NotifStroke = Instance.new("UIStroke")
-    NotifStroke.Color = self.AccentColor
-    NotifStroke.Thickness = 1.2
-    NotifStroke.Parent = NotifBox
-
-    local NotifIcon = Instance.new("ImageLabel")
-    NotifIcon.Name = "NotifIcon"
-    NotifIcon.Size = UDim2.new(0, 18, 0, 18)
-    NotifIcon.Position = UDim2.new(0, 12, 0, 10)
-    NotifIcon.BackgroundTransparency = 1
-    NotifIcon.Image = "rbxassetid://10734950309"
-    NotifIcon.ImageColor3 = self.AccentColor
-    NotifIcon.Parent = NotifBox
-
-    local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Name = "NotifTitle"
-    TitleLabel.Size = UDim2.new(1, -45, 0, 18)
-    TitleLabel.Position = UDim2.new(0, 36, 0, 10)
-    TitleLabel.BackgroundTransparency = 1
-    TitleLabel.Text = tostring(notifTitle)
-    TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 245)
-    TitleLabel.TextSize = 12
-    TitleLabel.Font = Enum.Font.GothamBold
-    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TitleLabel.Parent = NotifBox
-
-    local DescLabel = Instance.new("TextLabel")
-    DescLabel.Name = "NotifDesc"
-    DescLabel.Size = UDim2.new(1, -24, 0, 22)
-    DescLabel.Position = UDim2.new(0, 12, 0, 28)
-    DescLabel.BackgroundTransparency = 1
-    DescLabel.Text = tostring(notifText)
-    DescLabel.TextColor3 = Color3.fromRGB(175, 175, 185)
-    DescLabel.TextSize = 11
-    DescLabel.Font = Enum.Font.GothamMedium
-    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
-    DescLabel.TextWrapped = true
-    DescLabel.Parent = NotifBox
-
-    local tweenIn = TweenService:Create(NotifBox, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0, 0, 0, 0)
-    })
-    tweenIn:Play()
-
-    task.delay(viewTime, function()
-        local tweenOut = TweenService:Create(NotifBox, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-            Position = UDim2.new(1, 30, 0, 0),
-            BackgroundTransparency = 1
-        })
-        tweenOut:Play()
-        tweenOut.Completed:Connect(function()
-            NotifBox:Destroy()
-        end)
-    end)
-end
-
--- METHOD: CREATE TAB
-function RexzLibrary:CreateTab(tabName, iconId)
-    local tab = setmetatable({}, TabClass)
-    tab.Elements = {}
-    tab.Library = self -- [FIX BUG]: Menyimpan reference library utama ke dalam instance tab
-    
-    local TabButton = Instance.new("TextButton")
-    TabButton.Name = tabName .. "_TabBtn"
-    TabButton.Size = UDim2.new(1, -5, 0, 34)
-    TabButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-    TabButton.Text = ""
-    TabButton.BorderSizePixel = 0
-    TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
-    TabButton.Parent = self.MainSidebarScroll -- [FIXED]: Sekarang mengarah ke variable yang valid
-
-    local TabBtnCorner = Instance.new("UICorner")
-    TabBtnCorner.CornerRadius = UDim.new(0, 6)
-    TabBtnCorner.Parent = TabButton
-
-    if iconId then
-        local TabIcon = Instance.new("ImageLabel")
-        TabIcon.Name = "TabIcon"
-        TabIcon.Size = UDim2.new(0, 16, 0, 16)
-        TabIcon.Position = UDim2.new(0, 10, 0.5, -8)
-        TabIcon.BackgroundTransparency = 1
-        TabIcon.Image = "rbxassetid://" .. tostring(iconId)
-        TabIcon.ImageColor3 = Color3.fromRGB(150, 150, 160)
-        TabIcon.Parent = TabButton
-        tab.Icon = TabIcon
-    end
-
-    local TabLabel = Instance.new("TextLabel")
-    TabLabel.Name = "TabLabel"
-    TabLabel.Size = UDim2.new(1, iconId and -36 or -16, 1, 0)
-    TabLabel.Position = UDim2.new(0, iconId and 32 or 12, 0, 0)
-    TabLabel.BackgroundTransparency = 1
-    TabLabel.Text = tabName
-    TabLabel.TextColor3 = Color3.fromRGB(160, 160, 170)
-    TabLabel.TextSize = 12
-    TabLabel.Font = Enum.Font.GothamMedium
-    TabLabel.TextXAlignment = Enum.TextXAlignment.Left
-    TabLabel.Parent = TabButton
-    tab.Label = TabLabel
-
-    local ScrollBox = Instance.new("ScrollingFrame")
-    ScrollBox.Name = tabName .. "_ContentScroll"
-    ScrollBox.Size = UDim2.new(1, 0, 1, 0)
-    ScrollBox.BackgroundTransparency = 1
-    ScrollBox.BorderSizePixel = 0
-    ScrollBox.ScrollBarThickness = 3
-    ScrollBox.ScrollBarImageColor3 = Color3.fromRGB(50, 50, 60)
-    ScrollBox.CanvasSize = UDim2.new(0, 0, 0, 0)
-    ScrollBox.Visible = false
-    ScrollBox.Parent = self.ContentHolder
-    tab.ScrollBox = ScrollBox
-
-    local ListLayout = Instance.new("UIListLayout")
-    ListLayout.Parent = ScrollBox
-    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    ListLayout.Padding = UDim.new(0, 6)
-
-    ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        ScrollBox.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
-    end)
-
-    local function ActivateTab()
-        if self.ConfigBtn then self.ConfigBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 30) end
-        
-        for _, t in ipairs(self.Tabs) do
-            t.ScrollBox.Visible = false
-            t.BackgroundColor.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-            t.Label.TextColor3 = Color3.fromRGB(160, 160, 170)
-            if t.Icon then t.Icon.ImageColor3 = Color3.fromRGB(150, 150, 160) end
-        end
-        ScrollBox.Visible = true 
-        TabButton.BackgroundColor3 = Color3.fromRGB(32, 30, 42)
-        TabLabel.TextColor3 = self.AccentColor
-        if tab.Icon then tab.Icon.ImageColor3 = self.AccentColor end
-        self.CurrentTab = tab
-    end
-
-    TabButton.MouseButton1Click:Connect(ActivateTab)
-    
-    tab.BackgroundColor = TabButton
-    table.insert(self.Tabs, tab)
-
-    if #self.Tabs == 1 and tabName ~= "Credit" then
-        ActivateTab()
-    end
-
-    return tab
-end
-
--- METHOD: ADD BUTTON
-function TabClass:AddButton(text, iconId, callback)
-    local action = callback or function() end
-    
-    local ButtonElement = Instance.new("TextButton")
-    ButtonElement.Name = text .. "_Interaction"
-    ButtonElement.Size = UDim2.new(1, -4, 0, 36)
-    ButtonElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
-    ButtonElement.BorderSizePixel = 0
-    ButtonElement.Text = ""
-    ButtonElement.AutoButtonColor = true
-    ButtonElement.Parent = self.ScrollBox
-
-    local BtnCorner = Instance.new("UICorner")
-    BtnCorner.CornerRadius = UDim.new(0, 6)
-    BtnCorner.Parent = ButtonElement
-
-    local BtnStroke = Instance.new("UIStroke")
-    BtnStroke.Color = Color3.fromRGB(35, 35, 45)
-    BtnStroke.Thickness = 1
-    BtnStroke.Parent = ButtonElement
-
-    if iconId then
-        local IconSpec = Instance.new("ImageLabel")
-        IconSpec.Name = "ButtonIcon"
-        IconSpec.Size = UDim2.new(0, 16, 0, 16)
-        IconSpec.Position = UDim2.new(0, 10, 0.5, -8)
-        IconSpec.BackgroundTransparency = 1
-        IconSpec.Image = "rbxassetid://" .. tostring(iconId)
-        IconSpec.ImageColor3 = Color3.fromRGB(210, 210, 220)
-        IconSpec.Parent = ButtonElement
-    end
-
-    local Label = Instance.new("TextLabel")
-    Label.Name = "ButtonLabel"
-    Label.Size = UDim2.new(1, iconId and -40 or -20, 1, 0)
-    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(215, 215, 225)
-    Label.TextSize = 12
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = ButtonElement
-
-    ButtonElement.MouseButton1Click:Connect(function()
-        ButtonElement.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
-        task.wait(0.08)
-        ButtonElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
-        pcall(action)
-    end)
-
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = ButtonElement
-    })
-end
-
--- METHOD: ADD TOGGLE
-function TabClass:AddToggle(text, iconId, defaultState, callback)
-    local state = defaultState or false
-    local action = callback or function() end
-    local library = self.Library -- [FIX BUG]: Mengambil reference library utama
-
-    local ToggleElement = Instance.new("TextButton")
-    ToggleElement.Name = text .. "_Toggle"
-    ToggleElement.Size = UDim2.new(1, -4, 0, 38)
-    ToggleElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
-    ToggleElement.BorderSizePixel = 0
-    ToggleElement.Text = ""
-    ToggleElement.AutoButtonColor = false
-    ToggleElement.Parent = self.ScrollBox
-
-    local ToggleCorner = Instance.new("UICorner")
-    ToggleCorner.CornerRadius = UDim.new(0, 6)
-    ToggleCorner.Parent = ToggleElement
-
-    local ToggleStroke = Instance.new("UIStroke")
-    ToggleStroke.Color = Color3.fromRGB(35, 35, 45)
-    ToggleStroke.Thickness = 1
-    ToggleStroke.Parent = ToggleElement
-
-    if iconId then
-        local ToggleIcon = Instance.new("ImageLabel")
-        ToggleIcon.Name = "ToggleIcon"
-        ToggleIcon.Size = UDim2.new(0, 16, 0, 16)
-        ToggleIcon.Position = UDim2.new(0, 10, 0.5, -8)
-        ToggleIcon.BackgroundTransparency = 1
-        ToggleIcon.Image = "rbxassetid://" .. tostring(iconId)
-        ToggleIcon.ImageColor3 = Color3.fromRGB(210, 210, 220)
-        ToggleIcon.Parent = ToggleElement
-    end
-
-    local Label = Instance.new("TextLabel")
-    Label.Name = "ToggleLabel"
-    Label.Size = UDim2.new(1, iconId and -76 or -56, 1, 0)
-    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = text
-    Label.TextColor3 = Color3.fromRGB(215, 215, 225)
-    Label.TextSize = 12
-    Label.Font = Enum.Font.GothamMedium
-    Label.TextXAlignment = Enum.TextXAlignment.Left
-    Label.Parent = ToggleElement
-
-    local IndicatorFrame = Instance.new("Frame")
-    IndicatorFrame.Name = "IndicatorFrame"
-    IndicatorFrame.Size = UDim2.new(0, 24, 0, 24)
-    IndicatorFrame.Position = UDim2.new(1, -36, 0.5, -12)
-    IndicatorFrame.BackgroundColor3 = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
-    IndicatorFrame.BorderSizePixel = 0
-    IndicatorFrame.Parent = ToggleElement
-
-    local IndicatorCorner = Instance.new("UICorner")
-    IndicatorCorner.CornerRadius = UDim.new(0, 6)
-    IndicatorCorner.Parent = IndicatorFrame
-
-    local IndicatorStroke = Instance.new("UIStroke")
-    IndicatorStroke.Thickness = 1.2
-    IndicatorStroke.Parent = IndicatorFrame
-
-    local RLogo = Instance.new("TextLabel")
-    RLogo.Name = "RLogo"
-    RLogo.Size = UDim2.new(1, 0, 1, 0)
-    RLogo.BackgroundTransparency = 1
-    RLogo.Text = "R"
-    RLogo.TextColor3 = state and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(90, 90, 100)
-    RLogo.TextSize = 14
-    RLogo.Font = Enum.Font.GothamBold
-    RLogo.TextXAlignment = Enum.TextXAlignment.Center
-    RLogo.TextYAlignment = Enum.TextYAlignment.Center
-    RLogo.Parent = IndicatorFrame
-
-    -- [FIX MULTI-THEME]: Update visual fungsi dipisah agar dipanggil saat ganti warna di Settings
-    local function UpdateToggleVisual(animate)
-        local targetBg = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
-        local targetAccent = state and library.AccentColor or Color3.fromRGB(45, 45, 55)
-        
-        if animate then
-            TweenService:Create(IndicatorFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetBg}):Play()
-            TweenService:Create(IndicatorStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Color = targetAccent}):Play()
-        else
-            IndicatorFrame.BackgroundColor3 = targetBg
-            IndicatorStroke.Color = targetAccent
-        end
-    end
-
-    UpdateToggleVisual(false)
-
-    ToggleElement.MouseButton1Click:Connect(function()
-        state = not state
-        UpdateToggleVisual(true)
-        pcall(action, state)
-    end)
-
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = ToggleElement,
-        UpdateTheme = function() UpdateToggleVisual(false) end -- Callback untuk update tema eksternal
-    })
 end
 
 return RexzLibrary
