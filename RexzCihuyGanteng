@@ -180,15 +180,13 @@ function RexzLibrary:RefreshSaveProfiles()
         return tostring(a):lower() < tostring(b):lower()  
     end)  
     
-    if self.SaveDropdown.Refresh then
-        self.SaveDropdown:Refresh(list, true) -- Biasanya true digunakan untuk otomatis nge-clear opsi lama
-    elseif self.SaveDropdown.SetOptions then
-        self.SaveDropdown:SetOptions(list)
-    end
-end
-
     if #list == 0 then list = { "Belum ada profile" } end  
-    self.SaveDropdown:SetOptions(list, list[1], false)
+    
+    if self.SaveDropdown.SetOptions then
+        self.SaveDropdown:SetOptions(list, list[1], false)
+    elseif self.SaveDropdown.Refresh then
+        self.SaveDropdown:Refresh(list, true)
+    end
 end
 
 function RexzLibrary:SaveProfile(profileName)
@@ -485,7 +483,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     local Sidebar = Instance.new("ScrollingFrame")  
     Sidebar.Name = "Sidebar"  
-    Sidebar.Size = UDim2.new(0, 130, 1, -92)  -- Diperpendek agar ada sisa ruang 44px di paling bawah
+    Sidebar.Size = UDim2.new(0, 130, 1, -92)  
     Sidebar.Position = UDim2.new(0, 10, 0, 48)  
     Sidebar.BackgroundTransparency = 1  
     Sidebar.BorderSizePixel = 0  
@@ -582,7 +580,6 @@ function RexzLibrary.new(dummyHubName, title)
         CreditTab:AddButton("Powered by Rexz Engine", 10723344432, nil)  
     end)  
 
-    -- [!] SETTINGS TAB (isPinned diset true agar ditaruh di paling bawah terpisah)
     local SettingsTab = self:CreateTab("Settings", 10723367168, true)  
     SettingsTab:AddLabel("Theme Preset", 10723344432, "Pilih tema cepat untuk UI", false)  
 
@@ -825,10 +822,9 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
     TabButton.Text = ""  
     TabButton.BorderSizePixel = 0  
     
-    -- Cek jika tab diset sebagai Pinned (di bawah sendiri)
     if isPinned then
         TabButton.Size = UDim2.new(0, 125, 0, 34)
-        TabButton.Position = UDim2.new(0, 10, 1, -42) -- Mengunci posisi di area bawah MainFrame
+        TabButton.Position = UDim2.new(0, 10, 1, -42) 
         TabButton.Parent = self.MainFrame
     else
         TabButton.Size = UDim2.new(1, -5, 0, 34)
