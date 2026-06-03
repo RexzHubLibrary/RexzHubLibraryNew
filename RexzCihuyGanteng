@@ -307,7 +307,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     -- AUTO-INJECT SYSTEM: TAB CREDIT
     task.spawn(function()
-        local CreditTab = self:CreateTab("Credit", 10723351930)
+        local CreditTab = self:CreateTab("Credit", 10734950309)
         
         CreditTab:AddButton("Owner: RexzLock", 10734950309, function()
             setclipboard("RexzLock")
