@@ -1,7 +1,7 @@
 -- [[
 --     LIBRARY UI REXZ (PREMIUM INTEGRATED VERSION)
 --     File: RexzCihuyGanteng
---     Pembaruan: Dropdown Component + Custom Config Textbox + Fixed Sidebar Footer
+--     Pembaruan: Hidden Top Settings Tab + 10 Premium Themes Extended
 --     Pengembang: RexzLock / RexzCihuy
 -- ]]
 
@@ -13,13 +13,18 @@ TabClass.__index = TabClass
 
 local TweenService = game:GetService("TweenService")
 
--- [ PRESET TEMA PREMIUM ]
+-- [ EXTENDED: 10 PRESET TEMA PREMIUM ]
 local Themes = {
     {Name = "Rexz Purple", Color = Color3.fromRGB(160, 110, 255)},
     {Name = "Ruby Red", Color = Color3.fromRGB(220, 80, 80)},
     {Name = "Aqua Blue", Color = Color3.fromRGB(80, 160, 255)},
     {Name = "Emerald Green", Color = Color3.fromRGB(80, 220, 140)},
-    {Name = "Gold Edition", Color = Color3.fromRGB(255, 185, 60)}
+    {Name = "Gold Edition", Color = Color3.fromRGB(255, 185, 60)},
+    {Name = "Midnight Neon", Color = Color3.fromRGB(0, 255, 220)},
+    {Name = "Cyber Pink", Color = Color3.fromRGB(255, 80, 180)},
+    {Name = "Orange Burst", Color = Color3.fromRGB(255, 110, 50)},
+    {Name = "Sakura Pastel", Color = Color3.fromRGB(255, 190, 210)},
+    {Name = "Pure Platinum", Color = Color3.fromRGB(230, 235, 245)}
 }
 
 local function ToHex(color)
@@ -57,7 +62,7 @@ function RexzLibrary.new(dummyHubName, title)
     self.Hidden = false    
     self.CurrentTheme = 1 
     self.ToggleRegistry = {} 
-    self.CustomConfigName = "DefaultConfig" -- Default nama file custom
+    self.CustomConfigName = "DefaultConfig"
     
     local fixedHubName = "Rexz Hub"
 
@@ -249,7 +254,7 @@ function RexzLibrary.new(dummyHubName, title)
     SidebarLayout.Padding = UDim.new(0, 4)
 
     -- =========================================================================
-    -- [ FIXED SIDEBAR FOOTER ]: Tombol Setting di Paling Bawah Sendiri
+    -- [ FIXED SIDEBAR FOOTER ]: Tombol "Setting" Permanen
     -- =========================================================================
     local SidebarFooter = Instance.new("Frame")
     SidebarFooter.Name = "SidebarFooter"
@@ -350,14 +355,19 @@ function RexzLibrary.new(dummyHubName, title)
         end
     end)
 
-    -- [ AUTO-INJECT: SETTINGS TAB ]
+    -- [ AUTO-INJECT: SETTINGS TAB (HIDDEN FROM SIDEBAR LIST) ]
     task.spawn(function()
         local SettingsTab = self:CreateTab("Settings", "Settings")
+        
+        -- Sembunyikan tombol tab aslinya dari barisan sidebar atas
+        if SettingsTab.BackgroundColor then
+            SettingsTab.BackgroundColor.Visible = false
+        end
         
         local themeNames = {}
         for i, theme in ipairs(Themes) do table.insert(themeNames, theme.Name) end
 
-        -- Dropdown untuk Pilih Tema
+        -- Dropdown Tema UI (Sekarang otomatis berisi 10 tema)
         SettingsTab:AddDropdown("Pilih Tema UI", "Visuals", themeNames, function(selectedThemeName)
             for i, theme in ipairs(Themes) do
                 if theme.Name == selectedThemeName then
@@ -369,14 +379,14 @@ function RexzLibrary.new(dummyHubName, title)
 
         SettingsTab:AddLabel("⚙️ Sistem Konfigurasi", Color3.fromRGB(160, 110, 255))
 
-        -- TextBox Input Nama Custom Config
+        -- Custom Config Input Box
         SettingsTab:AddTextBox("Nama Custom Config", "Misc", "Ketik nama di sini...", function(text)
             if text and text ~= "" then
                 self.CustomConfigName = text
             end
         end)
 
-        -- Tombol Simpan & Muat
+        -- Simpan & Muat
         SettingsTab:AddButton("Simpan Konfigurasi", "Chest", function()
             self:SaveConfig(self.CustomConfigName)
         end)
@@ -455,7 +465,7 @@ function RexzLibrary:SetTheme(index)
     end
 end
 
--- METHOD: SAVE CONFIG TO JSON FILE
+-- METHOD: SAVE CONFIG
 function RexzLibrary:SaveConfig(customName)
     if not writefile then 
         self:Notify("Error", "Eksekutor kamu tidak mendukung writefile!", 3)
@@ -478,7 +488,7 @@ function RexzLibrary:SaveConfig(customName)
     end
 end
 
--- METHOD: LOAD CONFIG FROM JSON FILE
+-- METHOD: LOAD CONFIG
 function RexzLibrary:LoadConfig(customName)
     if not readfile or not isfile then 
         self:Notify("Error", "Eksekutor kamu tidak mendukung readfile!", 3)
@@ -813,9 +823,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     table.insert(self.Elements, {Name = text, Instance = ToggleElement, Type = "Toggle", UpdateVisual = UpdateToggleVisual})
 end
 
--- =========================================================================
--- [ KOMPONEN BARU: ADD DROPDOWN ]
--- =========================================================================
+-- METHOD: ADD DROPDOWN
 function TabClass:AddDropdown(text, iconId, list, callback)
     local action = callback or function() end
     local parsedIcon = FormatIcon(iconId)
@@ -925,9 +933,7 @@ function TabClass:AddDropdown(text, iconId, list, callback)
     table.insert(self.Elements, {Name = text, Instance = DropdownElement, Type = "Dropdown"})
 end
 
--- =========================================================================
--- [ KOMPONEN BARU: ADD TEXTBOX / INPUT CUSTOM ]
--- =========================================================================
+-- METHOD: ADD TEXTBOX
 function TabClass:AddTextBox(text, iconId, placeholder, callback)
     local action = callback or function() end
     local parsedIcon = FormatIcon(iconId)
