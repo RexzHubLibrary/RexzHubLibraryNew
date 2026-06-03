@@ -593,20 +593,28 @@ function RexzLibrary.new(dummyHubName, title)
     end  
 
     task.defer(function()  
-        local CreditTab = self:CreateTab("Credit", 10723351930)  
-        CreditTab:AddLabel("Rexz Hub", 10734950309, "Library UI Updated", false)  
-        CreditTab:AddButton("Owner: RexzLock", 10734950309, function()  
-            if setclipboard then setclipboard("RexzLock") end  
-            self:Notify("Sistem Info", "Nama owner berhasil disalin ke clipboard.", 4)  
-        end)  
-        CreditTab:AddButton("Support Icon Pack", 10723344432, function()  
-            if setclipboard then setclipboard(ICON_SUPPORT_URL) end  
-            self:Notify("Sistem Info", "Link icon support berhasil disalin.", 4)  
-        end)  
-        CreditTab:AddButton("Powered by Rexz Engine", 10723344432, nil)  
-    end)  
+        -- --- [ REVISED CREDIT TAB - TANPA ICON PACK LINK ] ---
+local CreditTab = self:CreateTab("Credits", info) 
 
-    local SettingsTab = self:CreateTab("Settings", 10723367168, true)  
+CreditTab:AddLabel("Rexz Hub Information", 10723344432, "Informasi mengenai Library & Developer", false)
+
+-- Bagian Owner
+CreditTab:AddButton("Owner: Rexz", 10734934585, function()  
+    if setclipboard then 
+        setclipboard("Rexz") 
+        self:Notify("Credits", "Nama owner telah disalin ke clipboard!", 3) 
+    end
+end)
+
+-- Bagian Engine Details
+CreditTab:AddLabel("Engine Details", 10723344432, "Versi: V29 | Powered by Rexz Engine", false)
+
+-- Tombol statis (hanya untuk informasi, tidak ada aksi salin link eksternal)
+CreditTab:AddButton("Status: Private Build", 10723344432, function()
+    self:Notify("Info", "Rexz Engine saat ini berjalan di versi V29.", 3)
+end)
+
+    local SettingsTab = self:CreateTab("Settings", settings, true)  
     SettingsTab:AddLabel("Theme Preset", 10723344432, "Pilih tema cepat untuk UI", false)  
 
     local presetDropdown = SettingsTab:AddDropdown("Preset", 10723344432, {  
