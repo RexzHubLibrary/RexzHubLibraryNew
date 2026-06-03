@@ -275,9 +275,332 @@ function RexzLibrary:CreateTab(tabName, iconInput, categoryRef)
     return TabMethods
 end
 
-function RexzLibrary:Notify(title, text, duration)
-    print("[" .. title .. "]: " .. text)
-    -- Sistem Notifikasi visual opsional bisa kamu kembangkan di sini
+-- METHOD: NOTIFY
+function RexzLibrary:Notify(notifTitle, notifText, duration)
+    local viewTime = duration or 3.5
+    
+    local NotifBox = Instance.new("Frame")
+    NotifBox.Name = "RexzNotification"
+    NotifBox.Size = UDim2.new(1, 0, 0, 55)
+    NotifBox.Position = UDim2.new(1, 30, 0, 0)
+    NotifBox.BackgroundColor3 = Color3.fromRGB(24, 24, 30)
+    NotifBox.BackgroundTransparency = 0.1
+    NotifBox.BorderSizePixel = 0
+    NotifBox.Parent = self.NotifHolder
+
+    local NotifCorner = Instance.new("UICorner")
+    NotifCorner.CornerRadius = UDim.new(0, 6)
+    NotifCorner.Parent = NotifBox
+
+    local NotifStroke = Instance.new("UIStroke")
+    NotifStroke.Color = self.AccentColor
+    NotifStroke.Thickness = 1.2
+    NotifStroke.Parent = NotifBox
+
+    local NotifIcon = Instance.new("ImageLabel")
+    NotifIcon.Name = "NotifIcon"
+    NotifIcon.Size = UDim2.new(0, 18, 0, 18)
+    NotifIcon.Position = UDim2.new(0, 12, 0, 10)
+    NotifIcon.BackgroundTransparency = 1
+    NotifIcon.Image = "rbxassetid://10734950309"
+    NotifIcon.ImageColor3 = self.AccentColor
+    NotifIcon.Parent = NotifBox
+
+    local TitleLabel = Instance.new("TextLabel")
+    TitleLabel.Name = "NotifTitle"
+    TitleLabel.Size = UDim2.new(1, -45, 0, 18)
+    TitleLabel.Position = UDim2.new(0, 36, 0, 10)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = tostring(notifTitle)
+    TitleLabel.TextColor3 = Color3.fromRGB(240, 240, 245)
+    TitleLabel.TextSize = 12
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.Parent = NotifBox
+
+    local DescLabel = Instance.new("TextLabel")
+    DescLabel.Name = "NotifDesc"
+    DescLabel.Size = UDim2.new(1, -24, 0, 22)
+    DescLabel.Position = UDim2.new(0, 12, 0, 28)
+    DescLabel.BackgroundTransparency = 1
+    DescLabel.Text = tostring(notifText)
+    DescLabel.TextColor3 = Color3.fromRGB(175, 175, 185)
+    DescLabel.TextSize = 11
+    DescLabel.Font = Enum.Font.GothamMedium
+    DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+    DescLabel.TextWrapped = true
+    DescLabel.Parent = NotifBox
+
+    local tweenIn = TweenService:Create(NotifBox, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0, 0, 0, 0)
+    })
+    tweenIn:Play()
+
+    task.delay(viewTime, function()
+        local tweenOut = TweenService:Create(NotifBox, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
+            Position = UDim2.new(1, 30, 0, 0),
+            BackgroundTransparency = 1
+        })
+        tweenOut:Play()
+        tweenOut.Completed:Connect(function()
+            NotifBox:Destroy()
+        end)
+    end)
+end
+
+-- METHOD: CREATE TAB
+function RexzLibrary:CreateTab(tabName, iconId)
+    local tab = setmetatable({}, TabClass)
+    tab.Elements = {}
+    tab.Library = self -- [FIX BUG]: Menyimpan reference library utama ke dalam instance tab
+    
+    local TabButton = Instance.new("TextButton")
+    TabButton.Name = tabName .. "_TabBtn"
+    TabButton.Size = UDim2.new(1, -5, 0, 34)
+    TabButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+    TabButton.Text = ""
+    TabButton.BorderSizePixel = 0
+    TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
+    TabButton.Parent = self.MainSidebarScroll -- [FIXED]: Sekarang mengarah ke variable yang valid
+
+    local TabBtnCorner = Instance.new("UICorner")
+    TabBtnCorner.CornerRadius = UDim.new(0, 6)
+    TabBtnCorner.Parent = TabButton
+
+    if iconId then
+        local TabIcon = Instance.new("ImageLabel")
+        TabIcon.Name = "TabIcon"
+        TabIcon.Size = UDim2.new(0, 16, 0, 16)
+        TabIcon.Position = UDim2.new(0, 10, 0.5, -8)
+        TabIcon.BackgroundTransparency = 1
+        TabIcon.Image = "rbxassetid://" .. tostring(iconId)
+        TabIcon.ImageColor3 = Color3.fromRGB(150, 150, 160)
+        TabIcon.Parent = TabButton
+        tab.Icon = TabIcon
+    end
+
+    local TabLabel = Instance.new("TextLabel")
+    TabLabel.Name = "TabLabel"
+    TabLabel.Size = UDim2.new(1, iconId and -36 or -16, 1, 0)
+    TabLabel.Position = UDim2.new(0, iconId and 32 or 12, 0, 0)
+    TabLabel.BackgroundTransparency = 1
+    TabLabel.Text = tabName
+    TabLabel.TextColor3 = Color3.fromRGB(160, 160, 170)
+    TabLabel.TextSize = 12
+    TabLabel.Font = Enum.Font.GothamMedium
+    TabLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TabLabel.Parent = TabButton
+    tab.Label = TabLabel
+
+    local ScrollBox = Instance.new("ScrollingFrame")
+    ScrollBox.Name = tabName .. "_ContentScroll"
+    ScrollBox.Size = UDim2.new(1, 0, 1, 0)
+    ScrollBox.BackgroundTransparency = 1
+    ScrollBox.BorderSizePixel = 0
+    ScrollBox.ScrollBarThickness = 3
+    ScrollBox.ScrollBarImageColor3 = Color3.fromRGB(50, 50, 60)
+    ScrollBox.CanvasSize = UDim2.new(0, 0, 0, 0)
+    ScrollBox.Visible = false
+    ScrollBox.Parent = self.ContentHolder
+    tab.ScrollBox = ScrollBox
+
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.Parent = ScrollBox
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, 6)
+
+    ListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        ScrollBox.CanvasSize = UDim2.new(0, 0, 0, ListLayout.AbsoluteContentSize.Y + 10)
+    end)
+
+    local function ActivateTab()
+        if self.ConfigBtn then self.ConfigBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 30) end
+        
+        for _, t in ipairs(self.Tabs) do
+            t.ScrollBox.Visible = false
+            t.BackgroundColor.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
+            t.Label.TextColor3 = Color3.fromRGB(160, 160, 170)
+            if t.Icon then t.Icon.ImageColor3 = Color3.fromRGB(150, 150, 160) end
+        end
+        ScrollBox.Visible = true 
+        TabButton.BackgroundColor3 = Color3.fromRGB(32, 30, 42)
+        TabLabel.TextColor3 = self.AccentColor
+        if tab.Icon then tab.Icon.ImageColor3 = self.AccentColor end
+        self.CurrentTab = tab
+    end
+
+    TabButton.MouseButton1Click:Connect(ActivateTab)
+    
+    tab.BackgroundColor = TabButton
+    table.insert(self.Tabs, tab)
+
+    if #self.Tabs == 1 and tabName ~= "Credit" then
+        ActivateTab()
+    end
+
+    return tab
+end
+
+-- METHOD: ADD BUTTON
+function TabClass:AddButton(text, iconId, callback)
+    local action = callback or function() end
+    
+    local ButtonElement = Instance.new("TextButton")
+    ButtonElement.Name = text .. "_Interaction"
+    ButtonElement.Size = UDim2.new(1, -4, 0, 36)
+    ButtonElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+    ButtonElement.BorderSizePixel = 0
+    ButtonElement.Text = ""
+    ButtonElement.AutoButtonColor = true
+    ButtonElement.Parent = self.ScrollBox
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = ButtonElement
+
+    local BtnStroke = Instance.new("UIStroke")
+    BtnStroke.Color = Color3.fromRGB(35, 35, 45)
+    BtnStroke.Thickness = 1
+    BtnStroke.Parent = ButtonElement
+
+    if iconId then
+        local IconSpec = Instance.new("ImageLabel")
+        IconSpec.Name = "ButtonIcon"
+        IconSpec.Size = UDim2.new(0, 16, 0, 16)
+        IconSpec.Position = UDim2.new(0, 10, 0.5, -8)
+        IconSpec.BackgroundTransparency = 1
+        IconSpec.Image = "rbxassetid://" .. tostring(iconId)
+        IconSpec.ImageColor3 = Color3.fromRGB(210, 210, 220)
+        IconSpec.Parent = ButtonElement
+    end
+
+    local Label = Instance.new("TextLabel")
+    Label.Name = "ButtonLabel"
+    Label.Size = UDim2.new(1, iconId and -40 or -20, 1, 0)
+    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(215, 215, 225)
+    Label.TextSize = 12
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = ButtonElement
+
+    ButtonElement.MouseButton1Click:Connect(function()
+        ButtonElement.BackgroundColor3 = Color3.fromRGB(38, 38, 48)
+        task.wait(0.08)
+        ButtonElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+        pcall(action)
+    end)
+
+    table.insert(self.Elements, {
+        Name = text,
+        Instance = ButtonElement
+    })
+end
+
+-- METHOD: ADD TOGGLE
+function TabClass:AddToggle(text, iconId, defaultState, callback)
+    local state = defaultState or false
+    local action = callback or function() end
+    local library = self.Library -- [FIX BUG]: Mengambil reference library utama
+
+    local ToggleElement = Instance.new("TextButton")
+    ToggleElement.Name = text .. "_Toggle"
+    ToggleElement.Size = UDim2.new(1, -4, 0, 38)
+    ToggleElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
+    ToggleElement.BorderSizePixel = 0
+    ToggleElement.Text = ""
+    ToggleElement.AutoButtonColor = false
+    ToggleElement.Parent = self.ScrollBox
+
+    local ToggleCorner = Instance.new("UICorner")
+    ToggleCorner.CornerRadius = UDim.new(0, 6)
+    ToggleCorner.Parent = ToggleElement
+
+    local ToggleStroke = Instance.new("UIStroke")
+    ToggleStroke.Color = Color3.fromRGB(35, 35, 45)
+    ToggleStroke.Thickness = 1
+    ToggleStroke.Parent = ToggleElement
+
+    if iconId then
+        local ToggleIcon = Instance.new("ImageLabel")
+        ToggleIcon.Name = "ToggleIcon"
+        ToggleIcon.Size = UDim2.new(0, 16, 0, 16)
+        ToggleIcon.Position = UDim2.new(0, 10, 0.5, -8)
+        ToggleIcon.BackgroundTransparency = 1
+        ToggleIcon.Image = "rbxassetid://" .. tostring(iconId)
+        ToggleIcon.ImageColor3 = Color3.fromRGB(210, 210, 220)
+        ToggleIcon.Parent = ToggleElement
+    end
+
+    local Label = Instance.new("TextLabel")
+    Label.Name = "ToggleLabel"
+    Label.Size = UDim2.new(1, iconId and -76 or -56, 1, 0)
+    Label.Position = UDim2.new(0, iconId and 34 or 12, 0, 0)
+    Label.BackgroundTransparency = 1
+    Label.Text = text
+    Label.TextColor3 = Color3.fromRGB(215, 215, 225)
+    Label.TextSize = 12
+    Label.Font = Enum.Font.GothamMedium
+    Label.TextXAlignment = Enum.TextXAlignment.Left
+    Label.Parent = ToggleElement
+
+    local IndicatorFrame = Instance.new("Frame")
+    IndicatorFrame.Name = "IndicatorFrame"
+    IndicatorFrame.Size = UDim2.new(0, 24, 0, 24)
+    IndicatorFrame.Position = UDim2.new(1, -36, 0.5, -12)
+    IndicatorFrame.BackgroundColor3 = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
+    IndicatorFrame.BorderSizePixel = 0
+    IndicatorFrame.Parent = ToggleElement
+
+    local IndicatorCorner = Instance.new("UICorner")
+    IndicatorCorner.CornerRadius = UDim.new(0, 6)
+    IndicatorCorner.Parent = IndicatorFrame
+
+    local IndicatorStroke = Instance.new("UIStroke")
+    IndicatorStroke.Thickness = 1.2
+    IndicatorStroke.Parent = IndicatorFrame
+
+    local RLogo = Instance.new("TextLabel")
+    RLogo.Name = "RLogo"
+    RLogo.Size = UDim2.new(1, 0, 1, 0)
+    RLogo.BackgroundTransparency = 1
+    RLogo.Text = "R"
+    RLogo.TextColor3 = state and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(90, 90, 100)
+    RLogo.TextSize = 14
+    RLogo.Font = Enum.Font.GothamBold
+    RLogo.TextXAlignment = Enum.TextXAlignment.Center
+    RLogo.TextYAlignment = Enum.TextYAlignment.Center
+    RLogo.Parent = IndicatorFrame
+
+    -- [FIX MULTI-THEME]: Update visual fungsi dipisah agar dipanggil saat ganti warna di Settings
+    local function UpdateToggleVisual(animate)
+        local targetBg = state and Color3.fromRGB(35, 30, 50) or Color3.fromRGB(20, 20, 25)
+        local targetAccent = state and library.AccentColor or Color3.fromRGB(45, 45, 55)
+        
+        if animate then
+            TweenService:Create(IndicatorFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundColor3 = targetBg}):Play()
+            TweenService:Create(IndicatorStroke, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Color = targetAccent}):Play()
+        else
+            IndicatorFrame.BackgroundColor3 = targetBg
+            IndicatorStroke.Color = targetAccent
+        end
+    end
+
+    UpdateToggleVisual(false)
+
+    ToggleElement.MouseButton1Click:Connect(function()
+        state = not state
+        UpdateToggleVisual(true)
+        pcall(action, state)
+    end)
+
+    table.insert(self.Elements, {
+        Name = text,
+        Instance = ToggleElement,
+        UpdateTheme = function() UpdateToggleVisual(false) end -- Callback untuk update tema eksternal
+    })
 end
 
 return RexzLibrary
