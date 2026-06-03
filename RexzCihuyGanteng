@@ -1,9 +1,4 @@
---[[
-LIBRARY UI REXZ (UPDATED: THEME SETTINGS + MULTI SAVE + LOAD DROPDOWN)
-Bahasa: Indonesia Profesional
-Pengembang: RexzCihuy & AI Collaborator
-]]
-
+-- [[ LIBRARY UI REXZ (UPDATED: FIXED BOTTOM SETTINGS TAB) ]] --
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
 
@@ -483,7 +478,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     local Sidebar = Instance.new("ScrollingFrame")  
     Sidebar.Name = "Sidebar"  
-    Sidebar.Size = UDim2.new(0, 130, 1, -48)  
+    Sidebar.Size = UDim2.new(0, 130, 1, -92)  -- Diperpendek agar ada sisa ruang 44px di paling bawah
     Sidebar.Position = UDim2.new(0, 10, 0, 48)  
     Sidebar.BackgroundTransparency = 1  
     Sidebar.BorderSizePixel = 0  
@@ -580,7 +575,8 @@ function RexzLibrary.new(dummyHubName, title)
         CreditTab:AddButton("Powered by Rexz Engine", 10723344432, nil)  
     end)  
 
-    local SettingsTab = self:CreateTab("Settings", 10723367168)  
+    -- [!] SETTINGS TAB (isPinned diset true agar ditaruh di paling bawah terpisah)
+    local SettingsTab = self:CreateTab("Settings", 10723367168, true)  
     SettingsTab:AddLabel("Theme Preset", 10723344432, "Pilih tema cepat untuk UI", false)  
 
     local presetDropdown = SettingsTab:AddDropdown("Preset", 10723344432, {  
@@ -705,7 +701,7 @@ function RexzLibrary.new(dummyHubName, title)
 
         self:ApplyTheme(self.Theme)  
         self:Notify("Theme", "Custom theme berhasil diterapkan.", 3)  
-end)  
+    end)  
 
     SettingsTab:AddLabel("Multi Save", 10723344432, "Simpan dan load profile dengan nama custom", false)  
     local profileNameBox = SettingsTab:AddInput("Nama Profile", 10723344432, "contoh: setup_1", function() end)  
@@ -810,7 +806,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     end)
 end
 
-function RexzLibrary:CreateTab(tabName, iconId)
+function RexzLibrary:CreateTab(tabName, iconId, isPinned)
     local tab = setmetatable({}, TabClass)
     tab.Library = self
     tab.Elements = {}
@@ -818,12 +814,20 @@ function RexzLibrary:CreateTab(tabName, iconId)
 
     local TabButton = Instance.new("TextButton")  
     TabButton.Name = tabName .. "_TabBtn"  
-    TabButton.Size = UDim2.new(1, -5, 0, 34)  
     TabButton.BackgroundColor3 = self.Theme.Element  
     TabButton.Text = ""  
     TabButton.BorderSizePixel = 0  
-    TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)  
-    TabButton.Parent = self.Sidebar  
+    
+    -- Cek jika tab diset sebagai Pinned (di bawah sendiri)
+    if isPinned then
+        TabButton.Size = UDim2.new(0, 125, 0, 34)
+        TabButton.Position = UDim2.new(0, 10, 1, -42) -- Mengunci posisi di area bawah MainFrame
+        TabButton.Parent = self.MainFrame
+    else
+        TabButton.Size = UDim2.new(1, -5, 0, 34)
+        TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)  
+        TabButton.Parent = self.Sidebar  
+    end
 
     local TabBtnCorner = Instance.new("UICorner")  
     TabBtnCorner.CornerRadius = UDim.new(0, 6)  
