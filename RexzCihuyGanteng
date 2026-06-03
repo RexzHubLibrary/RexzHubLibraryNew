@@ -1,7 +1,7 @@
 -- [[
---     LIBRARY UI REXZ (UPDATED: TRANSPARENT THEME & SMART ICON SUPPORT)
---     Bahasa: Indonesia Profesional
---     Pengembang: RexzCihuy
+--     LIBRARY UI REXZ (INTEGRATED VERSION)
+--     File: RexzCihuyGanteng
+--     Pengembang: RexzLock / RexzCihuy
 -- ]]
 
 local RexzLibrary = {}
@@ -12,10 +12,36 @@ TabClass.__index = TabClass
 
 local TweenService = game:GetService("TweenService")
 
--- Fungsi Helper untuk memformat Icon ID secara otomatis
+-- [ AUTO-SYNC ]: Menghubungkan library langsung ke repositori ikon kamu
+local ICONS_URL = "https://raw.githubusercontent.com/RexzHubLibrary/RexzHubIconSupport/refs/heads/main/Icon"
+
+local Success, RexzIcons = pcall(function()
+    return loadstring(game:HttpGet(ICONS_URL))()
+end)
+
+-- Cadangan lokal jika koneksi github bermasalah
+if not Success or type(RexzIcons) ~= "table" then
+    warn("[Rexz Library] Gagal memuat database ikon, menggunakan cadangan lokal.")
+    RexzIcons = {
+        Home = "rbxassetid://10723344432",
+        Settings = "rbxassetid://10723350104",
+        Combat = "rbxassetid://10734950309",
+        Visuals = "rbxassetid://10723345543",
+        Credit = "rbxassetid://10723351930",
+        Search = "rbxassetid://10723344432"
+    }
+end
+
+RexzLibrary.Icons = RexzIcons
+
+-- Helper memformat input ikon (Nama kata kunci, Angka ID, atau Path)
 local function FormatIcon(iconInput)
     if not iconInput then return nil end
     local iconStr = tostring(iconInput)
+    
+    if RexzIcons[iconStr] then
+        return RexzIcons[iconStr]
+    end
     if string.match(iconStr, "^%d+$") then
         return "rbxassetid://" .. iconStr
     end
@@ -59,7 +85,7 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
     ToggleBtn.Position = UDim2.new(0, 15, 0, 15)
     ToggleBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 32)
-    ToggleBtn.BackgroundTransparency = 0.2 -- Sedikit transparan
+    ToggleBtn.BackgroundTransparency = 0.2
     ToggleBtn.Text = ""
     ToggleBtn.Active = true
     ToggleBtn.Draggable = true
@@ -79,17 +105,17 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleIcon.Size = UDim2.new(0, 24, 0, 24)
     ToggleIcon.Position = UDim2.new(0.5, -12, 0.5, -12)
     ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = "rbxassetid://10734950309"
+    ToggleIcon.Image = FormatIcon("Combat") or "rbxassetid://10734950309"
     ToggleIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
     ToggleIcon.Parent = ToggleBtn
 
-    -- MAIN CONTAINER WINDOW (DIUBAH MENJADI SEMI-TRANSPARAN)
+    -- MAIN CONTAINER WINDOW (PREMIUM GLASSMORPHIC)
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainContainer"
     MainFrame.Size = UDim2.new(0, 480, 0, 300)
     MainFrame.Position = UDim2.new(0.5, -240, 0.5, -150)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
-    MainFrame.BackgroundTransparency = 0.15 -- Mengaktifkan efek transparan transisi premium
+    MainFrame.BackgroundTransparency = 0.15 
     MainFrame.BorderSizePixel = 0
     MainFrame.Active = true
     MainFrame.Draggable = true
@@ -107,22 +133,12 @@ function RexzLibrary.new(dummyHubName, title)
     MainStroke.Thickness = 1.2
     MainStroke.Parent = MainFrame
 
-    -- LOGIKA PEMISAHAN: MINIMIZE VS TOGGLE HIDE
+    -- LOGIKA MINIMIZE & TOGGLE HIDE
     local function MinimizeWindow()
         if self.Hidden then return end 
-        
         self.Minimized = not self.Minimized
-        if self.Minimized then
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 38)
-            })
-            tween:Play()
-        else
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                Size = UDim2.new(0, 480, 0, 300)
-            })
-            tween:Play()
-        end
+        local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)
+        TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
     end
 
     local function ToggleHideWindow()
@@ -133,18 +149,14 @@ function RexzLibrary.new(dummyHubName, title)
                 BackgroundTransparency = 1
             })
             tweenScale:Play()
-            tweenScale.Completed:Connect(function()
-                MainFrame.Visible = false
-            end)
+            tweenScale.Completed:Connect(function() MainFrame.Visible = false end)
         else
             MainFrame.Visible = true
             local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)
-            
-            local tweenShow = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
                 Size = targetSize,
                 BackgroundTransparency = 0.15
-            })
-            tweenShow:Play()
+            }):Play()
         end
     end
 
@@ -176,7 +188,7 @@ function RexzLibrary.new(dummyHubName, title)
     MainIcon.Size = UDim2.new(0, 20, 0, 20)
     MainIcon.Position = UDim2.new(0, 12, 0, 9)
     MainIcon.BackgroundTransparency = 1
-    MainIcon.Image = "rbxassetid://10734950309"
+    MainIcon.Image = FormatIcon("Combat") or "rbxassetid://10734950309"
     MainIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
     MainIcon.Parent = TopBar
 
@@ -204,9 +216,7 @@ function RexzLibrary.new(dummyHubName, title)
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = TopBar
 
-    CloseBtn.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
-    end)
+    CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
     local MinimizeBtn = Instance.new("TextButton")
     MinimizeBtn.Name = "MinimizeAction"
@@ -221,7 +231,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     MinimizeBtn.MouseButton1Click:Connect(MinimizeWindow)
 
-    -- SIDEBAR NAVIGATION CONTAINER
+    -- SIDEBAR NAVIGATION
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Name = "Sidebar"
     Sidebar.Size = UDim2.new(0, 130, 1, -48)
@@ -260,7 +270,7 @@ function RexzLibrary.new(dummyHubName, title)
     SearchIcon.Size = UDim2.new(0, 14, 0, 14)
     SearchIcon.Position = UDim2.new(0, 10, 0.5, -7)
     SearchIcon.BackgroundTransparency = 1
-    SearchIcon.Image = "rbxassetid://10723344432"
+    SearchIcon.Image = FormatIcon("Search") or "rbxassetid://10723344432"
     SearchIcon.ImageColor3 = Color3.fromRGB(100, 100, 120)
     SearchIcon.Parent = SearchFrame
 
@@ -278,7 +288,7 @@ function RexzLibrary.new(dummyHubName, title)
     SearchInput.TextXAlignment = Enum.TextXAlignment.Left
     SearchInput.Parent = SearchFrame
 
-    -- TABS CONTAINER HOLDER
+    -- TABS HOLDER
     local ContentHolder = Instance.new("Frame")
     ContentHolder.Name = "ContentHolder"
     ContentHolder.Size = UDim2.new(1, -165, 1, -96)
@@ -287,34 +297,24 @@ function RexzLibrary.new(dummyHubName, title)
     ContentHolder.Parent = MainFrame
     self.ContentHolder = ContentHolder
 
-    -- REALTIME GLOBAL SEARCH ENGINE
+    -- REALTIME SEARCH ENGINE
     SearchInput:GetPropertyChangedSignal("Text"):Connect(function()
         local query = string.lower(SearchInput.Text)
         if self.CurrentTab then
             for _, item in ipairs(self.CurrentTab.Elements) do
-                if query == "" then
-                    item.Instance.Visible = true
-                else
-                    if string.find(string.lower(item.Name), query) then
-                        item.Instance.Visible = true
-                    else
-                        item.Instance.Visible = false
-                    end
-                end
+                item.Instance.Visible = (query == "" or string.find(string.lower(item.Name), query)) and true or false
             end
         end
     end)
 
-    -- AUTO-INJECT SYSTEM: TAB CREDIT
+    -- AUTO-INJECT CREDIT TAB
     task.spawn(function()
-        local CreditTab = self:CreateTab("Credit", 10734950309)
-        
-        CreditTab:AddButton("Owner: RexzLock", 10734950309, function()
+        local CreditTab = self:CreateTab("Credit", "Credit")
+        CreditTab:AddButton("Owner: RexzLock", "Combat", function()
             setclipboard("RexzLock")
             self:Notify("Sistem Info", "Nama owner berhasil disalin ke clipboard!", 4)
         end)
-        
-        CreditTab:AddButton("Powered by Rexz Engine", 10723344432, nil)
+        CreditTab:AddButton("Powered by Rexz Engine", "Search", nil)
     end)
 
     return self
@@ -323,7 +323,6 @@ end
 -- METHOD: NOTIFY
 function RexzLibrary:Notify(notifTitle, notifText, duration)
     local viewTime = duration or 3.5
-    
     local NotifBox = Instance.new("Frame")
     NotifBox.Name = "RexzNotification"
     NotifBox.Size = UDim2.new(1, 0, 0, 55)
@@ -347,7 +346,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     NotifIcon.Size = UDim2.new(0, 18, 0, 18)
     NotifIcon.Position = UDim2.new(0, 12, 0, 10)
     NotifIcon.BackgroundTransparency = 1
-    NotifIcon.Image = "rbxassetid://10734950309"
+    NotifIcon.Image = FormatIcon("Combat") or "rbxassetid://10734950309"
     NotifIcon.ImageColor3 = Color3.fromRGB(160, 110, 255)
     NotifIcon.Parent = NotifBox
 
@@ -376,10 +375,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     DescLabel.TextWrapped = true
     DescLabel.Parent = NotifBox
 
-    local tweenIn = TweenService:Create(NotifBox, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0, 0, 0, 0)
-    })
-    tweenIn:Play()
+    TweenService:Create(NotifBox, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0)}):Play()
 
     task.delay(viewTime, function()
         local tweenOut = TweenService:Create(NotifBox, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
@@ -387,13 +383,11 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
             BackgroundTransparency = 1
         })
         tweenOut:Play()
-        tweenOut.Completed:Connect(function()
-            NotifBox:Destroy()
-        end)
+        tweenOut.Completed:Connect(function() NotifBox:Destroy() end)
     end)
 end
 
--- METHOD: CREATE TAB (SEMI-TRANSPARENT + ICON CONVERTER)
+-- METHOD: CREATE TAB
 function RexzLibrary:CreateTab(tabName, iconId)
     local tab = setmetatable({}, TabClass)
     tab.Elements = {}
@@ -404,7 +398,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     TabButton.Name = tabName .. "_TabBtn"
     TabButton.Size = UDim2.new(1, -5, 0, 34)
     TabButton.BackgroundColor3 = Color3.fromRGB(22, 22, 28)
-    TabButton.BackgroundTransparency = 0.3 -- Transparan
+    TabButton.BackgroundTransparency = 0.3
     TabButton.Text = ""
     TabButton.BorderSizePixel = 0
     TabButton.LayoutOrder = (tabName == "Credit") and 9999 or (#self.Tabs + 1)
@@ -488,7 +482,7 @@ function RexzLibrary:CreateTab(tabName, iconId)
     return tab
 end
 
--- METHOD: ADD BUTTON (SEMI-TRANSPARENT + ICON CONVERTER)
+-- METHOD: ADD BUTTON
 function TabClass:AddButton(text, iconId, callback)
     local action = callback or function() end
     local parsedIcon = FormatIcon(iconId)
@@ -497,7 +491,7 @@ function TabClass:AddButton(text, iconId, callback)
     ButtonElement.Name = text .. "_Interaction"
     ButtonElement.Size = UDim2.new(1, -4, 0, 36)
     ButtonElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
-    ButtonElement.BackgroundTransparency = 0.25 -- Transparan tipis
+    ButtonElement.BackgroundTransparency = 0.25
     ButtonElement.BorderSizePixel = 0
     ButtonElement.Text = ""
     ButtonElement.AutoButtonColor = true
@@ -542,13 +536,10 @@ function TabClass:AddButton(text, iconId, callback)
         pcall(action)
     end)
 
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = ButtonElement
-    })
+    table.insert(self.Elements, {Name = text, Instance = ButtonElement})
 end
 
--- METHOD: ADD TOGGLE (SEMI-TRANSPARENT + ICON CONVERTER)
+-- METHOD: ADD TOGGLE
 function TabClass:AddToggle(text, iconId, defaultState, callback)
     local state = defaultState or false
     local action = callback or function() end
@@ -558,7 +549,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
     ToggleElement.Name = text .. "_Toggle"
     ToggleElement.Size = UDim2.new(1, -4, 0, 38)
     ToggleElement.BackgroundColor3 = Color3.fromRGB(26, 26, 33)
-    ToggleElement.BackgroundTransparency = 0.25 -- Transparan tipis
+    ToggleElement.BackgroundTransparency = 0.25
     ToggleElement.BorderSizePixel = 0
     ToggleElement.Text = ""
     ToggleElement.AutoButtonColor = false
@@ -649,10 +640,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
         pcall(action, state)
     end)
 
-    table.insert(self.Elements, {
-        Name = text,
-        Instance = ToggleElement
-    })
+    table.insert(self.Elements, {Name = text, Instance = ToggleElement})
 end
 
 return RexzLibrary
