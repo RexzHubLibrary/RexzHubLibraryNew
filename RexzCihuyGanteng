@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta
+--// Rexz Sedang Jatuh Cinta.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -612,16 +612,18 @@ task.defer(function()
 
     local CreditTab = self:CreateTab("Credits", 124560466474914)
 
-    -- PROFILE CARD
+    local OWNER_USERNAME = "rexzakun2"
+    local OWNER_DISPLAY   = "Rexz"
 
+    -- PROFILE CARD
     local Profile = Instance.new("Frame")
-    Profile.Size = UDim2.new(1,-4,0,120)
+    Profile.Size = UDim2.new(1, -4, 0, 125)
     Profile.BackgroundColor3 = self.Theme.Element
     Profile.BorderSizePixel = 0
     Profile.Parent = CreditTab.ScrollBox
 
     local ProfileCorner = Instance.new("UICorner")
-    ProfileCorner.CornerRadius = UDim.new(0,8)
+    ProfileCorner.CornerRadius = UDim.new(0, 8)
     ProfileCorner.Parent = Profile
 
     local ProfileStroke = Instance.new("UIStroke")
@@ -629,62 +631,50 @@ task.defer(function()
     ProfileStroke.Thickness = 1.2
     ProfileStroke.Parent = Profile
 
-    -- Banner
-
     local Banner = Instance.new("Frame")
-    Banner.Size = UDim2.new(1,0,0,35)
+    Banner.Size = UDim2.new(1, 0, 0, 36)
     Banner.BackgroundColor3 = self.Theme.Accent
     Banner.BorderSizePixel = 0
     Banner.Parent = Profile
 
     local BannerCorner = Instance.new("UICorner")
-    BannerCorner.CornerRadius = UDim.new(0,8)
+    BannerCorner.CornerRadius = UDim.new(0, 8)
     BannerCorner.Parent = Banner
 
-    -- Avatar
-
     local Avatar = Instance.new("ImageLabel")
-    Avatar.Size = UDim2.new(0,70,0,70)
-    Avatar.Position = UDim2.new(0,12,0,25)
+    Avatar.Size = UDim2.new(0, 72, 0, 72)
+    Avatar.Position = UDim2.new(0, 12, 0, 26)
     Avatar.BackgroundTransparency = 1
     Avatar.Parent = Profile
 
     local AvatarCorner = Instance.new("UICorner")
-    AvatarCorner.CornerRadius = UDim.new(1,0)
+    AvatarCorner.CornerRadius = UDim.new(1, 0)
     AvatarCorner.Parent = Avatar
 
     pcall(function()
-
-        local UserId = Players:GetUserIdFromNameAsync("rexzakun2")
-
-        local Content = Players:GetUserThumbnailAsync(
-            UserId,
+        local userId = Players:GetUserIdFromNameAsync(OWNER_USERNAME)
+        local thumb = Players:GetUserThumbnailAsync(
+            userId,
             Enum.ThumbnailType.HeadShot,
             Enum.ThumbnailSize.Size420x420
         )
-
-        Avatar.Image = Content
-
+        Avatar.Image = thumb
     end)
 
-    -- Username
-
     local Name = Instance.new("TextLabel")
-    Name.Size = UDim2.new(1,-100,0,24)
-    Name.Position = UDim2.new(0,90,0,42)
+    Name.Size = UDim2.new(1, -100, 0, 24)
+    Name.Position = UDim2.new(0, 92, 0, 42)
     Name.BackgroundTransparency = 1
-    Name.Text = "Rexz"
+    Name.Text = OWNER_DISPLAY
     Name.TextColor3 = self.Theme.Text
     Name.TextSize = 18
     Name.Font = Enum.Font.GothamBold
     Name.TextXAlignment = Enum.TextXAlignment.Left
     Name.Parent = Profile
 
-    -- Role
-
     local Role = Instance.new("TextLabel")
-    Role.Size = UDim2.new(1,-100,0,18)
-    Role.Position = UDim2.new(0,90,0,64)
+    Role.Size = UDim2.new(1, -100, 0, 18)
+    Role.Position = UDim2.new(0, 92, 0, 65)
     Role.BackgroundTransparency = 1
     Role.Text = "Owner & Developer"
     Role.TextColor3 = self.Theme.Accent
@@ -693,11 +683,9 @@ task.defer(function()
     Role.TextXAlignment = Enum.TextXAlignment.Left
     Role.Parent = Profile
 
-    -- Bio
-
     local Bio = Instance.new("TextLabel")
-    Bio.Size = UDim2.new(1,-100,0,18)
-    Bio.Position = UDim2.new(0,90,0,82)
+    Bio.Size = UDim2.new(1, -100, 0, 18)
+    Bio.Position = UDim2.new(0, 92, 0, 84)
     Bio.BackgroundTransparency = 1
     Bio.Text = "Creator of Rexz Hub Library"
     Bio.TextColor3 = self.Theme.TextDim
@@ -706,278 +694,239 @@ task.defer(function()
     Bio.TextXAlignment = Enum.TextXAlignment.Left
     Bio.Parent = Profile
 
-    -- OWNER BADGE
-
     local Badge = Instance.new("TextLabel")
-    Badge.Size = UDim2.new(0,60,0,20)
-    Badge.Position = UDim2.new(1,-75,0,42)
+    Badge.Size = UDim2.new(0, 60, 0, 20)
+    Badge.Position = UDim2.new(1, -76, 0, 42)
     Badge.BackgroundColor3 = self.Theme.Accent
     Badge.Text = "OWNER"
-    Badge.TextColor3 = Color3.new(1,1,1)
+    Badge.TextColor3 = Color3.new(1, 1, 1)
     Badge.TextSize = 10
     Badge.Font = Enum.Font.GothamBold
     Badge.Parent = Profile
 
     local BadgeCorner = Instance.new("UICorner")
-    BadgeCorner.CornerRadius = UDim.new(0,5)
+    BadgeCorner.CornerRadius = UDim.new(0, 5)
     BadgeCorner.Parent = Badge
 
-    -- INFO
+    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━", 0, "", false)
 
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━",0,"",false)
+    CreditTab:AddLabel("👑 Owner", 0, OWNER_DISPLAY, false)
+    CreditTab:AddLabel("🧷 Username", 0, OWNER_USERNAME, false)
+    CreditTab:AddLabel("⚡ Version", 0, "V2.5.0 Stable", false)
+    CreditTab:AddLabel("🛠 Build", 0, "Rexz Licence", false)
+    CreditTab:AddLabel("💖 Status", 0, "Rexz Sedang Jatuh Cinta", false)
 
-    CreditTab:AddLabel(
-        "👑 Owner",
-        0,
-        "Rexz",
-        false
-    )
+    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━", 0, "", false)
 
-    CreditTab:AddLabel(
-        "⚡ Version",
-        0,
-        "V2.5.0 Stable",
-        false
-    )
-
-    CreditTab:AddLabel(
-        "🛠 Build",
-        0,
-        "Rexz Licence",
-        false
-    )
-
-    CreditTab:AddLabel(
-        "💖 Status",
-        0,
-        "Rexz Sedang Jatuh Cinta",
-        false
-    )
-
-    CreditTab:AddLabel(
-        "📦 Executor",
-        0,
-        "Delta • KRNL • Synapse",
-        false
-    )
-
-    CreditTab:AddLabel("━━━━━━━━━━━━━━━━━━━━",0,"",false)
-
-    -- BUTTONS
-
-    CreditTab:AddButton(
-        "Copy Owner",
-        10734934585,
-        function()
-
-            if setclipboard then
-                setclipboard("Rexz")
-
-                self:Notify(
-                    "Credits",
-                    "Nama owner berhasil disalin.",
-                    3
-                )
-            end
-
+    CreditTab:AddButton("Copy Owner", 10734934585, function()
+        if setclipboard then
+            setclipboard(OWNER_DISPLAY)
+            self:Notify("Credits", "Nama owner berhasil disalin.", 3)
         end
-    )
+    end)
 
-    CreditTab:AddButton(
-        "Check Status",
-        10723344432,
-        function()
-
-            self:Notify(
-                "Status",
-                "Rexz Hub berjalan normal.",
-                3
-            )
-
+    CreditTab:AddButton("Copy Username", 10734934585, function()
+        if setclipboard then
+            setclipboard(OWNER_USERNAME)
+            self:Notify("Credits", "Username owner berhasil disalin.", 3)
         end
-    )
+    end)
 
-    CreditTab:AddLabel(
-        "© 2026 Rexz Hub",
-        0,
-        "All Rights Reserved",
-        false
-    )
+    CreditTab:AddButton("Check Status", 10723344432, function()
+        self:Notify("Status", "Rexz Hub berjalan normal.", 3)
+    end)
+
+    CreditTab:AddLabel("© 2026 Rexz Hub", 0, "All Rights Reserved", false)
+
+    -- =======================================================
+    -- SETTINGS TAB
+    -- =======================================================
+
+    local SettingsTab = self:CreateTab("Settings", 80758916183665, true)
+
+    SettingsTab:AddLabel("Theme Preset", 10723344432, "Pilih tema cepat untuk UI", false)
+
+    local presetDropdown = SettingsTab:AddDropdown("Preset", 10723344432, {
+        "Default",
+        "Purple Dark",
+        "Blue Ice",
+        "Red Neon",
+        "Green Matrix"
+    }, "Default", function(selected) end)
+
+    local function ApplyPreset(preset)
+        preset = tostring(preset or "Default")
+
+        if preset == "Default" then
+            self.Theme.Background = Color3.fromRGB(18, 18, 22)
+            self.Theme.Topbar = Color3.fromRGB(25, 25, 32)
+            self.Theme.Sidebar = Color3.fromRGB(22, 22, 28)
+            self.Theme.Element = Color3.fromRGB(26, 26, 33)
+            self.Theme.TabActive = Color3.fromRGB(32, 30, 42)
+            self.Theme.Accent = Color3.fromRGB(160, 110, 255)
+            self.Theme.Text = Color3.fromRGB(235, 235, 240)
+            self.Theme.TextDim = Color3.fromRGB(160, 160, 170)
+            self.Theme.Icon = Color3.fromRGB(150, 150, 160)
+            self.Theme.Stroke = Color3.fromRGB(40, 40, 50)
+            self.Theme.ToggleOnBg = Color3.fromRGB(35, 30, 50)
+            self.Theme.ToggleOffBg = Color3.fromRGB(20, 20, 25)
+            self.Theme.DropdownBg = Color3.fromRGB(24, 24, 30)
+            self.Theme.InputBg = Color3.fromRGB(24, 24, 30)
+            self.Theme.LabelBg = Color3.fromRGB(24, 24, 30)
+        elseif preset == "Purple Dark" then
+            self.Theme.Background = Color3.fromRGB(15, 14, 22)
+            self.Theme.Topbar = Color3.fromRGB(23, 20, 36)
+            self.Theme.Sidebar = Color3.fromRGB(21, 18, 32)
+            self.Theme.Element = Color3.fromRGB(28, 23, 42)
+            self.Theme.TabActive = Color3.fromRGB(40, 30, 64)
+            self.Theme.Accent = Color3.fromRGB(186, 123, 255)
+            self.Theme.Text = Color3.fromRGB(245, 240, 250)
+            self.Theme.TextDim = Color3.fromRGB(170, 160, 180)
+            self.Theme.Icon = Color3.fromRGB(175, 160, 195)
+            self.Theme.Stroke = Color3.fromRGB(52, 44, 74)
+            self.Theme.ToggleOnBg = Color3.fromRGB(40, 26, 58)
+            self.Theme.ToggleOffBg = Color3.fromRGB(19, 17, 27)
+            self.Theme.DropdownBg = Color3.fromRGB(26, 21, 38)
+            self.Theme.InputBg = Color3.fromRGB(26, 21, 38)
+            self.Theme.LabelBg = Color3.fromRGB(26, 21, 38)
+        elseif preset == "Blue Ice" then
+            self.Theme.Background = Color3.fromRGB(14, 18, 24)
+            self.Theme.Topbar = Color3.fromRGB(20, 27, 37)
+            self.Theme.Sidebar = Color3.fromRGB(18, 24, 33)
+            self.Theme.Element = Color3.fromRGB(22, 30, 40)
+            self.Theme.TabActive = Color3.fromRGB(26, 40, 56)
+            self.Theme.Accent = Color3.fromRGB(96, 176, 255)
+            self.Theme.Text = Color3.fromRGB(235, 242, 250)
+            self.Theme.TextDim = Color3.fromRGB(155, 170, 190)
+            self.Theme.Icon = Color3.fromRGB(150, 175, 205)
+            self.Theme.Stroke = Color3.fromRGB(36, 48, 64)
+            self.Theme.ToggleOnBg = Color3.fromRGB(25, 40, 56)
+            self.Theme.ToggleOffBg = Color3.fromRGB(17, 21, 28)
+            self.Theme.DropdownBg = Color3.fromRGB(18, 26, 36)
+            self.Theme.InputBg = Color3.fromRGB(18, 26, 36)
+            self.Theme.LabelBg = Color3.fromRGB(18, 26, 36)
+        elseif preset == "Red Neon" then
+            self.Theme.Background = Color3.fromRGB(20, 14, 16)
+            self.Theme.Topbar = Color3.fromRGB(34, 18, 20)
+            self.Theme.Sidebar = Color3.fromRGB(29, 17, 19)
+            self.Theme.Element = Color3.fromRGB(38, 20, 24)
+            self.Theme.TabActive = Color3.fromRGB(58, 22, 30)
+            self.Theme.Accent = Color3.fromRGB(255, 96, 118)
+            self.Theme.Text = Color3.fromRGB(250, 240, 242)
+            self.Theme.TextDim = Color3.fromRGB(190, 155, 162)
+            self.Theme.Icon = Color3.fromRGB(220, 170, 178)
+            self.Theme.Stroke = Color3.fromRGB(76, 31, 38)
+            self.Theme.ToggleOnBg = Color3.fromRGB(58, 22, 28)
+            self.Theme.ToggleOffBg = Color3.fromRGB(26, 16, 18)
+            self.Theme.DropdownBg = Color3.fromRGB(34, 18, 21)
+            self.Theme.InputBg = Color3.fromRGB(34, 18, 21)
+            self.Theme.LabelBg = Color3.fromRGB(34, 18, 21)
+        elseif preset == "Green Matrix" then
+            self.Theme.Background = Color3.fromRGB(14, 18, 14)
+            self.Theme.Topbar = Color3.fromRGB(18, 28, 18)
+            self.Theme.Sidebar = Color3.fromRGB(16, 24, 16)
+            self.Theme.Element = Color3.fromRGB(20, 30, 20)
+            self.Theme.TabActive = Color3.fromRGB(24, 40, 24)
+            self.Theme.Accent = Color3.fromRGB(110, 255, 145)
+            self.Theme.Text = Color3.fromRGB(235, 245, 235)
+            self.Theme.TextDim = Color3.fromRGB(155, 180, 155)
+            self.Theme.Icon = Color3.fromRGB(160, 200, 160)
+            self.Theme.Stroke = Color3.fromRGB(34, 52, 34)
+            self.Theme.ToggleOnBg = Color3.fromRGB(24, 42, 24)
+            self.Theme.ToggleOffBg = Color3.fromRGB(18, 22, 18)
+            self.Theme.DropdownBg = Color3.fromRGB(18, 28, 18)
+            self.Theme.InputBg = Color3.fromRGB(18, 28, 18)
+            self.Theme.LabelBg = Color3.fromRGB(18, 28, 18)
+        end
+
+        self:ApplyTheme(self.Theme)
+    end
+
+    SettingsTab:AddButton("Apply Preset", 10723344432, function()
+        ApplyPreset(presetDropdown:GetValue())
+        self:Notify("Theme", "Preset berhasil diterapkan.", 3)
+    end)
+
+    SettingsTab:AddLabel("Custom Theme", 10723344432, "Masukkan HEX color untuk background dan accent", false)
+
+    local accentBox = SettingsTab:AddInput("Accent HEX", 10723344432, "#A06EFF", function() end)
+    local backgroundBox = SettingsTab:AddInput("Background HEX", 10723344432, "#121216", function() end)
+
+    self.SettingsRefs = {
+        AccentBox = accentBox.Box,
+        BackgroundBox = backgroundBox.Box
+    }
+
+    SettingsTab:AddButton("Apply Custom Theme", 10723344432, function()
+        local accent = HexToColor(accentBox:GetValue(), self.Theme.Accent)
+        local background = HexToColor(backgroundBox:GetValue(), self.Theme.Background)
+
+        self.Theme.Accent = accent
+        self.Theme.Background = background
+        self.Theme.Topbar = Color3.fromRGB(
+            math.floor(background.R * 255 * 0.95),
+            math.floor(background.G * 255 * 0.95),
+            math.floor(background.B * 255 * 0.95)
+        )
+        self.Theme.Sidebar = Color3.fromRGB(
+            math.floor(background.R * 255 * 0.90),
+            math.floor(background.G * 255 * 0.90),
+            math.floor(background.B * 255 * 0.90)
+        )
+        self.Theme.Element = Color3.fromRGB(
+            math.floor(background.R * 255 * 1.12),
+            math.floor(background.G * 255 * 1.12),
+            math.floor(background.B * 255 * 1.12)
+        )
+        self.Theme.TabActive = Color3.fromRGB(
+            math.floor(background.R * 255 * 1.25),
+            math.floor(background.G * 255 * 1.25),
+            math.floor(background.B * 255 * 1.25)
+        )
+
+        self:ApplyTheme(self.Theme)
+        self:Notify("Theme", "Custom theme berhasil diterapkan.", 3)
+    end)
+
+    SettingsTab:AddLabel("Multi Save", 10723344432, "Simpan dan load profile dengan nama custom", false)
+
+    local profileNameBox = SettingsTab:AddInput("Nama Profile", 10723344432, "contoh: setup_1", function() end)
+    local saveDropdown = SettingsTab:AddDropdown("Load Profile", 10723344432, { "Belum ada profile" }, "Belum ada profile", function() end)
+    self.SaveDropdown = saveDropdown
+
+    SettingsTab:AddButton("Save Profile", 10723344432, function()
+        local name = profileNameBox:GetValue()
+        if name == "" then name = "Profile" end
+        self:SaveProfile(name)
+    end)
+
+    SettingsTab:AddButton("Load Selected", 10723344432, function()
+        local selected = saveDropdown:GetValue()
+        if not selected or selected == "" or selected == "Belum ada profile" then
+            self:Notify("Load Profile", "Tidak ada profile yang dipilih.", 3)
+            return
+        end
+        self:LoadProfile(selected)
+    end)
+
+    SettingsTab:AddButton("Delete Selected", 10734934585, function()
+        local selected = saveDropdown:GetValue()
+        if not selected or selected == "" or selected == "Belum ada profile" then
+            self:Notify("Delete Profile", "Tidak ada profile yang dipilih.", 3)
+            return
+        end
+        self:DeleteProfile(selected)
+    end)
+
+    SettingsTab:AddButton("Refresh List", 10723344432, function()
+        self:RefreshSaveProfiles()
+        self:Notify("Profile", "Daftar profile berhasil diperbarui.", 3)
+    end)
+
+    self:RefreshSaveProfiles()
+    self:ApplyTheme(self.Theme)
 
 end)
-
-    local SettingsTab = self:CreateTab("Settings", 80758916183665, true)  
-    SettingsTab:AddLabel("Theme Preset", 10723344432, "Pilih tema cepat untuk UI", false)  
-
-    local presetDropdown = SettingsTab:AddDropdown("Preset", 10723344432, {  
-        "Default",  
-        "Purple Dark",  
-        "Blue Ice",  
-        "Red Neon",  
-        "Green Matrix"  
-    }, "Default", function(selected) end)  
-
-    local function ApplyPreset(preset)  
-        preset = tostring(preset or "Default")  
-        if preset == "Default" then  
-            self.Theme.Background = Color3.fromRGB(18, 18, 22)  
-            self.Theme.Topbar = Color3.fromRGB(25, 25, 32)  
-            self.Theme.Sidebar = Color3.fromRGB(22, 22, 28)  
-            self.Theme.Element = Color3.fromRGB(26, 26, 33)  
-            self.Theme.TabActive = Color3.fromRGB(32, 30, 42)  
-            self.Theme.Accent = Color3.fromRGB(160, 110, 255)  
-            self.Theme.Text = Color3.fromRGB(235, 235, 240)  
-            self.Theme.TextDim = Color3.fromRGB(160, 160, 170)  
-            self.Theme.Icon = Color3.fromRGB(150, 150, 160)  
-            self.Theme.Stroke = Color3.fromRGB(40, 40, 50)  
-            self.Theme.ToggleOnBg = Color3.fromRGB(35, 30, 50)  
-            self.Theme.ToggleOffBg = Color3.fromRGB(20, 20, 25)  
-            self.Theme.DropdownBg = Color3.fromRGB(24, 24, 30)  
-            self.Theme.InputBg = Color3.fromRGB(24, 24, 30)  
-            self.Theme.LabelBg = Color3.fromRGB(24, 24, 30)  
-        elseif preset == "Purple Dark" then  
-            self.Theme.Background = Color3.fromRGB(15, 14, 22)  
-            self.Theme.Topbar = Color3.fromRGB(23, 20, 36)  
-            self.Theme.Sidebar = Color3.fromRGB(21, 18, 32)  
-            self.Theme.Element = Color3.fromRGB(28, 23, 42)  
-            self.Theme.TabActive = Color3.fromRGB(40, 30, 64)  
-            self.Theme.Accent = Color3.fromRGB(186, 123, 255)  
-            self.Theme.Text = Color3.fromRGB(245, 240, 250)  
-            self.Theme.TextDim = Color3.fromRGB(170, 160, 180)  
-            self.Theme.Icon = Color3.fromRGB(175, 160, 195)  
-            self.Theme.Stroke = Color3.fromRGB(52, 44, 74)  
-            self.Theme.ToggleOnBg = Color3.fromRGB(40, 26, 58)  
-            self.Theme.ToggleOffBg = Color3.fromRGB(19, 17, 27)  
-            self.Theme.DropdownBg = Color3.fromRGB(26, 21, 38)  
-            self.Theme.InputBg = Color3.fromRGB(26, 21, 38)  
-            self.Theme.LabelBg = Color3.fromRGB(26, 21, 38)  
-        elseif preset == "Blue Ice" then  
-            self.Theme.Background = Color3.fromRGB(14, 18, 24)  
-            self.Theme.Topbar = Color3.fromRGB(20, 27, 37)  
-            self.Theme.Sidebar = Color3.fromRGB(18, 24, 33)  
-            self.Theme.Element = Color3.fromRGB(22, 30, 40)  
-            self.Theme.TabActive = Color3.fromRGB(26, 40, 56)  
-            self.Theme.Accent = Color3.fromRGB(96, 176, 255)  
-            self.Theme.Text = Color3.fromRGB(235, 242, 250)  
-            self.Theme.TextDim = Color3.fromRGB(155, 170, 190)  
-            self.Theme.Icon = Color3.fromRGB(150, 175, 205)  
-            self.Theme.Stroke = Color3.fromRGB(36, 48, 64)  
-            self.Theme.ToggleOnBg = Color3.fromRGB(25, 40, 56)  
-            self.Theme.ToggleOffBg = Color3.fromRGB(17, 21, 28)  
-            self.Theme.DropdownBg = Color3.fromRGB(18, 26, 36)  
-            self.Theme.InputBg = Color3.fromRGB(18, 26, 36)  
-            self.Theme.LabelBg = Color3.fromRGB(18, 26, 36)  
-        elseif preset == "Red Neon" then  
-            self.Theme.Background = Color3.fromRGB(20, 14, 16)  
-            self.Theme.Topbar = Color3.fromRGB(34, 18, 20)  
-            self.Theme.Sidebar = Color3.fromRGB(29, 17, 19)  
-            self.Theme.Element = Color3.fromRGB(38, 20, 24)  
-            self.Theme.TabActive = Color3.fromRGB(58, 22, 30)  
-            self.Theme.Accent = Color3.fromRGB(255, 96, 118)  
-            self.Theme.Text = Color3.fromRGB(250, 240, 242)  
-            self.Theme.TextDim = Color3.fromRGB(190, 155, 162)  
-            self.Theme.Icon = Color3.fromRGB(220, 170, 178)  
-            self.Theme.Stroke = Color3.fromRGB(76, 31, 38)  
-            self.Theme.ToggleOnBg = Color3.fromRGB(58, 22, 28)  
-            self.Theme.ToggleOffBg = Color3.fromRGB(26, 16, 18)  
-            self.Theme.DropdownBg = Color3.fromRGB(34, 18, 21)  
-            self.Theme.InputBg = Color3.fromRGB(34, 18, 21)  
-            self.Theme.LabelBg = Color3.fromRGB(34, 18, 21)  
-        elseif preset == "Green Matrix" then  
-            self.Theme.Background = Color3.fromRGB(14, 18, 14)  
-            self.Theme.Topbar = Color3.fromRGB(18, 28, 18)  
-            self.Theme.Sidebar = Color3.fromRGB(16, 24, 16)  
-            self.Theme.Element = Color3.fromRGB(20, 30, 20)  
-            self.Theme.TabActive = Color3.fromRGB(24, 40, 24)  
-            self.Theme.Accent = Color3.fromRGB(110, 255, 145)  
-            self.Theme.Text = Color3.fromRGB(235, 245, 235)  
-            self.Theme.TextDim = Color3.fromRGB(155, 180, 155)  
-            self.Theme.Icon = Color3.fromRGB(160, 200, 160)  
-            self.Theme.Stroke = Color3.fromRGB(34, 52, 34)  
-            self.Theme.ToggleOnBg = Color3.fromRGB(24, 42, 24)  
-            self.Theme.ToggleOffBg = Color3.fromRGB(18, 22, 18)  
-            self.Theme.DropdownBg = Color3.fromRGB(18, 28, 18)  
-            self.Theme.InputBg = Color3.fromRGB(18, 28, 18)  
-            self.Theme.LabelBg = Color3.fromRGB(18, 28, 18)  
-        end  
-        self:ApplyTheme(self.Theme)  
-    end  
-
-    SettingsTab:AddButton("Apply Preset", 10723344432, function()  
-        ApplyPreset(presetDropdown:GetValue())  
-        self:Notify("Theme", "Preset berhasil diterapkan.", 3)  
-    end)  
-
-    SettingsTab:AddLabel("Custom Theme", 10723344432, "Masukkan HEX color untuk background dan accent", false)  
-
-    local accentBox = SettingsTab:AddInput("Accent HEX", 10723344432, "#A06EFF", function() end)  
-    local backgroundBox = SettingsTab:AddInput("Background HEX", 10723344432, "#121216", function() end)  
-
-    self.SettingsRefs = {  
-        AccentBox = accentBox.Box,  
-        BackgroundBox = backgroundBox.Box  
-    }  
-
-    SettingsTab:AddButton("Apply Custom Theme", 10723344432, function()  
-        local accent = HexToColor(accentBox:GetValue(), self.Theme.Accent)  
-        local background = HexToColor(backgroundBox:GetValue(), self.Theme.Background)  
-
-        self.Theme.Accent = accent  
-        self.Theme.Background = background  
-        self.Theme.Topbar = Color3.fromRGB(math.floor(background.R * 255 * 0.95), math.floor(background.G * 255 * 0.95), math.floor(background.B * 255 * 0.95))  
-        self.Theme.Sidebar = Color3.fromRGB(math.floor(background.R * 255 * 0.90), math.floor(background.G * 255 * 0.90), math.floor(background.B * 255 * 0.90))  
-        self.Theme.Element = Color3.fromRGB(math.floor(background.R * 255 * 1.12), math.floor(background.G * 255 * 1.12), math.floor(background.B * 255 * 1.12))  
-        self.Theme.TabActive = Color3.fromRGB(math.floor(background.R * 255 * 1.25), math.floor(background.G * 255 * 1.25), math.floor(background.B * 255 * 1.25))  
-
-        self:ApplyTheme(self.Theme)  
-        self:Notify("Theme", "Custom theme berhasil diterapkan.", 3)  
-    end)  
-
-    SettingsTab:AddLabel("Multi Save", 10723344432, "Simpan dan load profile dengan nama custom", false)  
-    local profileNameBox = SettingsTab:AddInput("Nama Profile", 10723344432, "contoh: setup_1", function() end)  
-    local saveDropdown = SettingsTab:AddDropdown("Load Profile", 10723344432, { "Belum ada profile" }, "Belum ada profile", function() end)  
-    self.SaveDropdown = saveDropdown  
-
-    SettingsTab:AddButton("Save Profile", 10723344432, function()  
-        local name = profileNameBox:GetValue()  
-        if name == "" then name = "Profile" end  
-        self:SaveProfile(name)  
-    end)  
-
-    SettingsTab:AddButton("Load Selected", 10723344432, function()  
-        local selected = saveDropdown:GetValue()  
-        if not selected or selected == "" or selected == "Belum ada profile" then  
-            self:Notify("Load Profile", "Tidak ada profile yang dipilih.", 3)  
-            return  
-        end  
-        self:LoadProfile(selected)  
-    end)
-    
-    -- Tambahkan tombol ini tepat di bawah tombol "Load Selected"
-    SettingsTab:AddButton("Delete Selected", 10734934585, function()  
-        local selected = saveDropdown:GetValue()  
-        -- Validasi agar tidak menghapus teks default
-        if not selected or selected == "" or selected == "Belum ada profile" then  
-            self:Notify("Delete Profile", "Tidak ada profile yang dipilih.", 3)  
-            return  
-        end  
-        
-        -- Memanggil fungsi delete yang sudah kamu buat
-        self:DeleteProfile(selected)  
-    end)  
-  
-    SettingsTab:AddButton("Refresh List", 10723344432, function()  
-        self:RefreshSaveProfiles()  
-        self:Notify("Profile", "Daftar profile berhasil diperbarui.", 3)  
-    end)  
-
-    self:RefreshSaveProfiles()  
-    self:ApplyTheme(self.Theme)  
-    
-    end)
-
-    return self
-end
 
 function RexzLibrary:Notify(notifTitle, notifText, duration)
     local viewTime = duration or 3.5
