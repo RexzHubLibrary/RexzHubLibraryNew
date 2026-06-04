@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz
+--// OWNER   : Rexz.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -1379,10 +1379,12 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
 end
 
 -- ─────────────────────────────────────────
---  SIDEBAR CATEGORY
+--  SIDEBAR CATEGORY (FIXED COLLAPSE BUG)
 -- ─────────────────────────────────────────
 function RexzLibrary:AddSidebarCategory(categoryName)
     local collapsed = false
+    self.Categories = self.Categories or {}
+    
     local linkedTabs = {}
 
     local Cat = Instance.new("TextButton")
@@ -1446,20 +1448,16 @@ function RexzLibrary:AddSidebarCategory(categoryName)
             if tabBtn and tabBtn.Parent then
                 tabBtn.Visible = not collapsed
 
-                -- Kalau tab yang aktif sedang di-collapse, pindah ke tab lain
-                if collapsed and self.CurrentTab then
-                    local currentBtn = self.CurrentTab.BackgroundColor
-                    if currentBtn == tabBtn then
-                        -- Cari tab pertama yang visible
-                        for _, t in ipairs(self.Tabs) do
-                            if t.BackgroundColor and t.BackgroundColor.Visible then
-                                t.BackgroundColor.BackgroundColor3 = self.Theme.TabActive
-                                t.Label.TextColor3 = self.Theme.Accent
-                                if t.Icon then t.Icon.ImageColor3 = self.Theme.Accent end
-                                if t.ScrollBox then t.ScrollBox.Visible = true end
-                                self.CurrentTab = t
-                                break
-                            end
+                -- SINKRONISASI AKTIF: Jika tab yang sedang dibuka ikut ter-collapse, pindah ke tab lain yang visible
+                if collapsed and self.CurrentTab and self.CurrentTab.BackgroundColor == tabBtn then
+                    for _, t in ipairs(self.Tabs) do
+                        if t.BackgroundColor and t.BackgroundColor.Visible and t.BackgroundColor.Parent == self.Sidebar then
+                            t.BackgroundColor.BackgroundColor3 = self.Theme.TabActive
+                            t.Label.TextColor3 = self.Theme.Accent
+                            if t.Icon then t.Icon.ImageColor3 = self.Theme.Accent end
+                            if t.ScrollBox then t.ScrollBox.Visible = true end
+                            self.CurrentTab = t
+                            break
                         end
                     end
                 end
@@ -1477,21 +1475,22 @@ function RexzLibrary:AddSidebarCategory(categoryName)
             { TextColor3 = self.Theme.Muted }):Play()
     end)
 
-    -- Return object dengan method LinkTab
     local catObj = {}
-
     function catObj:LinkTab(tabButton)
         table.insert(linkedTabs, tabButton)
+        -- Jika kategori di-collapse sebelum tab dibuat, pastikan langsung tidak terlihat
+        tabButton.Visible = not collapsed
     end
 
     catObj.Instance = Cat
+    self.Categories[categoryName] = catObj
     return catObj
 end
 
 -- ─────────────────────────────────────────
---  CREATE TAB
+--  CREATE TAB (AUTOMATIC CATEGORY LINKING)
 -- ─────────────────────────────────────────
-function RexzLibrary:CreateTab(tabName, iconId, isPinned)
+function RexzLibrary:CreateTab(tabName, iconId, isPinned, targetCategory)
     local tab = setmetatable({}, TabClass)
     tab.Library  = self
     tab.Elements = {}
@@ -1510,7 +1509,6 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
         TabButton.Parent = self.MainFrame
     else
         TabButton.Size = UDim2.new(1, -4, 0, 32)
-        -- Hitung LayoutOrder berdasarkan children sidebar saat ini
         local childCount = 0
         for _, c in ipairs(self.Sidebar:GetChildren()) do
             if c:IsA("Frame") or c:IsA("TextButton") then
@@ -1519,6 +1517,12 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
         end
         TabButton.LayoutOrder = childCount + 1
         TabButton.Parent = self.Sidebar
+        
+        -- OMATISASI LINK KE KATEGORI:
+        -- Jika targetCategory diisi (string), langsung hubungkan ke kategori tersebut
+        if targetCategory and self.Categories and self.Categories[targetCategory] then
+            self.Categories[targetCategory]:LinkTab(TabButton)
+        end
     end
 
     Corner(TabButton, 6)
@@ -1571,6 +1575,9 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
     end)
 
     local function ActivateTab()
+        -- Hanya aktifkan jika tombol tab-nya sedang visible (tidak di-collapse)
+        if not TabButton.Visible then return end
+        
         for _, t in ipairs(self.Tabs) do
             if t.ScrollBox then t.ScrollBox.Visible = false end
             if t.BackgroundColor then
@@ -1610,6 +1617,7 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
 
     return tab
 end
+
 
 -- ─────────────────────────────────────────
 --  ELEMENTS
