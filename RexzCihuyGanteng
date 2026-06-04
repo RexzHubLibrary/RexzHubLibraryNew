@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz.
+--// OWNER   : Rexz
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -415,7 +415,7 @@ function RexzLibrary.new(dummyHubName, title)
     ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
     ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
     ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = ResolveIcon(14962299865)
+    ToggleIcon.Image = ResolveIcon(75184333398586)
     ToggleIcon.ImageColor3 = self.Theme.Accent
     ToggleIcon.Parent = ToggleBtn
 
