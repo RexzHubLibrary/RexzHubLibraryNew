@@ -6,7 +6,7 @@
 -- ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝ --
 
 --// LIBRARY UI REXZ
---// VERSION : V2.5
+--// VERSION : V2.5 (Custom Independent R-Toggle Build)
 --// STATUS  : Private
 --// OWNER   : Rexz.
 
@@ -178,41 +178,34 @@ function RexzLibrary:ApplyTheme(theme)
     end
 
     for _, ref in ipairs(self.ControlRegistry or {}) do
-        if ref.Root and ref.Root.Parent then
-            local bg = theme.Element
-            if ref.Kind == "Dropdown" then bg = theme.DropdownBg
-            elseif ref.Kind == "Input"    then bg = theme.InputBg
-            elseif ref.Kind == "Label"    then bg = theme.LabelBg
+        -- Proteksi: Jangan sentuh kustomisasi visual objek jika jenisnya adalah Toggle!
+        if ref.Kind ~= "Toggle" then
+            if ref.Root and ref.Root.Parent then
+                local bg = theme.Element
+                if ref.Kind == "Dropdown" then bg = theme.DropdownBg
+                elseif ref.Kind == "Input"    then bg = theme.InputBg
+                elseif ref.Kind == "Label"    then bg = theme.LabelBg
+                end
+                ref.Root.BackgroundColor3 = bg
+                local s = ref.Root:FindFirstChildOfClass("UIStroke")
+                if s then s.Color = theme.Stroke end
             end
-            ref.Root.BackgroundColor3 = bg
-            local s = ref.Root:FindFirstChildOfClass("UIStroke")
-            if s then s.Color = theme.Stroke end
-        end
-        if ref.Title then ref.Title.TextColor3 = theme.Text end
-        if ref.Icon  then ref.Icon.ImageColor3  = theme.Icon  end
+            if ref.Title then ref.Title.TextColor3 = theme.Text end
+            if ref.Icon  then ref.Icon.ImageColor3  = theme.Icon  end
 
-        if ref.Kind == "Button" then
-            if ref.Text then ref.Text.TextColor3 = theme.Text end
-        elseif ref.Kind == "Toggle" then
-            if ref.Text then ref.Text.TextColor3 = theme.Text end
-            if ref.Indicator then
-                ref.Indicator.BackgroundColor3 = ref.State and theme.ToggleOnBg or theme.ToggleOffBg
-                local s = ref.Indicator:FindFirstChildOfClass("UIStroke")
-                if s then s.Color = ref.State and theme.Accent or theme.Stroke end
+            if ref.Kind == "Button" then
+                if ref.Text then ref.Text.TextColor3 = theme.Text end
+            elseif ref.Kind == "Dropdown" then
+                if ref.ValueLabel then ref.ValueLabel.TextColor3 = theme.TextDim end
+                if ref.Arrow       then ref.Arrow.TextColor3      = theme.Muted   end
+            elseif ref.Kind == "Input" then
+                if ref.Box then
+                    ref.Box.TextColor3        = theme.Text
+                    ref.Box.PlaceholderColor3 = theme.Muted
+                end
+            elseif ref.Kind == "Label" then
+                if ref.SubText then ref.SubText.TextColor3 = theme.Muted end
             end
-            if ref.RLogo then
-                ref.RLogo.TextColor3 = ref.State and theme.Accent or theme.Muted
-            end
-        elseif ref.Kind == "Dropdown" then
-            if ref.ValueLabel then ref.ValueLabel.TextColor3 = theme.TextDim end
-            if ref.Arrow       then ref.Arrow.TextColor3      = theme.Muted   end
-        elseif ref.Kind == "Input" then
-            if ref.Box then
-                ref.Box.TextColor3        = theme.Text
-                ref.Box.PlaceholderColor3 = theme.Muted
-            end
-        elseif ref.Kind == "Label" then
-            if ref.SubText then ref.SubText.TextColor3 = theme.Muted end
         end
     end
 end
@@ -434,16 +427,13 @@ function RexzLibrary.new(dummyHubName, title)
     Corner(MainFrame, 10)
     Stroke(MainFrame, self.Theme.Stroke, 1.2)
 
-        -- ── Minimize / Hide (FIXED SIDEBAR BUG) ──
 local function MinimizeWindow()  
     if self.Hidden then return end  
     self.Minimized = not self.Minimized  
     
-    -- 1. Tentukan ukuran target MainFrame (Lebar disinkronkan ke 500 sesuai constructor baru)
     local targetSize = self.Minimized and UDim2.new(0, 500, 0, 38) or UDim2.new(0, 500, 0, 320)  
     TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = targetSize }):Play()  
     
-    -- 2. Atur visibilitas komponen utama berdasarkan status minimize
     local visibility = not self.Minimized
     
     self.Sidebar.Visible = visibility
@@ -451,18 +441,15 @@ local function MinimizeWindow()
     self.SearchFrame.Visible = visibility
     self.ContentHolder.Visible = visibility
     
-    -- Fix: Cari divider sidebar agar ikut hilang
     local div = MainFrame:FindFirstChild("SidebarDivider")
     if div then div.Visible = visibility end
     
-    -- 3. Sembunyikan/Munculkan Semua Elemen di dalam Sidebar (Termasuk Kategori)
     for _, child in ipairs(self.Sidebar:GetChildren()) do
         if child:IsA("TextButton") or child:IsA("Frame") then
             child.Visible = visibility
         end
     end
     
-    -- 4. Sembunyikan semua Tab Pinned (seperti Settings) agar tidak mengambang/bocor
     for _, child in ipairs(MainFrame:GetChildren()) do
         if child:IsA("TextButton") and child.Name:match("_TabBtn$") then
             child.Visible = visibility
@@ -482,7 +469,6 @@ local function ToggleHideWindow()
         MainFrame.Visible = true
         MainFrame.BackgroundTransparency = 1
         
-        -- Sinkronisasi ukuran awal constructor (500x320 / 500x38)
         local target = self.Minimized
             and UDim2.new(0, 500, 0, 38)
             or  UDim2.new(0, 500, 0, 320)
@@ -491,7 +477,6 @@ local function ToggleHideWindow()
             TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             { Size = target, BackgroundTransparency = 0 }):Play()
             
-        -- Kembalikan visibilitas jika tidak dalam kondisi minimized
         if not self.Minimized then
             self.Sidebar.Visible = true
             self.SidebarBg.Visible = true
@@ -534,15 +519,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     TopFix.BorderSizePixel = 0
     TopFix.Parent = TopBar
 
-    -- Accent line bawah topbar
-    local TopAccentLine = Instance.new("Frame")
-    TopAccentLine.Name = "AccentLine"
-    TopAccentLine.Size = UDim2.new(1, 0, 0, 1)
-    TopAccentLine.Position = UDim2.new(0, 0, 1, -1)
-    TopAccentLine.BackgroundColor3 = self.Theme.Stroke
-    TopAccentLine.BorderSizePixel = 0
-    TopAccentLine.Parent = TopBar
-
     local MainIcon = Instance.new("ImageLabel")
     MainIcon.Name = "WindowIcon"
     MainIcon.Size = UDim2.new(0, 18, 0, 18)
@@ -567,7 +543,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = TopBar
 
-    -- Close button
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Name = "ExitAction"
     CloseBtn.Size = UDim2.new(0, 28, 0, 28)
@@ -594,7 +569,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     end)
     CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-    -- Minimize button
     local MinBtn = Instance.new("TextButton")
     MinBtn.Name = "MinimizeAction"
     MinBtn.Size = UDim2.new(0, 28, 0, 28)
@@ -619,7 +593,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     end)
     MinBtn.MouseButton1Click:Connect(MinimizeWindow)
 
-    -- ── Sidebar Background ──
     local SidebarBg = Instance.new("Frame")
     SidebarBg.Name = "SidebarBg"
     SidebarBg.Size = UDim2.new(0, 138, 1, -38)
@@ -629,7 +602,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     SidebarBg.Parent = MainFrame
     self.SidebarBg = SidebarBg
 
-    -- Divider antara sidebar dan content
     local SidebarDivider = Instance.new("Frame")
     SidebarDivider.Name = "SidebarDivider"
     SidebarDivider.Size = UDim2.new(0, 1, 1, -38)
@@ -638,7 +610,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     SidebarDivider.BorderSizePixel = 0
     SidebarDivider.Parent = MainFrame
 
-    -- ── Sidebar ScrollingFrame ──
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Name = "Sidebar"
     Sidebar.Size = UDim2.new(0, 130, 1, -88)
@@ -659,7 +630,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
         Sidebar.CanvasSize = UDim2.new(0, 0, 0, SidebarLayout.AbsoluteContentSize.Y + 6)
     end)
 
-    -- ── Search Bar ──
     local SearchFrame = Instance.new("Frame")
     SearchFrame.Name = "SearchBarContainer"
     SearchFrame.Size = UDim2.new(1, -154, 0, 30)
@@ -696,7 +666,6 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     SearchInput.Parent = SearchFrame
     self.SearchInput = SearchInput
 
-    -- ── Content Holder ──
     local ContentHolder = Instance.new("Frame")
     ContentHolder.Name = "ContentHolder"
     ContentHolder.Size = UDim2.new(1, -154, 1, -124)
@@ -721,17 +690,13 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
         if self.SearchInput then self.SearchInput.Text = "" end
     end
 
-    -- ─────────────────────────────────────────
-    --  DEFERRED BUILT-IN TABS
-    -- ─────────────────────────────────────────
     task.defer(function()
 
-        -- ════════════════════════════════════════
+-- ════════════════════════════════════════
 --  CREDITS TAB
 -- ════════════════════════════════════════
 local CreditTab = self:CreateTab("Credits", 124560466474914)
 
--- ── Helper divider ──
 local function SectionDivider(parent, labelText)
     local Div = Instance.new("Frame")
     Div.Size = UDim2.new(1, -4, 0, 18)
@@ -758,9 +723,6 @@ local function SectionDivider(parent, labelText)
     DivLabel.Parent = Div
 end
 
--- ════════════════════════
--- OWNER CARD
--- ════════════════════════
 local OwnerCard = Instance.new("Frame")
 OwnerCard.Name = "OwnerCard"
 OwnerCard.Size = UDim2.new(1, -4, 0, 72)
@@ -770,7 +732,6 @@ OwnerCard.Parent = CreditTab.ScrollBox
 Corner(OwnerCard, 8)
 Stroke(OwnerCard, self.Theme.Stroke, 1)
 
--- Accent bar kiri
 local AccentBar = Instance.new("Frame")
 AccentBar.Size = UDim2.new(0, 2, 1, -16)
 AccentBar.Position = UDim2.new(0, 0, 0, 8)
@@ -779,7 +740,6 @@ AccentBar.BorderSizePixel = 0
 AccentBar.Parent = OwnerCard
 Corner(AccentBar, 2)
 
--- Avatar
 local AvatarFrame = Instance.new("Frame")
 AvatarFrame.Size = UDim2.new(0, 46, 0, 46)
 AvatarFrame.Position = UDim2.new(0, 14, 0.5, -23)
@@ -806,7 +766,6 @@ pcall(function()
     AvatarImg.Image = content
 end)
 
--- Nama
 local OwnerName = Instance.new("TextLabel")
 OwnerName.Size = UDim2.new(1, -160, 0, 20)
 OwnerName.Position = UDim2.new(0, 70, 0, 14)
@@ -840,7 +799,6 @@ OwnerSub.Font = Enum.Font.GothamMedium
 OwnerSub.TextXAlignment = Enum.TextXAlignment.Left
 OwnerSub.Parent = OwnerCard
 
--- Copy button
 local CopyBtn = Instance.new("TextButton")
 CopyBtn.Size = UDim2.new(0, 52, 0, 22)
 CopyBtn.Position = UDim2.new(1, -60, 0.5, -11)
@@ -873,9 +831,6 @@ CopyBtn.MouseButton1Click:Connect(function()
     self:Notify("Clipboard", "Username berhasil disalin.", 3)
 end)
 
--- ════════════════════════
--- INFO ROW  (3 kartu kecil)
--- ════════════════════════
 SectionDivider(CreditTab.ScrollBox, "Info")
 
 local InfoRow = Instance.new("Frame")
@@ -928,9 +883,6 @@ for _, info in ipairs(infoData) do
     Lbl.Parent = Card
 end
 
--- ════════════════════════
--- KONTRIBUTOR
--- ════════════════════════
 SectionDivider(CreditTab.ScrollBox, "Tim")
 
 local contribs = {
@@ -979,9 +931,6 @@ for _, c in ipairs(contribs) do
     CRole.Parent = Row
 end
 
--- ════════════════════════
--- CHANGELOG
--- ════════════════════════
 SectionDivider(CreditTab.ScrollBox, "Changelog")
 
 local changelog = {
@@ -1000,7 +949,6 @@ for i, log in ipairs(changelog) do
     Corner(LogRow, 7)
     Stroke(LogRow, self.Theme.Stroke, 1)
 
-    -- Badge versi
     local Badge = Instance.new("TextLabel")
     Badge.Size = UDim2.new(0, 36, 0, 18)
     Badge.Position = UDim2.new(0, 8, 0.5, -9)
@@ -1027,9 +975,6 @@ for i, log in ipairs(changelog) do
     LogDesc.Parent = LogRow
 end
 
--- ════════════════════════
--- SOSIAL
--- ════════════════════════
 SectionDivider(CreditTab.ScrollBox, "Sosial")
 
 local SocialRow = Instance.new("Frame")
@@ -1078,9 +1023,6 @@ for _, soc in ipairs(socials) do
     end)
 end
 
--- ════════════════════════
--- COPYRIGHT
--- ════════════════════════
 local Footer = Instance.new("TextLabel")
 Footer.Size = UDim2.new(1, -4, 0, 24)
 Footer.BackgroundTransparency = 1
@@ -1096,7 +1038,6 @@ Footer.Parent = CreditTab.ScrollBox
         -- ════════════════════════════════════════
         local SettingsTab = self:CreateTab("Settings", 80758916183665, true)
 
-        -- Preset tabel
         local Presets = {
             ["Default"] = {
                 Background=Color3.fromRGB(15,15,20), Topbar=Color3.fromRGB(20,20,27),
@@ -1157,7 +1098,6 @@ Footer.Parent = CreditTab.ScrollBox
             self:ApplyTheme(self.Theme)
         end
 
-        -- ── Section: Theme Preset ──
         SettingsTab:AddLabel("Theme Preset", 10723344432,
             "Terapkan tema instan ke seluruh UI", false)
 
@@ -1172,7 +1112,6 @@ Footer.Parent = CreditTab.ScrollBox
             self:Notify("Theme", "Preset \"" .. sel .. "\" diterapkan.", 3)
         end)
 
-        -- ── Section: Custom Theme ──
         SettingsTab:AddLabel("Custom Theme", 10723344432,
             "Atur warna accent dan background secara manual", false)
 
@@ -1222,7 +1161,6 @@ Footer.Parent = CreditTab.ScrollBox
             self:Notify("Theme", "Tema dikembalikan ke Default.", 3)
         end)
 
-        -- ── Section: Profile Manager ──
         SettingsTab:AddLabel("Profile Manager", 10723344432,
             "Simpan dan muat konfigurasi toggle serta tema", false)
 
@@ -1234,7 +1172,6 @@ Footer.Parent = CreditTab.ScrollBox
             { "Belum ada profile" }, "Belum ada profile", function() end)
         self.SaveDropdown = saveDropdown
 
-        -- Action row 3 tombol
         local ActionRow = Instance.new("Frame")
         ActionRow.Name = "ProfileActionRow"
         ActionRow.Size = UDim2.new(1, -4, 0, 32)
@@ -1322,7 +1259,6 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
     Corner(NotifBox, 8)
     Stroke(NotifBox, self.Theme.Accent, 1.2)
 
-    -- Accent bar kiri
     local NBar = Instance.new("Frame")
     NBar.Size = UDim2.new(0, 3, 1, -12)
     NBar.Position = UDim2.new(0, 0, 0, 6)
@@ -1379,7 +1315,7 @@ function RexzLibrary:Notify(notifTitle, notifText, duration)
 end
 
 -- ─────────────────────────────────────────
---  SIDEBAR CATEGORY (FIXED COLLAPSE BUG)
+--  SIDEBAR CATEGORY
 -- ─────────────────────────────────────────
 function RexzLibrary:AddSidebarCategory(categoryName)
     local collapsed = false
@@ -1404,7 +1340,6 @@ function RexzLibrary:AddSidebarCategory(categoryName)
     Cat.LayoutOrder = childCount + 1
     Cat.Parent = self.Sidebar
 
-    -- Garis kiri
     local Line = Instance.new("Frame")
     Line.Size = UDim2.new(0, 10, 0, 1)
     Line.Position = UDim2.new(0, 6, 0.5, 0)
@@ -1412,7 +1347,6 @@ function RexzLibrary:AddSidebarCategory(categoryName)
     Line.BorderSizePixel = 0
     Line.Parent = Cat
 
-    -- Label kategori
     local CatText = Instance.new("TextLabel")
     CatText.Size = UDim2.new(1, -44, 1, 0)
     CatText.Position = UDim2.new(0, 20, 0, 0)
@@ -1424,7 +1358,6 @@ function RexzLibrary:AddSidebarCategory(categoryName)
     CatText.TextXAlignment = Enum.TextXAlignment.Left
     CatText.Parent = Cat
 
-    -- Arrow indicator
     local Arrow = Instance.new("TextLabel")
     Arrow.Size = UDim2.new(0, 16, 1, 0)
     Arrow.Position = UDim2.new(1, -18, 0, 0)
@@ -1436,7 +1369,6 @@ function RexzLibrary:AddSidebarCategory(categoryName)
     Arrow.TextXAlignment = Enum.TextXAlignment.Center
     Arrow.Parent = Cat
 
-    -- Toggle collapse
     Cat.MouseButton1Click:Connect(function()
         collapsed = not collapsed
 
@@ -1448,7 +1380,6 @@ function RexzLibrary:AddSidebarCategory(categoryName)
             if tabBtn and tabBtn.Parent then
                 tabBtn.Visible = not collapsed
 
-                -- SINKRONISASI AKTIF: Jika tab yang sedang dibuka ikut ter-collapse, pindah ke tab lain yang visible
                 if collapsed and self.CurrentTab and self.CurrentTab.BackgroundColor == tabBtn then
                     for _, t in ipairs(self.Tabs) do
                         if t.BackgroundColor and t.BackgroundColor.Visible and t.BackgroundColor.Parent == self.Sidebar then
@@ -1465,7 +1396,6 @@ function RexzLibrary:AddSidebarCategory(categoryName)
         end
     end)
 
-    -- Hover effect
     Cat.MouseEnter:Connect(function()
         TweenService:Create(CatText, TweenInfo.new(0.1),
             { TextColor3 = self.Theme.Text }):Play()
@@ -1478,7 +1408,6 @@ function RexzLibrary:AddSidebarCategory(categoryName)
     local catObj = {}
     function catObj:LinkTab(tabButton)
         table.insert(linkedTabs, tabButton)
-        -- Jika kategori di-collapse sebelum tab dibuat, pastikan langsung tidak terlihat
         tabButton.Visible = not collapsed
     end
 
@@ -1488,7 +1417,7 @@ function RexzLibrary:AddSidebarCategory(categoryName)
 end
 
 -- ─────────────────────────────────────────
---  CREATE TAB (AUTOMATIC CATEGORY LINKING)
+--  CREATE TAB
 -- ─────────────────────────────────────────
 function RexzLibrary:CreateTab(tabName, iconId, isPinned, targetCategory)
     local tab = setmetatable({}, TabClass)
@@ -1518,8 +1447,6 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned, targetCategory)
         TabButton.LayoutOrder = childCount + 1
         TabButton.Parent = self.Sidebar
         
-        -- OMATISASI LINK KE KATEGORI:
-        -- Jika targetCategory diisi (string), langsung hubungkan ke kategori tersebut
         if targetCategory and self.Categories and self.Categories[targetCategory] then
             self.Categories[targetCategory]:LinkTab(TabButton)
         end
@@ -1575,7 +1502,6 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned, targetCategory)
     end)
 
     local function ActivateTab()
-        -- Hanya aktifkan jika tombol tab-nya sedang visible (tidak di-collapse)
         if not TabButton.Visible then return end
         
         for _, t in ipairs(self.Tabs) do
@@ -1719,7 +1645,6 @@ function TabClass:AddButton(text, iconId, callback)
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = El
 
-    -- Arrow kecil di kanan
     local Arrow = Instance.new("TextLabel")
     Arrow.Size = UDim2.new(0, 16, 1, 0)
     Arrow.Position = UDim2.new(1, -20, 0, 0)
@@ -1754,23 +1679,27 @@ function TabClass:AddButton(text, iconId, callback)
     table.insert(self.Elements, { Name = text, Instance = El })
 end
 
+-- ─────────────────────────────────────────
+--  ADD TOGGLE (PREMIUM INDEPENDENT BUILD)
+-- ─────────────────────────────────────────
 function TabClass:AddToggle(text, iconId, defaultState, callback)
     local lib    = self.Library
     local state  = defaultState or false
     local action = callback or function() end
 
+    -- Container element utama toggle (Fix static color: Mengabaikan theme saat runtime)
     local El = Instance.new("TextButton")
     El.Name = text .. "_Toggle"
-    El.Size = UDim2.new(1, -4, 0, 42) -- Ukuran element sedikit ditinggikan agar proporsional
-    El.BackgroundColor3 = lib.Theme.Element
+    El.Size = UDim2.new(1, -4, 0, 42) 
+    El.BackgroundColor3 = Color3.fromRGB(22, 22, 30) -- Static Premium Dark Element
     El.BorderSizePixel = 0
     El.Text = ""
     El.AutoButtonColor = false
     El.Parent = self.ScrollBox
     Corner(El, 6)
-    Stroke(El, lib.Theme.Stroke, 1)
+    Stroke(El, Color3.fromRGB(40, 40, 52), 1) -- Static Border Stroke
 
-    -- 1. Icon Bawaan Fitur (Jika ada parameter iconId)
+    -- Fitur icon pendukung bawaan (jika ditambahkan di parameter script)
     local Icon = nil
     if iconId then
         Icon = Instance.new("ImageLabel")
@@ -1779,66 +1708,64 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
         Icon.Position = UDim2.new(0, 10, 0.5, -7)
         Icon.BackgroundTransparency = 1
         Icon.Image = ResolveIcon(iconId)
-        Icon.ImageColor3 = lib.Theme.Icon
+        Icon.ImageColor3 = Color3.fromRGB(130, 130, 145)
         Icon.Parent = El
     end
 
-    -- 2. INDIKATOR TOGGLE (Posisi di TENGAH KIRI, Ukuran Lebih Besar untuk Logo Custom)
+    -- Indikator Frame Kustom untuk Logo R
     local Ind = Instance.new("Frame")
     Ind.Name = "IndicatorFrame"
-    -- Posisi X disesuaikan: jika ada iconId bergeser ke kanan sedikit (X: 32), jika tidak ada tetap di kiri (X: 12)
     Ind.Position = UDim2.new(0, iconId and 32 or 12, 0.5, -15) 
-    Ind.Size = UDim2.new(0, 30, 0, 30) -- Ukuran diperbesar menjadi 30x30 agar logo kustom jelas
-    Ind.BackgroundTransparency = 1 -- Background dibuat transparan total agar logo tidak terhalang kotak bunderan
+    Ind.Size = UDim2.new(0, 30, 0, 30) 
+    Ind.BackgroundTransparency = 1 
     Ind.BorderSizePixel = 0
     Ind.Parent = El
 
-    -- Logo R Custom (Warna MERAH MURNI, tidak terpengaruh oleh lib.Theme)
+    -- Logo R Custom (Murni Merah saat aktif, Abu-abu Redup saat mati)
     local RLogo = Instance.new("TextLabel")
     RLogo.Name = "RLogo"
     RLogo.Size = UDim2.new(1, 0, 1, 0)
     RLogo.BackgroundTransparency = 1
     RLogo.Text = "R"
-    RLogo.TextSize = 22 -- Ukuran font diperbesar mengikuti frame kustom
+    RLogo.TextSize = 22 
     RLogo.Font = Enum.Font.GothamBold
     RLogo.TextXAlignment = Enum.TextXAlignment.Center
     RLogo.TextYAlignment = Enum.TextYAlignment.Center
     RLogo.Parent = Ind
 
-    -- 3. JUDUL FITUR (Bergeser ke kanan setelah Indikator Toggle)
+    -- Text Label Label Fitur Utama
     local Label = Instance.new("TextLabel")
     Label.Name = "ToggleLabel"
-    -- Posisi X bergeser ke kanan memberikan ruang untuk indikator kustom
     Label.Position = UDim2.new(0, iconId and 72 or 52, 0, 0)
     Label.Size = UDim2.new(1, iconId and -82 or -62, 1, 0)
     Label.BackgroundTransparency = 1
     Label.Text = text
-    Label.TextColor3 = lib.Theme.Text
+    Label.TextColor3 = Color3.fromRGB(230, 230, 238) -- Static White Text
     Label.TextSize = 12
     Label.Font = Enum.Font.GothamMedium
     Label.TextXAlignment = Enum.TextXAlignment.Left
     Label.Parent = El
 
-    -- Logika Update Visual (Murni Merah saat ON, Abu-abu saat OFF — Mengabaikan Theme)
+    -- Fungsi Pembaruan Visual Khusus (Aman total dari gangguan Theme Preset/Custom Changer)
     local function UpdateVisual(animate)
-        local txtColor = state and Color3.fromRGB(255, 30, 30) or Color3.fromRGB(80, 80, 90)
-        local txtTrans = state and 0 or 0.45 -- Efek redup transparan saat mati agar kontras kelihatan jelas
+        local targetColor = state and Color3.fromRGB(255, 30, 30) or Color3.fromRGB(90, 90, 100)
+        local targetTrans = state and 0 or 0.45 
 
         if animate then
             TweenService:Create(RLogo, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-                TextColor3 = txtColor,
-                TextTransparency = txtTrans
+                TextColor3 = targetColor,
+                TextTransparency = targetTrans
             }):Play()
         else
-            RLogo.TextColor3 = txtColor
-            RLogo.TextTransparency = txtTrans
+            RLogo.TextColor3 = targetColor
+            RLogo.TextTransparency = targetTrans
         end
     end
 
-    -- Pasang visual pertama kali tanpa animasi
+    -- Initial state load
     UpdateVisual(false)
 
-    -- Listener saat toggle diklik
+    -- Interaksi klik trigger toggle
     El.MouseButton1Click:Connect(function()
         state = not state
         lib.ToggleStates[text] = state
@@ -1856,7 +1783,7 @@ function TabClass:AddToggle(text, iconId, defaultState, callback)
         end
     }
 
-    -- Daftarkan ke sistem registry library
+    -- Daftarkan ke control registry sebagai tipe Toggle (ApplyTheme akan melewatkan manipulasi objek ini)
     table.insert(lib.ControlRegistry, {
         Kind = "Toggle", Root = El, Title = Label, Icon = Icon,
         Text = Label, Indicator = Ind, RLogo = RLogo, State = state
@@ -1989,7 +1916,6 @@ function TabClass:AddSlider(text, iconId, min, max, default, callback)
     Fill.Parent = TrackBg
     Corner(Fill, 5)
 
-    -- Hit area lebih besar biar gampang diklik/disentuh
     local SliderBtn = Instance.new("TextButton")
     SliderBtn.Size = UDim2.new(1, 0, 1, 20)
     SliderBtn.Position = UDim2.new(0, 0, 0, -10)
@@ -2000,12 +1926,6 @@ function TabClass:AddSlider(text, iconId, min, max, default, callback)
     SliderBtn.Parent = TrackBg
 
     local dragging = false
-
-    local function IsValidInput(input)
-        return input.UserInputType == Enum.UserInputType.Touch
-            or input.UserInputType == Enum.UserInputType.MouseButton1
-            or input.UserInputType == Enum.UserInputType.MouseMovement
-    end
 
     local function UpdateFromX(x)
         local abs = TrackBg.AbsolutePosition.X
@@ -2041,7 +1961,6 @@ function TabClass:AddSlider(text, iconId, min, max, default, callback)
         end
     end)
 
-    -- Fallback saat jari/mouse keluar area SliderBtn
     UserInputService.InputChanged:Connect(function(input)
         if not dragging then return end
         if input.UserInputType == Enum.UserInputType.Touch
