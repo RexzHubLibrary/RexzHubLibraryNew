@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private Build
---// OWNER   : Rexz
+--// OWNER   : Rexz.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
