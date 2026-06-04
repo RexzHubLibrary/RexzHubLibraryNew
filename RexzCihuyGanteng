@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta
+--// Rexz Sedang Jatuh Cinta.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -983,26 +983,6 @@ task.defer(function()
     SettingsTab:AddButton("Refresh Daftar Profile", 10723344432, function()
         self:RefreshSaveProfiles()
         self:Notify("Profile", "Daftar berhasil diperbarui.", 3)
-    end)
-
-    -- ── WINDOW ──
-    SettingsTab:AddLabel("Window", 10723344432,
-        "Pengaturan tampilan jendela UI", false)
-
-    SettingsTab:AddButton("⊡  Minimize / Restore", 10723344432, function()
-        self.Minimized = not self.Minimized
-        local target = self.Minimized
-            and UDim2.new(0, 480, 0, 38)
-            or  UDim2.new(0, 480, 0, 300)
-        TweenService:Create(self.MainFrame,
-            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
-            { Size = target }):Play()
-    end)
-
-    SettingsTab:AddButton("✕  Tutup UI", 10723344432, function()
-        self:Notify("Bye!", "UI ditutup.", 2)
-        task.wait(0.5)
-        self.ScreenGui:Destroy()
     end)
 
     self:RefreshSaveProfiles()
