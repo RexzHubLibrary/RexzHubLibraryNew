@@ -6,7 +6,7 @@
 -- ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝ --
 
 --// LIBRARY UI REXZ
---// VERSION : V2.5
+--// VERSION : V2.5 (Custom Independent R-Toggle Build)
 --// STATUS  : Private
 --// OWNER   : Rexz.
 
@@ -392,7 +392,7 @@ function RexzLibrary.new(dummyHubName, title)
         -- ── Toggle Button ──
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "UiToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 66, 0, 66)
+    ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
     
     -- Mengunci titik tumpu tombol di tengah bagian kirinya
     ToggleBtn.AnchorPoint = Vector2.new(0, 0.5)
@@ -412,7 +412,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     local ToggleIcon = Instance.new("ImageLabel")
     ToggleIcon.Name = "ToggleIcon"
-    ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
+    ToggleIcon.Size = UDim2.new(0, 32, 0, 32)
     ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
     ToggleIcon.BackgroundTransparency = 1
     ToggleIcon.Image = ResolveIcon(75184333398586)
