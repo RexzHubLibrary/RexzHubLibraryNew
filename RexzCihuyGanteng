@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private Build
---// OWNER   : Rexz.
+--// OWNER   : Rexz
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -1330,7 +1330,16 @@ function RexzLibrary:AddSidebarCategory(categoryName)
     Cat.Size = UDim2.new(1, -4, 0, 20)
     Cat.BackgroundTransparency = 1
     Cat.BorderSizePixel = 0
-    Cat.LayoutOrder = #self.Tabs + 1
+
+    -- Hitung LayoutOrder berdasarkan jumlah children sidebar saat ini
+    local childCount = 0
+    for _, c in ipairs(self.Sidebar:GetChildren()) do
+        if c:IsA("Frame") or c:IsA("TextButton") then
+            childCount = childCount + 1
+        end
+    end
+    Cat.LayoutOrder = childCount + 1
+
     Cat.Parent = self.Sidebar
 
     local Line = Instance.new("Frame")
@@ -1376,7 +1385,14 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
         TabButton.Parent = self.MainFrame
     else
         TabButton.Size = UDim2.new(1, -4, 0, 32)
-        TabButton.LayoutOrder = #self.Tabs + 1
+        -- Hitung LayoutOrder berdasarkan children sidebar saat ini
+        local childCount = 0
+        for _, c in ipairs(self.Sidebar:GetChildren()) do
+            if c:IsA("Frame") or c:IsA("TextButton") then
+                childCount = childCount + 1
+            end
+        end
+        TabButton.LayoutOrder = childCount + 1
         TabButton.Parent = self.Sidebar
     end
 
