@@ -9,7 +9,6 @@
 --// VERSION : V2.5
 --// STATUS  : Private
 --// OWNER   : Rexz
---// Gokil
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -435,23 +434,35 @@ function RexzLibrary.new(dummyHubName, title)
     Corner(MainFrame, 10)
     Stroke(MainFrame, self.Theme.Stroke, 1.2)
 
-    -- ── Minimize / Hide ──
+        -- ── Minimize / Hide (FIXED SIDEBAR BUG) ──
 local function MinimizeWindow()  
     if self.Hidden then return end  
     self.Minimized = not self.Minimized  
     
-    -- 1. Tentukan ukuran target MainFrame (Tetap Menggunakan Lebar 480)
-    local targetSize = self.Minimized and UDim2.new(0, 480, 0, 38) or UDim2.new(0, 480, 0, 300)  
+    -- 1. Tentukan ukuran target MainFrame (Lebar disinkronkan ke 500 sesuai constructor baru)
+    local targetSize = self.Minimized and UDim2.new(0, 500, 0, 38) or UDim2.new(0, 500, 0, 320)  
     TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), { Size = targetSize }):Play()  
     
     -- 2. Atur visibilitas komponen utama berdasarkan status minimize
     local visibility = not self.Minimized
     
     self.Sidebar.Visible = visibility
+    self.SidebarBg.Visible = visibility
     self.SearchFrame.Visible = visibility
     self.ContentHolder.Visible = visibility
     
-    -- 3. Sembunyikan semua Tab Pinned (seperti Settings) agar tidak mengambang/bocor
+    -- Fix: Cari divider sidebar agar ikut hilang
+    local div = MainFrame:FindFirstChild("SidebarDivider")
+    if div then div.Visible = visibility end
+    
+    -- 3. Sembunyikan/Munculkan Semua Elemen di dalam Sidebar (Termasuk Kategori)
+    for _, child in ipairs(self.Sidebar:GetChildren()) do
+        if child:IsA("TextButton") or child:IsA("Frame") then
+            child.Visible = visibility
+        end
+    end
+    
+    -- 4. Sembunyikan semua Tab Pinned (seperti Settings) agar tidak mengambang/bocor
     for _, child in ipairs(MainFrame:GetChildren()) do
         if child:IsA("TextButton") and child.Name:match("_TabBtn$") then
             child.Visible = visibility
@@ -471,14 +482,35 @@ local function ToggleHideWindow()
         MainFrame.Visible = true
         MainFrame.BackgroundTransparency = 1
         
-        -- SINKRONISASI DISINI: Sesuaikan target ukuran dengan basis lebar 480
+        -- Sinkronisasi ukuran awal constructor (500x320 / 500x38)
         local target = self.Minimized
-            and UDim2.new(0, 480, 0, 38)
-            or  UDim2.new(0, 480, 0, 300)
+            and UDim2.new(0, 500, 0, 38)
+            or  UDim2.new(0, 500, 0, 320)
             
         TweenService:Create(MainFrame,
             TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
             { Size = target, BackgroundTransparency = 0 }):Play()
+            
+        -- Kembalikan visibilitas jika tidak dalam kondisi minimized
+        if not self.Minimized then
+            self.Sidebar.Visible = true
+            self.SidebarBg.Visible = true
+            self.SearchFrame.Visible = true
+            self.ContentHolder.Visible = true
+            local div = MainFrame:FindFirstChild("SidebarDivider")
+            if div then div.Visible = true end
+            
+            for _, child in ipairs(self.Sidebar:GetChildren()) do
+                if child:IsA("TextButton") or child:IsA("Frame") then
+                    child.Visible = true
+                end
+            end
+            for _, child in ipairs(MainFrame:GetChildren()) do
+                if child:IsA("TextButton") and child.Name:match("_TabBtn$") then
+                    child.Visible = true
+                end
+            end
+        end
     end
 end
 
@@ -903,8 +935,8 @@ SectionDivider(CreditTab.ScrollBox, "Tim")
 
 local contribs = {
     { name = "Rexz",   role = "Owner  &  Developer"  },
-    { name = "- - -",  role = "UI Designer"           },
-    { name = "- - -",  role = "Script Developer"      },
+    { name = "Rexz",  role = "UI Designer"           },
+    { name = "Rexz",  role = "Script Developer"      },
 }
 
 for _, c in ipairs(contribs) do
@@ -1052,7 +1084,7 @@ end
 local Footer = Instance.new("TextLabel")
 Footer.Size = UDim2.new(1, -4, 0, 24)
 Footer.BackgroundTransparency = 1
-Footer.Text = "Copyright (c) 2026 Rexz Hub  |  All rights reserved"
+Footer.Text = "(©) Copyright 2026 Rexz Hub  |  All rights reserved"
 Footer.TextColor3 = self.Theme.Muted
 Footer.TextSize = 9
 Footer.Font = Enum.Font.GothamMedium
