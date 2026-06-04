@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private Build
---// OWNER   : Rexz
+--// OWNER   : Rexz.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -608,7 +608,7 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     -- ── Sidebar ScrollingFrame ──
     local Sidebar = Instance.new("ScrollingFrame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 130, 1, -48)
+    Sidebar.Size = UDim2.new(0, 130, 1, -88)
     Sidebar.Position = UDim2.new(0, 4, 0, 44)
     Sidebar.BackgroundTransparency = 1
     Sidebar.BorderSizePixel = 0
@@ -666,7 +666,7 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     -- ── Content Holder ──
     local ContentHolder = Instance.new("Frame")
     ContentHolder.Name = "ContentHolder"
-    ContentHolder.Size = UDim2.new(1, -154, 1, -84)
+    ContentHolder.Size = UDim2.new(1, -154, 1, -124)
     ContentHolder.Position = UDim2.new(0, 148, 0, 82)
     ContentHolder.BackgroundTransparency = 1
     ContentHolder.Parent = MainFrame
@@ -698,86 +698,63 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
 -- ════════════════════════════════════════
 local CreditTab = self:CreateTab("Credits", 124560466474914)
 
--- ── Header Banner ──
-local Banner = Instance.new("Frame")
-Banner.Name = "Banner"
-Banner.Size = UDim2.new(1, -4, 0, 70)
-Banner.BackgroundColor3 = self.Theme.TabActive
-Banner.BorderSizePixel = 0
-Banner.ClipsDescendants = true
-Banner.Parent = CreditTab.ScrollBox
-Corner(Banner, 10)
-Stroke(Banner, self.Theme.Accent, 1.5)
+-- ── Helper divider ──
+local function SectionDivider(parent, labelText)
+    local Div = Instance.new("Frame")
+    Div.Size = UDim2.new(1, -4, 0, 18)
+    Div.BackgroundTransparency = 1
+    Div.Parent = parent
 
-local BannerGrad = Instance.new("UIGradient")
-BannerGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 40, 160)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 35)),
-})
-BannerGrad.Rotation = 135
-BannerGrad.Parent = Banner
+    local Line = Instance.new("Frame")
+    Line.Size = UDim2.new(1, 0, 0, 1)
+    Line.Position = UDim2.new(0, 0, 0.5, 0)
+    Line.BackgroundColor3 = self.Theme.Stroke
+    Line.BorderSizePixel = 0
+    Line.Parent = Div
 
-local BannerTitle = Instance.new("TextLabel")
-BannerTitle.Size = UDim2.new(1, -20, 0, 28)
-BannerTitle.Position = UDim2.new(0, 14, 0, 10)
-BannerTitle.BackgroundTransparency = 1
-BannerTitle.Text = "Rexz Hub"
-BannerTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-BannerTitle.TextSize = 18
-BannerTitle.Font = Enum.Font.GothamBold
-BannerTitle.TextXAlignment = Enum.TextXAlignment.Left
-BannerTitle.Parent = Banner
+    local DivLabel = Instance.new("TextLabel")
+    DivLabel.Size = UDim2.new(0, 0, 1, 0)
+    DivLabel.AutomaticSize = Enum.AutomaticSize.X
+    DivLabel.Position = UDim2.new(0, 0, 0, 0)
+    DivLabel.BackgroundColor3 = self.Theme.Sidebar
+    DivLabel.BorderSizePixel = 0
+    DivLabel.Text = "  " .. string.upper(labelText) .. "  "
+    DivLabel.TextColor3 = self.Theme.Muted
+    DivLabel.TextSize = 8
+    DivLabel.Font = Enum.Font.GothamBold
+    DivLabel.Parent = Div
+end
 
-local BannerSub = Instance.new("TextLabel")
-BannerSub.Size = UDim2.new(1, -20, 0, 16)
-BannerSub.Position = UDim2.new(0, 14, 0, 38)
-BannerSub.BackgroundTransparency = 1
-BannerSub.Text = "Private Build  |  V2.5  |  Made by Rexz"
-BannerSub.TextColor3 = Color3.fromRGB(200, 180, 255)
-BannerSub.TextSize = 10
-BannerSub.Font = Enum.Font.GothamMedium
-BannerSub.TextXAlignment = Enum.TextXAlignment.Left
-BannerSub.Parent = Banner
-
-local BannerBadge = Instance.new("TextLabel")
-BannerBadge.Size = UDim2.new(0, 60, 0, 20)
-BannerBadge.Position = UDim2.new(1, -70, 0.5, -10)
-BannerBadge.BackgroundColor3 = self.Theme.Accent
-BannerBadge.BackgroundTransparency = 0.3
-BannerBadge.Text = "PRIVATE"
-BannerBadge.TextColor3 = Color3.fromRGB(255, 255, 255)
-BannerBadge.TextSize = 9
-BannerBadge.Font = Enum.Font.GothamBold
-BannerBadge.TextXAlignment = Enum.TextXAlignment.Center
-BannerBadge.Parent = Banner
-Corner(BannerBadge, 20)
-
--- ── Owner Card ──
+-- ════════════════════════
+-- OWNER CARD
+-- ════════════════════════
 local OwnerCard = Instance.new("Frame")
 OwnerCard.Name = "OwnerCard"
-OwnerCard.Size = UDim2.new(1, -4, 0, 80)
-OwnerCard.BackgroundColor3 = self.Theme.TabActive
+OwnerCard.Size = UDim2.new(1, -4, 0, 72)
+OwnerCard.BackgroundColor3 = self.Theme.Element
 OwnerCard.BorderSizePixel = 0
 OwnerCard.Parent = CreditTab.ScrollBox
 Corner(OwnerCard, 8)
-Stroke(OwnerCard, self.Theme.Accent, 1.2)
+Stroke(OwnerCard, self.Theme.Stroke, 1)
 
+-- Accent bar kiri
 local AccentBar = Instance.new("Frame")
-AccentBar.Size = UDim2.new(0, 3, 1, -16)
-AccentBar.Position = UDim2.new(0, 8, 0, 8)
+AccentBar.Size = UDim2.new(0, 2, 1, -16)
+AccentBar.Position = UDim2.new(0, 0, 0, 8)
 AccentBar.BackgroundColor3 = self.Theme.Accent
 AccentBar.BorderSizePixel = 0
 AccentBar.Parent = OwnerCard
-Corner(AccentBar, 4)
+Corner(AccentBar, 2)
 
+-- Avatar
 local AvatarFrame = Instance.new("Frame")
-AvatarFrame.Size = UDim2.new(0, 50, 0, 50)
-AvatarFrame.Position = UDim2.new(0, 18, 0.5, -25)
-AvatarFrame.BackgroundColor3 = self.Theme.Element
+AvatarFrame.Size = UDim2.new(0, 46, 0, 46)
+AvatarFrame.Position = UDim2.new(0, 14, 0.5, -23)
+AvatarFrame.BackgroundColor3 = self.Theme.TabActive
 AvatarFrame.BorderSizePixel = 0
 AvatarFrame.Parent = OwnerCard
 Corner(AvatarFrame, 50)
-Stroke(AvatarFrame, self.Theme.Accent, 1.5)
+Stroke(AvatarFrame, self.Theme.Accent, 1.2)
 
 local AvatarImg = Instance.new("ImageLabel")
 AvatarImg.Size = UDim2.new(1, -4, 1, -4)
@@ -788,18 +765,18 @@ AvatarImg.Parent = AvatarFrame
 Corner(AvatarImg, 50)
 
 pcall(function()
-    local OWNER_USER_ID = 10652722254
     local content = Players:GetUserThumbnailAsync(
-        OWNER_USER_ID,
+        10652722254,
         Enum.ThumbnailType.HeadShot,
         Enum.ThumbnailSize.Size150x150
     )
     AvatarImg.Image = content
 end)
 
+-- Nama
 local OwnerName = Instance.new("TextLabel")
-OwnerName.Size = UDim2.new(1, -150, 0, 20)
-OwnerName.Position = UDim2.new(0, 78, 0, 14)
+OwnerName.Size = UDim2.new(1, -160, 0, 20)
+OwnerName.Position = UDim2.new(0, 70, 0, 14)
 OwnerName.BackgroundTransparency = 1
 OwnerName.Text = "Rexz"
 OwnerName.TextColor3 = self.Theme.Text
@@ -809,8 +786,8 @@ OwnerName.TextXAlignment = Enum.TextXAlignment.Left
 OwnerName.Parent = OwnerCard
 
 local OwnerRole = Instance.new("TextLabel")
-OwnerRole.Size = UDim2.new(1, -150, 0, 14)
-OwnerRole.Position = UDim2.new(0, 78, 0, 34)
+OwnerRole.Size = UDim2.new(1, -160, 0, 14)
+OwnerRole.Position = UDim2.new(0, 70, 0, 34)
 OwnerRole.BackgroundTransparency = 1
 OwnerRole.Text = "Owner  &  Developer"
 OwnerRole.TextColor3 = self.Theme.Accent
@@ -820,8 +797,8 @@ OwnerRole.TextXAlignment = Enum.TextXAlignment.Left
 OwnerRole.Parent = OwnerCard
 
 local OwnerSub = Instance.new("TextLabel")
-OwnerSub.Size = UDim2.new(1, -150, 0, 13)
-OwnerSub.Position = UDim2.new(0, 78, 0, 50)
+OwnerSub.Size = UDim2.new(1, -160, 0, 12)
+OwnerSub.Position = UDim2.new(0, 70, 0, 50)
 OwnerSub.BackgroundTransparency = 1
 OwnerSub.Text = "Rexz Hub  |  Private Build"
 OwnerSub.TextColor3 = self.Theme.Muted
@@ -830,26 +807,29 @@ OwnerSub.Font = Enum.Font.GothamMedium
 OwnerSub.TextXAlignment = Enum.TextXAlignment.Left
 OwnerSub.Parent = OwnerCard
 
+-- Copy button
 local CopyBtn = Instance.new("TextButton")
-CopyBtn.Size = UDim2.new(0, 56, 0, 24)
-CopyBtn.Position = UDim2.new(1, -64, 0.5, -12)
-CopyBtn.BackgroundColor3 = self.Theme.Accent
-CopyBtn.BackgroundTransparency = 0.2
+CopyBtn.Size = UDim2.new(0, 52, 0, 22)
+CopyBtn.Position = UDim2.new(1, -60, 0.5, -11)
+CopyBtn.BackgroundColor3 = self.Theme.TabActive
 CopyBtn.Text = "Copy"
-CopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CopyBtn.TextColor3 = self.Theme.Accent
 CopyBtn.TextSize = 10
 CopyBtn.Font = Enum.Font.GothamBold
 CopyBtn.BorderSizePixel = 0
 CopyBtn.Parent = OwnerCard
-Corner(CopyBtn, 6)
+Corner(CopyBtn, 5)
+Stroke(CopyBtn, self.Theme.Accent, 1)
 
 CopyBtn.MouseEnter:Connect(function()
     TweenService:Create(CopyBtn, TweenInfo.new(0.12),
-        { BackgroundTransparency = 0 }):Play()
+        { BackgroundColor3 = self.Theme.Accent,
+          TextColor3 = Color3.fromRGB(255,255,255) }):Play()
 end)
 CopyBtn.MouseLeave:Connect(function()
     TweenService:Create(CopyBtn, TweenInfo.new(0.12),
-        { BackgroundTransparency = 0.2 }):Play()
+        { BackgroundColor3 = self.Theme.TabActive,
+          TextColor3 = self.Theme.Accent }):Play()
 end)
 CopyBtn.MouseButton1Click:Connect(function()
     if setclipboard then setclipboard("Rexz") end
@@ -860,10 +840,14 @@ CopyBtn.MouseButton1Click:Connect(function()
     self:Notify("Clipboard", "Username berhasil disalin.", 3)
 end)
 
--- ── Info Row ──
+-- ════════════════════════
+-- INFO ROW  (3 kartu kecil)
+-- ════════════════════════
+SectionDivider(CreditTab.ScrollBox, "Info")
+
 local InfoRow = Instance.new("Frame")
 InfoRow.Name = "InfoRow"
-InfoRow.Size = UDim2.new(1, -4, 0, 52)
+InfoRow.Size = UDim2.new(1, -4, 0, 46)
 InfoRow.BackgroundTransparency = 1
 InfoRow.Parent = CreditTab.ScrollBox
 
@@ -885,20 +869,12 @@ for _, info in ipairs(infoData) do
     Card.BackgroundColor3 = self.Theme.Element
     Card.BorderSizePixel = 0
     Card.Parent = InfoRow
-    Corner(Card, 8)
+    Corner(Card, 7)
     Stroke(Card, self.Theme.Stroke, 1)
-
-    local CardAccent = Instance.new("Frame")
-    CardAccent.Size = UDim2.new(1, 0, 0, 2)
-    CardAccent.BackgroundColor3 = self.Theme.Accent
-    CardAccent.BackgroundTransparency = 0.5
-    CardAccent.BorderSizePixel = 0
-    CardAccent.Parent = Card
-    Corner(CardAccent, 8)
 
     local Val = Instance.new("TextLabel")
     Val.Size = UDim2.new(1, -10, 0, 20)
-    Val.Position = UDim2.new(0, 8, 0, 10)
+    Val.Position = UDim2.new(0, 8, 0, 6)
     Val.BackgroundTransparency = 1
     Val.Text = info.value
     Val.TextColor3 = self.Theme.Accent
@@ -919,47 +895,113 @@ for _, info in ipairs(infoData) do
     Lbl.Parent = Card
 end
 
--- ── Section Divider ──
-local function SectionDivider(parent, labelText)
-    local Div = Instance.new("Frame")
-    Div.Size = UDim2.new(1, -4, 0, 18)
-    Div.BackgroundTransparency = 1
-    Div.Parent = parent
+-- ════════════════════════
+-- KONTRIBUTOR
+-- ════════════════════════
+SectionDivider(CreditTab.ScrollBox, "Tim")
 
-    local Line = Instance.new("Frame")
-    Line.Size = UDim2.new(1, 0, 0, 1)
-    Line.Position = UDim2.new(0, 0, 0.5, 0)
-    Line.BackgroundColor3 = self.Theme.Stroke
-    Line.BorderSizePixel = 0
-    Line.Parent = Div
+local contribs = {
+    { name = "Rexz",   role = "Owner  &  Developer"  },
+    { name = "- - -",  role = "UI Designer"           },
+    { name = "- - -",  role = "Script Developer"      },
+}
 
-    local DivLabel = Instance.new("TextLabel")
-    DivLabel.Size = UDim2.new(0, 0, 1, 0)
-    DivLabel.AutomaticSize = Enum.AutomaticSize.X
-    DivLabel.Position = UDim2.new(0, 8, 0, 0)
-    DivLabel.BackgroundColor3 = self.Theme.Background
-    DivLabel.BorderSizePixel = 0
-    DivLabel.Text = "  " .. labelText .. "  "
-    DivLabel.TextColor3 = self.Theme.Muted
-    DivLabel.TextSize = 8
-    DivLabel.Font = Enum.Font.GothamBold
-    DivLabel.Parent = Div
+for _, c in ipairs(contribs) do
+    local Row = Instance.new("Frame")
+    Row.Size = UDim2.new(1, -4, 0, 34)
+    Row.BackgroundColor3 = self.Theme.Element
+    Row.BorderSizePixel = 0
+    Row.Parent = CreditTab.ScrollBox
+    Corner(Row, 7)
+    Stroke(Row, self.Theme.Stroke, 1)
+
+    local Dot = Instance.new("Frame")
+    Dot.Size = UDim2.new(0, 5, 0, 5)
+    Dot.Position = UDim2.new(0, 10, 0.5, -2)
+    Dot.BackgroundColor3 = self.Theme.Accent
+    Dot.BorderSizePixel = 0
+    Dot.Parent = Row
+    Corner(Dot, 50)
+
+    local CName = Instance.new("TextLabel")
+    CName.Size = UDim2.new(0, 100, 1, 0)
+    CName.Position = UDim2.new(0, 24, 0, 0)
+    CName.BackgroundTransparency = 1
+    CName.Text = c.name
+    CName.TextColor3 = self.Theme.Text
+    CName.TextSize = 11
+    CName.Font = Enum.Font.GothamBold
+    CName.TextXAlignment = Enum.TextXAlignment.Left
+    CName.Parent = Row
+
+    local CRole = Instance.new("TextLabel")
+    CRole.Size = UDim2.new(1, -130, 1, 0)
+    CRole.Position = UDim2.new(0, 128, 0, 0)
+    CRole.BackgroundTransparency = 1
+    CRole.Text = c.role
+    CRole.TextColor3 = self.Theme.Muted
+    CRole.TextSize = 10
+    CRole.Font = Enum.Font.GothamMedium
+    CRole.TextXAlignment = Enum.TextXAlignment.Left
+    CRole.Parent = Row
 end
 
-SectionDivider(CreditTab.ScrollBox, "INFORMASI")
+-- ════════════════════════
+-- CHANGELOG
+-- ════════════════════════
+SectionDivider(CreditTab.ScrollBox, "Changelog")
 
-CreditTab:AddLabel("Tentang Library", 10723344432,
-    "UI library modern & private untuk Roblox executor", false)
+local changelog = {
+    { ver = "V2.5", desc = "Credits tab redesign, copyright, social row" },
+    { ver = "V2.4", desc = "Profile manager, save & load system"         },
+    { ver = "V2.3", desc = "Theme preset & custom hex color input"        },
+    { ver = "V2.0", desc = "Sidebar kategori, search bar, minimize"       },
+}
 
-CreditTab:AddLabel("Ketentuan Penggunaan", 10723344432,
-    "Bersifat private  |  Dilarang redistribusi tanpa izin", false)
+for i, log in ipairs(changelog) do
+    local LogRow = Instance.new("Frame")
+    LogRow.Size = UDim2.new(1, -4, 0, 36)
+    LogRow.BackgroundColor3 = self.Theme.Element
+    LogRow.BorderSizePixel = 0
+    LogRow.Parent = CreditTab.ScrollBox
+    Corner(LogRow, 7)
+    Stroke(LogRow, self.Theme.Stroke, 1)
 
-SectionDivider(CreditTab.ScrollBox, "SOSIAL")
+    -- Badge versi
+    local Badge = Instance.new("TextLabel")
+    Badge.Size = UDim2.new(0, 36, 0, 18)
+    Badge.Position = UDim2.new(0, 8, 0.5, -9)
+    Badge.BackgroundColor3 = i == 1 and self.Theme.Accent or self.Theme.TabActive
+    Badge.Text = log.ver
+    Badge.TextColor3 = i == 1 and Color3.fromRGB(255,255,255) or self.Theme.Muted
+    Badge.TextSize = 8
+    Badge.Font = Enum.Font.GothamBold
+    Badge.TextXAlignment = Enum.TextXAlignment.Center
+    Badge.BorderSizePixel = 0
+    Badge.Parent = LogRow
+    Corner(Badge, 4)
 
--- ── Social Row ──
+    local LogDesc = Instance.new("TextLabel")
+    LogDesc.Size = UDim2.new(1, -60, 1, 0)
+    LogDesc.Position = UDim2.new(0, 52, 0, 0)
+    LogDesc.BackgroundTransparency = 1
+    LogDesc.Text = log.desc
+    LogDesc.TextColor3 = i == 1 and self.Theme.Text or self.Theme.Muted
+    LogDesc.TextSize = 10
+    LogDesc.Font = i == 1 and Enum.Font.GothamMedium or Enum.Font.Gotham
+    LogDesc.TextXAlignment = Enum.TextXAlignment.Left
+    LogDesc.TextWrapped = true
+    LogDesc.Parent = LogRow
+end
+
+-- ════════════════════════
+-- SOSIAL
+-- ════════════════════════
+SectionDivider(CreditTab.ScrollBox, "Sosial")
+
 local SocialRow = Instance.new("Frame")
 SocialRow.Name = "SocialRow"
-SocialRow.Size = UDim2.new(1, -4, 0, 34)
+SocialRow.Size = UDim2.new(1, -4, 0, 32)
 SocialRow.BackgroundTransparency = 1
 SocialRow.Parent = CreditTab.ScrollBox
 
@@ -970,18 +1012,17 @@ socLayout.Padding = UDim.new(0, 4)
 socLayout.Parent = SocialRow
 
 local socials = {
-    { label = "Discord",  color = Color3.fromRGB(88, 101, 242) },
-    { label = "YouTube",  color = Color3.fromRGB(200, 40, 40)  },
-    { label = "Roblox",   color = Color3.fromRGB(130, 80, 230) },
+    { label = "Discord", color = Color3.fromRGB(88, 101, 242) },
+    { label = "YouTube", color = Color3.fromRGB(200, 40,  40) },
+    { label = "Roblox",  color = Color3.fromRGB(130, 80, 230) },
 }
 
 for _, soc in ipairs(socials) do
     local SocBtn = Instance.new("TextButton")
     SocBtn.Size = UDim2.new(1/3, -3, 1, 0)
-    SocBtn.BackgroundColor3 = soc.color
-    SocBtn.BackgroundTransparency = 0.65
+    SocBtn.BackgroundColor3 = self.Theme.Element
     SocBtn.Text = soc.label
-    SocBtn.TextColor3 = Color3.fromRGB(230, 230, 240)
+    SocBtn.TextColor3 = soc.color
     SocBtn.TextSize = 10
     SocBtn.Font = Enum.Font.GothamBold
     SocBtn.BorderSizePixel = 0
@@ -991,48 +1032,31 @@ for _, soc in ipairs(socials) do
 
     SocBtn.MouseEnter:Connect(function()
         TweenService:Create(SocBtn, TweenInfo.new(0.12),
-            { BackgroundTransparency = 0.3 }):Play()
+            { BackgroundColor3 = soc.color,
+              TextColor3 = Color3.fromRGB(255,255,255) }):Play()
     end)
     SocBtn.MouseLeave:Connect(function()
         TweenService:Create(SocBtn, TweenInfo.new(0.12),
-            { BackgroundTransparency = 0.65 }):Play()
+            { BackgroundColor3 = self.Theme.Element,
+              TextColor3 = soc.color }):Play()
     end)
     SocBtn.MouseButton1Click:Connect(function()
         self:Notify("Sosial", soc.label .. " diklik!", 2.5)
     end)
 end
 
--- ── Copyright Footer ──
-local CopyrightCard = Instance.new("Frame")
-CopyrightCard.Name = "CopyrightCard"
-CopyrightCard.Size = UDim2.new(1, -4, 0, 38)
-CopyrightCard.BackgroundColor3 = self.Theme.Element
-CopyrightCard.BorderSizePixel = 0
-CopyrightCard.Parent = CreditTab.ScrollBox
-Corner(CopyrightCard, 8)
-Stroke(CopyrightCard, self.Theme.Stroke, 1)
-
-local CopyrightText = Instance.new("TextLabel")
-CopyrightText.Size = UDim2.new(1, -20, 0, 16)
-CopyrightText.Position = UDim2.new(0, 10, 0, 4)
-CopyrightText.BackgroundTransparency = 1
-CopyrightText.Text = "Copyright (c) 2026 Rexz Hub"
-CopyrightText.TextColor3 = self.Theme.Text
-CopyrightText.TextSize = 11
-CopyrightText.Font = Enum.Font.GothamBold
-CopyrightText.TextXAlignment = Enum.TextXAlignment.Center
-CopyrightText.Parent = CopyrightCard
-
-local CopyrightSub = Instance.new("TextLabel")
-CopyrightSub.Size = UDim2.new(1, -20, 0, 13)
-CopyrightSub.Position = UDim2.new(0, 10, 0, 20)
-CopyrightSub.BackgroundTransparency = 1
-CopyrightSub.Text = "All rights reserved. Unauthorized redistribution is prohibited."
-CopyrightSub.TextColor3 = self.Theme.Muted
-CopyrightSub.TextSize = 9
-CopyrightSub.Font = Enum.Font.GothamMedium
-CopyrightSub.TextXAlignment = Enum.TextXAlignment.Center
-CopyrightSub.Parent = CopyrightCard
+-- ════════════════════════
+-- COPYRIGHT
+-- ════════════════════════
+local Footer = Instance.new("TextLabel")
+Footer.Size = UDim2.new(1, -4, 0, 24)
+Footer.BackgroundTransparency = 1
+Footer.Text = "Copyright (c) 2026 Rexz Hub  |  All rights reserved"
+Footer.TextColor3 = self.Theme.Muted
+Footer.TextSize = 9
+Footer.Font = Enum.Font.GothamMedium
+Footer.TextXAlignment = Enum.TextXAlignment.Center
+Footer.Parent = CreditTab.ScrollBox
 
         -- ════════════════════════════════════════
         --  SETTINGS TAB  (pinned)
@@ -1325,13 +1349,17 @@ end
 --  SIDEBAR CATEGORY
 -- ─────────────────────────────────────────
 function RexzLibrary:AddSidebarCategory(categoryName)
-    local Cat = Instance.new("Frame")
+    local collapsed = false
+    local linkedTabs = {}
+
+    local Cat = Instance.new("TextButton")
     Cat.Name = "Category_" .. categoryName
     Cat.Size = UDim2.new(1, -4, 0, 20)
     Cat.BackgroundTransparency = 1
     Cat.BorderSizePixel = 0
+    Cat.Text = ""
+    Cat.AutoButtonColor = false
 
-    -- Hitung LayoutOrder berdasarkan jumlah children sidebar saat ini
     local childCount = 0
     for _, c in ipairs(self.Sidebar:GetChildren()) do
         if c:IsA("Frame") or c:IsA("TextButton") then
@@ -1339,19 +1367,20 @@ function RexzLibrary:AddSidebarCategory(categoryName)
         end
     end
     Cat.LayoutOrder = childCount + 1
-
     Cat.Parent = self.Sidebar
 
+    -- Garis kiri
     local Line = Instance.new("Frame")
-    Line.Size = UDim2.new(0, 16, 0, 1)
+    Line.Size = UDim2.new(0, 10, 0, 1)
     Line.Position = UDim2.new(0, 6, 0.5, 0)
     Line.BackgroundColor3 = self.Theme.Stroke
     Line.BorderSizePixel = 0
     Line.Parent = Cat
 
+    -- Label kategori
     local CatText = Instance.new("TextLabel")
-    CatText.Size = UDim2.new(1, -28, 1, 0)
-    CatText.Position = UDim2.new(0, 26, 0, 0)
+    CatText.Size = UDim2.new(1, -44, 1, 0)
+    CatText.Position = UDim2.new(0, 20, 0, 0)
     CatText.BackgroundTransparency = 1
     CatText.Text = string.upper(categoryName)
     CatText.TextColor3 = self.Theme.Muted
@@ -1360,7 +1389,70 @@ function RexzLibrary:AddSidebarCategory(categoryName)
     CatText.TextXAlignment = Enum.TextXAlignment.Left
     CatText.Parent = Cat
 
-    return Cat
+    -- Arrow indicator
+    local Arrow = Instance.new("TextLabel")
+    Arrow.Size = UDim2.new(0, 16, 1, 0)
+    Arrow.Position = UDim2.new(1, -18, 0, 0)
+    Arrow.BackgroundTransparency = 1
+    Arrow.Text = "v"
+    Arrow.TextColor3 = self.Theme.Muted
+    Arrow.TextSize = 8
+    Arrow.Font = Enum.Font.GothamBold
+    Arrow.TextXAlignment = Enum.TextXAlignment.Center
+    Arrow.Parent = Cat
+
+    -- Toggle collapse
+    Cat.MouseButton1Click:Connect(function()
+        collapsed = not collapsed
+
+        TweenService:Create(Arrow, TweenInfo.new(0.15),
+            { TextColor3 = collapsed and self.Theme.Accent or self.Theme.Muted }):Play()
+        Arrow.Text = collapsed and ">" or "v"
+
+        for _, tabBtn in ipairs(linkedTabs) do
+            if tabBtn and tabBtn.Parent then
+                tabBtn.Visible = not collapsed
+
+                -- Kalau tab yang aktif sedang di-collapse, pindah ke tab lain
+                if collapsed and self.CurrentTab then
+                    local currentBtn = self.CurrentTab.BackgroundColor
+                    if currentBtn == tabBtn then
+                        -- Cari tab pertama yang visible
+                        for _, t in ipairs(self.Tabs) do
+                            if t.BackgroundColor and t.BackgroundColor.Visible then
+                                t.BackgroundColor.BackgroundColor3 = self.Theme.TabActive
+                                t.Label.TextColor3 = self.Theme.Accent
+                                if t.Icon then t.Icon.ImageColor3 = self.Theme.Accent end
+                                if t.ScrollBox then t.ScrollBox.Visible = true end
+                                self.CurrentTab = t
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end)
+
+    -- Hover effect
+    Cat.MouseEnter:Connect(function()
+        TweenService:Create(CatText, TweenInfo.new(0.1),
+            { TextColor3 = self.Theme.Text }):Play()
+    end)
+    Cat.MouseLeave:Connect(function()
+        TweenService:Create(CatText, TweenInfo.new(0.1),
+            { TextColor3 = self.Theme.Muted }):Play()
+    end)
+
+    -- Return object dengan method LinkTab
+    local catObj = {}
+
+    function catObj:LinkTab(tabButton)
+        table.insert(linkedTabs, tabButton)
+    end
+
+    catObj.Instance = Cat
+    return catObj
 end
 
 -- ─────────────────────────────────────────
@@ -1477,6 +1569,7 @@ function RexzLibrary:CreateTab(tabName, iconId, isPinned)
     end)
 
     tab.BackgroundColor = TabButton
+    tab.Button = TabButton
     table.insert(self.Tabs, tab)
 
     if #self.Tabs == 1 and tabName ~= "Credits" then ActivateTab() end
