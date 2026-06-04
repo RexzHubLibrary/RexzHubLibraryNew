@@ -7,8 +7,9 @@
 
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
---// STATUS  : Private Build
---// OWNER   : Rexz.
+--// STATUS  : Private
+--// OWNER   : Rexz
+--// Gokil
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -1928,45 +1929,84 @@ function TabClass:AddSlider(text, iconId, min, max, default, callback)
     ValLabel.Parent = El
 
     local TrackBg = Instance.new("Frame")
-    TrackBg.Size = UDim2.new(1, -20, 0, 5)
-    TrackBg.Position = UDim2.new(0, 10, 0, 34)
+    TrackBg.Size = UDim2.new(1, -20, 0, 10)
+    TrackBg.Position = UDim2.new(0, 10, 0, 30)
     TrackBg.BackgroundColor3 = lib.Theme.ToggleOffBg
     TrackBg.BorderSizePixel = 0
     TrackBg.Parent = El
-    Corner(TrackBg, 4)
+    Corner(TrackBg, 5)
 
     local Fill = Instance.new("Frame")
-    Fill.Size = UDim2.new((value-min)/(max-min), 0, 1, 0)
+    Fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
     Fill.BackgroundColor3 = lib.Theme.Accent
     Fill.BorderSizePixel = 0
     Fill.Parent = TrackBg
-    Corner(Fill, 4)
+    Corner(Fill, 5)
+
+    -- Hit area lebih besar biar gampang diklik/disentuh
+    local SliderBtn = Instance.new("TextButton")
+    SliderBtn.Size = UDim2.new(1, 0, 1, 20)
+    SliderBtn.Position = UDim2.new(0, 0, 0, -10)
+    SliderBtn.BackgroundTransparency = 1
+    SliderBtn.Text = ""
+    SliderBtn.AutoButtonColor = false
+    SliderBtn.ZIndex = 5
+    SliderBtn.Parent = TrackBg
 
     local dragging = false
 
-    local function Update(input)
-        local pct = math.clamp(
-            (input.Position.X - TrackBg.AbsolutePosition.X) / TrackBg.AbsoluteSize.X,
-            0, 1)
-        value = math.floor(min + (max - min) * pct)
+    local function IsValidInput(input)
+        return input.UserInputType == Enum.UserInputType.Touch
+            or input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.MouseMovement
+    end
+
+    local function UpdateFromX(x)
+        local abs = TrackBg.AbsolutePosition.X
+        local sz  = TrackBg.AbsoluteSize.X
+        if sz <= 0 then return end
+        local pct = math.clamp((x - abs) / sz, 0, 1)
+        value = math.floor(min + (max - min) * pct + 0.5)
         Fill.Size = UDim2.new(pct, 0, 1, 0)
         ValLabel.Text = tostring(value)
         pcall(action, value)
     end
 
-    TrackBg.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+    SliderBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
-            Update(input)
+            UpdateFromX(input.Position.X)
         end
     end)
+
+    SliderBtn.InputChanged:Connect(function(input)
+        if not dragging then return end
+        if input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseMovement then
+            UpdateFromX(input.Position.X)
+        end
+    end)
+
+    SliderBtn.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+
+    -- Fallback saat jari/mouse keluar area SliderBtn
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            Update(input)
+        if not dragging then return end
+        if input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseMovement then
+            UpdateFromX(input.Position.X)
         end
     end)
+
     UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        if input.UserInputType == Enum.UserInputType.Touch
+        or input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
@@ -1977,7 +2017,7 @@ function TabClass:AddSlider(text, iconId, min, max, default, callback)
         GetValue = function() return value end,
         SetValue = function(v)
             value = math.clamp(v, min, max)
-            Fill.Size = UDim2.new((value-min)/(max-min), 0, 1, 0)
+            Fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
             ValLabel.Text = tostring(value)
         end
     }
