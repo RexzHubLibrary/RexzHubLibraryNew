@@ -6,7 +6,7 @@
 -- ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝ --
 
 --// LIBRARY UI REXZ
---// VERSION : V2.5 (Custom Independent R-Toggle Build)
+--// VERSION : V2.5 
 --// STATUS  : Private
 --// OWNER   : Rexz.
 
@@ -389,35 +389,42 @@ function RexzLibrary.new(dummyHubName, title)
     NotifLayout.Padding = UDim.new(0, 6)
     NotifLayout.Parent = NotifHolder
 
-        -- ── Toggle Button ──
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Name = "UiToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-    
-    -- Mengunci titik tumpu tombol di tengah bagian kirinya
-    ToggleBtn.AnchorPoint = Vector2.new(0, 0.5)
-    
-    -- Posisi: 0 dari kiri (ditambah offset 10 pixel agar tidak terlalu nempel), 0.5 (50%) dari atas layar
-    ToggleBtn.Position = UDim2.new(0, 10, 0.5, 0)
-    
-    ToggleBtn.BackgroundColor3 = self.Theme.Element
-    ToggleBtn.Text = ""
-    ToggleBtn.Active = true
-    ToggleBtn.Draggable = true
-    ToggleBtn.Parent = ScreenGui
-    self.ToggleBtn = ToggleBtn
-    Corner(ToggleBtn, 50)
-    Stroke(ToggleBtn, self.Theme.Accent, 1.5)
+-- ── Toggle Button ──
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "UiToggleBtn"
+ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
+
+-- Mengunci titik tumpu tombol di tengah bagian kirinya
+ToggleBtn.AnchorPoint = Vector2.new(0, 0.5)
+
+-- Posisi: 0 dari kiri (ditambah offset 10 pixel agar tidak terlalu nempel), 0.5 (50%) dari atas layar
+ToggleBtn.Position = UDim2.new(0, 10, 0.5, 0)
+
+ToggleBtn.BackgroundColor3 = self.Theme.Element
+ToggleBtn.Text = ""
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
+ToggleBtn.Parent = ScreenGui
+self.ToggleBtn = ToggleBtn
+Corner(ToggleBtn, 50)
+Stroke(ToggleBtn, self.Theme.Accent, 1.5)
 
 
-    local ToggleIcon = Instance.new("ImageLabel")
-    ToggleIcon.Name = "ToggleIcon"
-    ToggleIcon.Size = UDim2.new(0, 32, 0, 32)
-    ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
-    ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = ResolveIcon(75184333398586)
-    ToggleIcon.ImageColor3 = self.Theme.Accent
-    ToggleIcon.Parent = ToggleBtn
+-- ── Toggle Icon (Sudah Disinkronkan ke Tengah) ──
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Name = "ToggleIcon"
+ToggleIcon.Size = UDim2.new(0, 28, 0, 28) -- Ukuran 28x28 agar proporsional di dalam tombol 45x45
+
+-- Mengunci titik tumpu ikon tepat di tengah-tengah dirinya sendiri
+ToggleIcon.AnchorPoint = Vector2.new(0.5, 0.5)
+
+-- Posisi murni 50% di tengah-tengah ToggleBtn tanpa perlu offset minus (-) lagi
+ToggleIcon.Position = UDim2.new(0.5, 0, 0.5, 0)
+
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = ResolveIcon(75184333398586)
+ToggleIcon.ImageColor3 = self.Theme.Accent
+ToggleIcon.Parent = ToggleBtn
 
     -- ── Main Frame ──
     local MainFrame = Instance.new("Frame")
