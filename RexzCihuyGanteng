@@ -1050,20 +1050,6 @@ function RexzLibrary.new(dummyHubName, title)
             self:Notify("Profile", "Daftar berhasil diperbarui.", 3)
         end)
 
-        -- ── Section: Window ──
-        SettingsTab:AddLabel("Window", 10723344432,
-            "Kontrol tampilan jendela UI", false)
-
-        SettingsTab:AddButton("Minimize / Restore", 10723344432, function()
-            MinimizeWindow()
-        end)
-
-        SettingsTab:AddButton("Tutup UI", 10723344432, function()
-            self:Notify("Selamat tinggal", "UI ditutup.", 2)
-            task.wait(0.6)
-            ScreenGui:Destroy()
-        end)
-
         self:RefreshSaveProfiles()
         self:ApplyTheme(self.Theme)
     end)
