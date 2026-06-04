@@ -9,7 +9,7 @@
 --// UPDATED : Gok Gok
 --// STATUS  : Enak
 --// OWNER   : Rexz
---// Rexz Sedang Jatuh Cinta.
+--// Rexz Sedang Jatuh Cinta
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -606,200 +606,307 @@ function RexzLibrary.new(dummyHubName, title)
 
 task.defer(function()
 
-    -- ══════════════════════════════════════
-    --           CREDITS TAB
-    -- ══════════════════════════════════════
+    -- ══════════════════════════════════════════════════
+    --                   CREDITS TAB
+    -- ══════════════════════════════════════════════════
     local CreditTab = self:CreateTab("Credits", 124560466474914)
 
-    CreditTab:AddLabel("Rexz Hub", 98755624629571,
-        "UI Library untuk Roblox Executor · V2.5 Build", false)
+    -- Hero card owner
+    local OwnerCard = Instance.new("Frame")
+    OwnerCard.Name = "OwnerCard"
+    OwnerCard.Size = UDim2.new(1, -4, 0, 80)
+    OwnerCard.BackgroundColor3 = self.Theme.TabActive
+    OwnerCard.BorderSizePixel = 0
+    OwnerCard.Parent = CreditTab.ScrollBox
 
-    CreditTab:AddLabel("Developer", 10734934585,
-        "Dibuat & dikembangkan oleh Rexz", false)
+    local OCardCorner = Instance.new("UICorner")
+    OCardCorner.CornerRadius = UDim.new(0, 8)
+    OCardCorner.Parent = OwnerCard
 
-    CreditTab:AddButton("Owner · Rexz", 10734934585, function()
-        if setclipboard then
-            setclipboard("Rexz")
-            self:Notify("Disalin!", "Nama owner berhasil disalin ke clipboard.", 3)
-        end
+    local OCardStroke = Instance.new("UIStroke")
+    OCardStroke.Color = self.Theme.Accent
+    OCardStroke.Thickness = 1.2
+    OCardStroke.Parent = OwnerCard
+
+    -- Gradient accent bar kiri
+    local AccentBar = Instance.new("Frame")
+    AccentBar.Size = UDim2.new(0, 3, 1, -16)
+    AccentBar.Position = UDim2.new(0, 8, 0, 8)
+    AccentBar.BackgroundColor3 = self.Theme.Accent
+    AccentBar.BorderSizePixel = 0
+    AccentBar.Parent = OwnerCard
+    Instance.new("UICorner", AccentBar).CornerRadius = UDim.new(1, 0)
+
+    -- Avatar placeholder (bulat)
+    local AvatarFrame = Instance.new("Frame")
+    AvatarFrame.Size = UDim2.new(0, 52, 0, 52)
+    AvatarFrame.Position = UDim2.new(0, 18, 0.5, -26)
+    AvatarFrame.BackgroundColor3 = self.Theme.Element
+    AvatarFrame.BorderSizePixel = 0
+    AvatarFrame.Parent = OwnerCard
+    Instance.new("UICorner", AvatarFrame).CornerRadius = UDim.new(1, 0)
+
+    local AvatarStroke = Instance.new("UIStroke")
+    AvatarStroke.Color = self.Theme.Accent
+    AvatarStroke.Thickness = 1.5
+    AvatarStroke.Parent = AvatarFrame
+
+    local AvatarImg = Instance.new("ImageLabel")
+    AvatarImg.Size = UDim2.new(1, -4, 1, -4)
+    AvatarImg.Position = UDim2.new(0, 2, 0, 2)
+    AvatarImg.BackgroundTransparency = 1
+    AvatarImg.Image = "https://www.roblox.com/headshot-thumbnail/image?userId=1&width=150&height=150&format=png"
+    AvatarImg.ScaleType = Enum.ScaleType.Fit
+    AvatarImg.Parent = AvatarFrame
+    Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0)
+
+    -- Ambil avatar real via pcall
+    pcall(function()
+        local Players = game:GetService("Players")
+        -- Ganti userId ini dengan userId Roblox owner kamu
+        local OWNER_USER_ID = 10652722254 -- << GANTI INI
+        local thumbType = Enum.ThumbnailType.HeadShot
+        local thumbSize = Enum.ThumbnailSize.Size150x150
+        local content, isReady = Players:GetUserThumbnailAsync(OWNER_USER_ID, thumbType, thumbSize)
+        AvatarImg.Image = content
     end)
 
-    CreditTab:AddLabel("Informasi Build", 10723344432,
-        "Versi stabil yang sedang berjalan saat ini", false)
+    local OwnerName = Instance.new("TextLabel")
+    OwnerName.Size = UDim2.new(1, -90, 0, 22)
+    OwnerName.Position = UDim2.new(0, 80, 0, 14)
+    OwnerName.BackgroundTransparency = 1
+    OwnerName.Text = "Rexz"
+    OwnerName.TextColor3 = self.Theme.Text
+    OwnerName.TextSize = 15
+    OwnerName.Font = Enum.Font.GothamBold
+    OwnerName.TextXAlignment = Enum.TextXAlignment.Left
+    OwnerName.Parent = OwnerCard
 
-    CreditTab:AddButton("Versi  ·  V2.5 Private Build", 10723344432, function()
-        self:Notify("Build Info", "Rexz Engine V2.5 · Status: Private · Stable", 4)
+    local OwnerRole = Instance.new("TextLabel")
+    OwnerRole.Size = UDim2.new(1, -90, 0, 16)
+    OwnerRole.Position = UDim2.new(0, 80, 0, 34)
+    OwnerRole.BackgroundTransparency = 1
+    OwnerRole.Text = "Owner & Developer"
+    OwnerRole.TextColor3 = self.Theme.Accent
+    OwnerRole.TextSize = 11
+    OwnerRole.Font = Enum.Font.GothamMedium
+    OwnerRole.TextXAlignment = Enum.TextXAlignment.Left
+    OwnerRole.Parent = OwnerCard
+
+    local OwnerSub = Instance.new("TextLabel")
+    OwnerSub.Size = UDim2.new(1, -90, 0, 14)
+    OwnerSub.Position = UDim2.new(0, 80, 0, 52)
+    OwnerSub.BackgroundTransparency = 1
+    OwnerSub.Text = "Rexz Hub · Private Build"
+    OwnerSub.TextColor3 = self.Theme.Muted
+    OwnerSub.TextSize = 10
+    OwnerSub.Font = Enum.Font.GothamMedium
+    OwnerSub.TextXAlignment = Enum.TextXAlignment.Left
+    OwnerSub.Parent = OwnerCard
+
+    -- Tombol copy username
+    local CopyBtn = Instance.new("TextButton")
+    CopyBtn.Size = UDim2.new(0, 60, 0, 24)
+    CopyBtn.Position = UDim2.new(1, -68, 0.5, -12)
+    CopyBtn.BackgroundColor3 = self.Theme.Accent
+    CopyBtn.Text = "Copy"
+    CopyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    CopyBtn.TextSize = 10
+    CopyBtn.Font = Enum.Font.GothamBold
+    CopyBtn.BorderSizePixel = 0
+    CopyBtn.Parent = OwnerCard
+    Instance.new("UICorner", CopyBtn).CornerRadius = UDim.new(0, 6)
+
+    CopyBtn.MouseButton1Click:Connect(function()
+        if setclipboard then setclipboard("Rexz") end
+        CopyBtn.Text = "✓ Done"
+        task.wait(1.5)
+        CopyBtn.Text = "Copy"
+        self:Notify("Disalin!", "Username Rexz berhasil disalin.", 3)
     end)
 
-    CreditTab:AddButton("Status  ·  Active & Maintained", 10723344432, function()
-        self:Notify("Status", "Library aktif dan sedang dalam pengembangan.", 3)
-    end)
+    -- Info cards row
+    local function MakeInfoCard(labelText, valueText, xOffset, width)
+        local Card = Instance.new("Frame")
+        Card.Size = UDim2.new(0, width, 0, 50)
+        Card.Position = UDim2.new(0, xOffset, 0, 0)
+        Card.BackgroundColor3 = self.Theme.Element
+        Card.BorderSizePixel = 0
+        Instance.new("UICorner", Card).CornerRadius = UDim.new(0, 8)
+        local Stroke = Instance.new("UIStroke")
+        Stroke.Color = self.Theme.Stroke
+        Stroke.Thickness = 1
+        Stroke.Parent = Card
 
-    CreditTab:AddLabel("Catatan", 10723344432,
-        "Library ini bersifat private. Dilarang redistribusi.", false)
+        local Val = Instance.new("TextLabel")
+        Val.Size = UDim2.new(1, -12, 0, 22)
+        Val.Position = UDim2.new(0, 10, 0, 6)
+        Val.BackgroundTransparency = 1
+        Val.Text = valueText
+        Val.TextColor3 = self.Theme.Accent
+        Val.TextSize = 13
+        Val.Font = Enum.Font.GothamBold
+        Val.TextXAlignment = Enum.TextXAlignment.Left
+        Val.Parent = Card
 
-    -- ══════════════════════════════════════
-    --           SETTINGS TAB (PINNED)
-    -- ══════════════════════════════════════
-    local SettingsTab = self:CreateTab("Settings", 80758916183665, true)
+        local Lbl = Instance.new("TextLabel")
+        Lbl.Size = UDim2.new(1, -12, 0, 16)
+        Lbl.Position = UDim2.new(0, 10, 0, 26)
+        Lbl.BackgroundTransparency = 1
+        Lbl.Text = labelText
+        Lbl.TextColor3 = self.Theme.Muted
+        Lbl.TextSize = 9
+        Lbl.Font = Enum.Font.GothamMedium
+        Lbl.TextXAlignment = Enum.TextXAlignment.Left
+        Lbl.Parent = Card
 
-    -- ── Kategori: Theme Preset ──
-    SettingsTab:AddLabel("Theme Preset", 10723344432,
-        "Pilih tema cepat untuk seluruh UI", false)
-
-    local presetDropdown = SettingsTab:AddDropdown("Preset Theme", 10723344432, {
-        "Default",
-        "Purple Dark",
-        "Blue Ice",
-        "Red Neon",
-        "Green Matrix"
-    }, "Default", function(selected) end)
-
-    local function ApplyPreset(preset)
-        preset = tostring(preset or "Default")
-        local presets = {
-            ["Default"] = {
-                Background  = Color3.fromRGB(18,18,22),
-                Topbar      = Color3.fromRGB(25,25,32),
-                Sidebar     = Color3.fromRGB(22,22,28),
-                Element     = Color3.fromRGB(26,26,33),
-                TabActive   = Color3.fromRGB(32,30,42),
-                Accent      = Color3.fromRGB(160,110,255),
-                Text        = Color3.fromRGB(235,235,240),
-                TextDim     = Color3.fromRGB(160,160,170),
-                Icon        = Color3.fromRGB(150,150,160),
-                Stroke      = Color3.fromRGB(40,40,50),
-                ToggleOnBg  = Color3.fromRGB(35,30,50),
-                ToggleOffBg = Color3.fromRGB(20,20,25),
-                DropdownBg  = Color3.fromRGB(24,24,30),
-                InputBg     = Color3.fromRGB(24,24,30),
-                LabelBg     = Color3.fromRGB(24,24,30),
-                Muted       = Color3.fromRGB(110,110,125),
-            },
-            ["Purple Dark"] = {
-                Background  = Color3.fromRGB(15,14,22),
-                Topbar      = Color3.fromRGB(23,20,36),
-                Sidebar     = Color3.fromRGB(21,18,32),
-                Element     = Color3.fromRGB(28,23,42),
-                TabActive   = Color3.fromRGB(40,30,64),
-                Accent      = Color3.fromRGB(186,123,255),
-                Text        = Color3.fromRGB(245,240,250),
-                TextDim     = Color3.fromRGB(170,160,180),
-                Icon        = Color3.fromRGB(175,160,195),
-                Stroke      = Color3.fromRGB(52,44,74),
-                ToggleOnBg  = Color3.fromRGB(40,26,58),
-                ToggleOffBg = Color3.fromRGB(19,17,27),
-                DropdownBg  = Color3.fromRGB(26,21,38),
-                InputBg     = Color3.fromRGB(26,21,38),
-                LabelBg     = Color3.fromRGB(26,21,38),
-                Muted       = Color3.fromRGB(120,105,140),
-            },
-            ["Blue Ice"] = {
-                Background  = Color3.fromRGB(14,18,24),
-                Topbar      = Color3.fromRGB(20,27,37),
-                Sidebar     = Color3.fromRGB(18,24,33),
-                Element     = Color3.fromRGB(22,30,40),
-                TabActive   = Color3.fromRGB(26,40,56),
-                Accent      = Color3.fromRGB(96,176,255),
-                Text        = Color3.fromRGB(235,242,250),
-                TextDim     = Color3.fromRGB(155,170,190),
-                Icon        = Color3.fromRGB(150,175,205),
-                Stroke      = Color3.fromRGB(36,48,64),
-                ToggleOnBg  = Color3.fromRGB(25,40,56),
-                ToggleOffBg = Color3.fromRGB(17,21,28),
-                DropdownBg  = Color3.fromRGB(18,26,36),
-                InputBg     = Color3.fromRGB(18,26,36),
-                LabelBg     = Color3.fromRGB(18,26,36),
-                Muted       = Color3.fromRGB(105,130,160),
-            },
-            ["Red Neon"] = {
-                Background  = Color3.fromRGB(20,14,16),
-                Topbar      = Color3.fromRGB(34,18,20),
-                Sidebar     = Color3.fromRGB(29,17,19),
-                Element     = Color3.fromRGB(38,20,24),
-                TabActive   = Color3.fromRGB(58,22,30),
-                Accent      = Color3.fromRGB(255,96,118),
-                Text        = Color3.fromRGB(250,240,242),
-                TextDim     = Color3.fromRGB(190,155,162),
-                Icon        = Color3.fromRGB(220,170,178),
-                Stroke      = Color3.fromRGB(76,31,38),
-                ToggleOnBg  = Color3.fromRGB(58,22,28),
-                ToggleOffBg = Color3.fromRGB(26,16,18),
-                DropdownBg  = Color3.fromRGB(34,18,21),
-                InputBg     = Color3.fromRGB(34,18,21),
-                LabelBg     = Color3.fromRGB(34,18,21),
-                Muted       = Color3.fromRGB(160,100,110),
-            },
-            ["Green Matrix"] = {
-                Background  = Color3.fromRGB(14,18,14),
-                Topbar      = Color3.fromRGB(18,28,18),
-                Sidebar     = Color3.fromRGB(16,24,16),
-                Element     = Color3.fromRGB(20,30,20),
-                TabActive   = Color3.fromRGB(24,40,24),
-                Accent      = Color3.fromRGB(110,255,145),
-                Text        = Color3.fromRGB(235,245,235),
-                TextDim     = Color3.fromRGB(155,180,155),
-                Icon        = Color3.fromRGB(160,200,160),
-                Stroke      = Color3.fromRGB(34,52,34),
-                ToggleOnBg  = Color3.fromRGB(24,42,24),
-                ToggleOffBg = Color3.fromRGB(18,22,18),
-                DropdownBg  = Color3.fromRGB(18,28,18),
-                InputBg     = Color3.fromRGB(18,28,18),
-                LabelBg     = Color3.fromRGB(18,28,18),
-                Muted       = Color3.fromRGB(100,150,110),
-            },
-        }
-        local p = presets[preset]
-        if p then
-            for k, v in pairs(p) do self.Theme[k] = v end
-            self:ApplyTheme(self.Theme)
-        end
+        return Card
     end
 
-    SettingsTab:AddButton("Apply Preset", 10723344432, function()
-        ApplyPreset(presetDropdown:GetValue())
-        self:Notify("Theme Diterapkan", "Preset \"" .. presetDropdown:GetValue() .. "\" aktif.", 3)
+    local InfoRow = Instance.new("Frame")
+    InfoRow.Name = "InfoRow"
+    InfoRow.Size = UDim2.new(1, -4, 0, 50)
+    InfoRow.BackgroundTransparency = 1
+    InfoRow.Parent = CreditTab.ScrollBox
+
+    local totalWidth = CreditTab.ScrollBox.AbsoluteSize.X - 4
+    local cardW = math.floor((totalWidth - 8) / 3)
+
+    MakeInfoCard("Versi", "V2.5", 0, cardW).Parent = InfoRow
+    MakeInfoCard("Status", "Private", cardW + 4, cardW).Parent = InfoRow
+    MakeInfoCard("Build", "Stable", (cardW + 4) * 2, cardW).Parent = InfoRow
+
+    CreditTab:AddLabel("Tentang Library", 10723344432,
+        "RexzLib adalah UI library modern untuk Roblox executor", false)
+
+    CreditTab:AddLabel("Ketentuan", 10723344432,
+        "Library ini bersifat private · Dilarang redistribusi tanpa izin", false)
+
+    -- ══════════════════════════════════════════════════
+    --                   SETTINGS TAB
+    -- ══════════════════════════════════════════════════
+    local SettingsTab = self:CreateTab("Settings", 80758916183665, true)
+
+    -- ── THEME PRESET ──
+    SettingsTab:AddLabel("Theme Preset", 10723344432,
+        "Terapkan tema instan ke seluruh UI", false)
+
+    local presetList = {
+        "Default", "Purple Dark", "Blue Ice", "Red Neon", "Green Matrix"
+    }
+
+    local presetDropdown = SettingsTab:AddDropdown(
+        "Pilih Preset", 10723344432, presetList, "Default", function() end)
+
+    local Presets = {
+        ["Default"] = {
+            Background=Color3.fromRGB(18,18,22), Topbar=Color3.fromRGB(25,25,32),
+            Sidebar=Color3.fromRGB(22,22,28), Element=Color3.fromRGB(26,26,33),
+            TabActive=Color3.fromRGB(32,30,42), Accent=Color3.fromRGB(160,110,255),
+            Text=Color3.fromRGB(235,235,240), TextDim=Color3.fromRGB(160,160,170),
+            Icon=Color3.fromRGB(150,150,160), Stroke=Color3.fromRGB(40,40,50),
+            ToggleOnBg=Color3.fromRGB(35,30,50), ToggleOffBg=Color3.fromRGB(20,20,25),
+            DropdownBg=Color3.fromRGB(24,24,30), InputBg=Color3.fromRGB(24,24,30),
+            LabelBg=Color3.fromRGB(24,24,30), Muted=Color3.fromRGB(110,110,125),
+        },
+        ["Purple Dark"] = {
+            Background=Color3.fromRGB(15,14,22), Topbar=Color3.fromRGB(23,20,36),
+            Sidebar=Color3.fromRGB(21,18,32), Element=Color3.fromRGB(28,23,42),
+            TabActive=Color3.fromRGB(40,30,64), Accent=Color3.fromRGB(186,123,255),
+            Text=Color3.fromRGB(245,240,250), TextDim=Color3.fromRGB(170,160,180),
+            Icon=Color3.fromRGB(175,160,195), Stroke=Color3.fromRGB(52,44,74),
+            ToggleOnBg=Color3.fromRGB(40,26,58), ToggleOffBg=Color3.fromRGB(19,17,27),
+            DropdownBg=Color3.fromRGB(26,21,38), InputBg=Color3.fromRGB(26,21,38),
+            LabelBg=Color3.fromRGB(26,21,38), Muted=Color3.fromRGB(120,105,140),
+        },
+        ["Blue Ice"] = {
+            Background=Color3.fromRGB(14,18,24), Topbar=Color3.fromRGB(20,27,37),
+            Sidebar=Color3.fromRGB(18,24,33), Element=Color3.fromRGB(22,30,40),
+            TabActive=Color3.fromRGB(26,40,56), Accent=Color3.fromRGB(96,176,255),
+            Text=Color3.fromRGB(235,242,250), TextDim=Color3.fromRGB(155,170,190),
+            Icon=Color3.fromRGB(150,175,205), Stroke=Color3.fromRGB(36,48,64),
+            ToggleOnBg=Color3.fromRGB(25,40,56), ToggleOffBg=Color3.fromRGB(17,21,28),
+            DropdownBg=Color3.fromRGB(18,26,36), InputBg=Color3.fromRGB(18,26,36),
+            LabelBg=Color3.fromRGB(18,26,36), Muted=Color3.fromRGB(105,130,160),
+        },
+        ["Red Neon"] = {
+            Background=Color3.fromRGB(20,14,16), Topbar=Color3.fromRGB(34,18,20),
+            Sidebar=Color3.fromRGB(29,17,19), Element=Color3.fromRGB(38,20,24),
+            TabActive=Color3.fromRGB(58,22,30), Accent=Color3.fromRGB(255,96,118),
+            Text=Color3.fromRGB(250,240,242), TextDim=Color3.fromRGB(190,155,162),
+            Icon=Color3.fromRGB(220,170,178), Stroke=Color3.fromRGB(76,31,38),
+            ToggleOnBg=Color3.fromRGB(58,22,28), ToggleOffBg=Color3.fromRGB(26,16,18),
+            DropdownBg=Color3.fromRGB(34,18,21), InputBg=Color3.fromRGB(34,18,21),
+            LabelBg=Color3.fromRGB(34,18,21), Muted=Color3.fromRGB(160,100,110),
+        },
+        ["Green Matrix"] = {
+            Background=Color3.fromRGB(14,18,14), Topbar=Color3.fromRGB(18,28,18),
+            Sidebar=Color3.fromRGB(16,24,16), Element=Color3.fromRGB(20,30,20),
+            TabActive=Color3.fromRGB(24,40,24), Accent=Color3.fromRGB(110,255,145),
+            Text=Color3.fromRGB(235,245,235), TextDim=Color3.fromRGB(155,180,155),
+            Icon=Color3.fromRGB(160,200,160), Stroke=Color3.fromRGB(34,52,34),
+            ToggleOnBg=Color3.fromRGB(24,42,24), ToggleOffBg=Color3.fromRGB(18,22,18),
+            DropdownBg=Color3.fromRGB(18,28,18), InputBg=Color3.fromRGB(18,28,18),
+            LabelBg=Color3.fromRGB(18,28,18), Muted=Color3.fromRGB(100,150,110),
+        },
+    }
+
+    local function ApplyPreset(name)
+        local p = Presets[name]
+        if not p then return end
+        for k, v in pairs(p) do self.Theme[k] = v end
+        self:ApplyTheme(self.Theme)
+    end
+
+    SettingsTab:AddButton("✦  Apply Preset", 10723344432, function()
+        local sel = presetDropdown:GetValue()
+        ApplyPreset(sel)
+        self:Notify("Theme", "Preset \"" .. sel .. "\" diterapkan.", 3)
     end)
 
-    -- ── Kategori: Custom Theme ──
+    -- ── CUSTOM THEME ──
     SettingsTab:AddLabel("Custom Theme", 10723344432,
-        "Masukkan HEX color untuk kustomisasi manual", false)
+        "Atur warna accent dan background secara manual", false)
 
-    local accentBox     = SettingsTab:AddInput("Accent Color (HEX)",     10723344432, "#A06EFF", function() end)
-    local backgroundBox = SettingsTab:AddInput("Background Color (HEX)", 10723344432, "#121216", function() end)
+    local accentBox = SettingsTab:AddInput(
+        "Accent Color", 10723344432, "#A06EFF", function() end)
+    local bgBox = SettingsTab:AddInput(
+        "Background Color", 10723344432, "#121216", function() end)
 
     self.SettingsRefs = {
         AccentBox     = accentBox.Box,
-        BackgroundBox = backgroundBox.Box
+        BackgroundBox = bgBox.Box
     }
 
-    SettingsTab:AddButton("Apply Custom Theme", 10723344432, function()
-        local accent     = HexToColor(accentBox:GetValue(),     self.Theme.Accent)
-        local background = HexToColor(backgroundBox:GetValue(), self.Theme.Background)
+    SettingsTab:AddButton("✦  Apply Custom Theme", 10723344432, function()
+        local accent = HexToColor(accentBox:GetValue(), self.Theme.Accent)
+        local bg     = HexToColor(bgBox:GetValue(), self.Theme.Background)
 
-        local function darken(c, factor)
+        local function shift(c, f)
             return Color3.fromRGB(
-                math.clamp(math.floor(c.R * 255 * factor), 0, 255),
-                math.clamp(math.floor(c.G * 255 * factor), 0, 255),
-                math.clamp(math.floor(c.B * 255 * factor), 0, 255)
+                math.clamp(math.floor(c.R*255*f),0,255),
+                math.clamp(math.floor(c.G*255*f),0,255),
+                math.clamp(math.floor(c.B*255*f),0,255)
             )
         end
 
         self.Theme.Accent      = accent
-        self.Theme.Background  = background
-        self.Theme.Topbar      = darken(background, 1.35)
-        self.Theme.Sidebar     = darken(background, 1.20)
-        self.Theme.Element     = darken(background, 1.45)
-        self.Theme.TabActive   = darken(background, 1.70)
-        self.Theme.DropdownBg  = darken(background, 1.30)
-        self.Theme.InputBg     = darken(background, 1.30)
-        self.Theme.LabelBg     = darken(background, 1.30)
+        self.Theme.Background  = bg
+        self.Theme.Topbar      = shift(bg, 1.40)
+        self.Theme.Sidebar     = shift(bg, 1.22)
+        self.Theme.Element     = shift(bg, 1.48)
+        self.Theme.TabActive   = shift(bg, 1.75)
+        self.Theme.DropdownBg  = shift(bg, 1.32)
+        self.Theme.InputBg     = shift(bg, 1.32)
+        self.Theme.LabelBg     = shift(bg, 1.32)
+        self.Theme.Stroke      = shift(bg, 2.20)
+        self.Theme.Muted       = shift(bg, 6.00)
 
         self:ApplyTheme(self.Theme)
         self:Notify("Custom Theme", "Tema kustom berhasil diterapkan.", 3)
     end)
 
-    SettingsTab:AddButton("Reset ke Default", 10723344432, function()
+    SettingsTab:AddButton("↺  Reset ke Default", 10723344432, function()
         ApplyPreset("Default")
         presetDropdown:SetValue("Default", false)
         if self.SettingsRefs.AccentBox     then self.SettingsRefs.AccentBox.Text     = "#A06EFF" end
@@ -807,46 +914,95 @@ task.defer(function()
         self:Notify("Theme Reset", "Tema dikembalikan ke Default.", 3)
     end)
 
-    -- ── Kategori: Profile Manager ──
+    -- ── PROFILE MANAGER ──
     SettingsTab:AddLabel("Profile Manager", 10723344432,
-        "Simpan, muat, dan hapus konfigurasi tersimpan", false)
+        "Simpan konfigurasi toggle & tema ke file lokal", false)
 
-    local profileNameBox = SettingsTab:AddInput("Nama Profile", 10723344432, "contoh: setup_ranked", function() end)
+    local profileBox = SettingsTab:AddInput(
+        "Nama Profile", 10723344432, "setup_1", function() end)
 
-    local saveDropdown = SettingsTab:AddDropdown("Pilih Profile", 10723344432,
+    local saveDropdown = SettingsTab:AddDropdown(
+        "Profile Tersimpan", 10723344432,
         { "Belum ada profile" }, "Belum ada profile", function() end)
     self.SaveDropdown = saveDropdown
 
-    SettingsTab:AddButton("💾  Simpan Profile", 10723344432, function()
-        local name = profileNameBox:GetValue()
-        if name == "" or name == "contoh: setup_ranked" then
-            self:Notify("Simpan Gagal", "Masukkan nama profile terlebih dahulu.", 3)
-            return
+    -- Mini action bar (3 tombol dalam 1 row)
+    local ActionRow = Instance.new("Frame")
+    ActionRow.Name = "ProfileActions"
+    ActionRow.Size = UDim2.new(1, -4, 0, 34)
+    ActionRow.BackgroundTransparency = 1
+    ActionRow.Parent = SettingsTab.ScrollBox
+
+    local function MakeActionBtn(label, color, xOff, width, cb)
+        local Btn = Instance.new("TextButton")
+        Btn.Size = UDim2.new(0, width, 1, 0)
+        Btn.Position = UDim2.new(0, xOff, 0, 0)
+        Btn.BackgroundColor3 = color
+        Btn.Text = label
+        Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+        Btn.TextSize = 11
+        Btn.Font = Enum.Font.GothamBold
+        Btn.BorderSizePixel = 0
+        Btn.Parent = ActionRow
+        Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+        Btn.MouseButton1Click:Connect(function()
+            Btn.BackgroundTransparency = 0.3
+            task.wait(0.08)
+            Btn.BackgroundTransparency = 0
+            pcall(cb)
+        end)
+        return Btn
+    end
+
+    local rowW = math.floor((SettingsTab.ScrollBox.AbsoluteSize.X - 4 - 8) / 3)
+
+    MakeActionBtn("Save", Color3.fromRGB(60, 130, 80), 0, rowW, function()
+        local name = profileBox:GetValue()
+        if name == "" or name == "setup_1" then
+            self:Notify("Simpan Gagal", "Isi nama profile dulu.", 3) return
         end
         self:SaveProfile(name)
     end)
 
-    SettingsTab:AddButton("📂  Load Profile Terpilih", 10723344432, function()
-        local selected = saveDropdown:GetValue()
-        if not selected or selected == "" or selected == "Belum ada profile" then
-            self:Notify("Load Gagal", "Pilih profile dari dropdown terlebih dahulu.", 3)
-            return
+    MakeActionBtn("Load", Color3.fromRGB(70, 100, 160), rowW + 4, rowW, function()
+        local sel = saveDropdown:GetValue()
+        if not sel or sel == "Belum ada profile" then
+            self:Notify("Load Gagal", "Pilih profile dari dropdown.", 3) return
         end
-        self:LoadProfile(selected)
+        self:LoadProfile(sel)
     end)
 
-    SettingsTab:AddButton("🗑  Hapus Profile Terpilih", 10734934585, function()
-        local selected = saveDropdown:GetValue()
-        if not selected or selected == "" or selected == "Belum ada profile" then
-            self:Notify("Hapus Gagal", "Pilih profile dari dropdown terlebih dahulu.", 3)
-            return
+    MakeActionBtn("Delete", Color3.fromRGB(160, 60, 60), (rowW + 4) * 2, rowW, function()
+        local sel = saveDropdown:GetValue()
+        if not sel or sel == "Belum ada profile" then
+            self:Notify("Hapus Gagal", "Pilih profile dari dropdown.", 3) return
         end
-        self:DeleteProfile(selected)
+        self:DeleteProfile(sel)
     end)
 
-    SettingsTab:AddButton("🔄  Refresh Daftar", 10723344432, function()
+    SettingsTab:AddButton("Refresh Daftar Profile", 10723344432, function()
         self:RefreshSaveProfiles()
-        self:Notify("Profile", "Daftar profile berhasil diperbarui.", 3)
+        self:Notify("Profile", "Daftar berhasil diperbarui.", 3)
+    end)
+
+    -- ── WINDOW ──
+    SettingsTab:AddLabel("Window", 10723344432,
+        "Pengaturan tampilan jendela UI", false)
+
+    SettingsTab:AddButton("⊡  Minimize / Restore", 10723344432, function()
+        self.Minimized = not self.Minimized
+        local target = self.Minimized
+            and UDim2.new(0, 480, 0, 38)
+            or  UDim2.new(0, 480, 0, 300)
+        TweenService:Create(self.MainFrame,
+            TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            { Size = target }):Play()
+    end)
+
+    SettingsTab:AddButton("✕  Tutup UI", 10723344432, function()
+        self:Notify("Bye!", "UI ditutup.", 2)
+        task.wait(0.5)
+        self.ScreenGui:Destroy()
     end)
 
     self:RefreshSaveProfiles()
