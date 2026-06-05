@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz
+--// OWNER   : Rexz.
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -132,13 +132,7 @@ function RexzLibrary:ApplyTheme(theme)
         self.SidebarBg.BackgroundColor3 = theme.Sidebar
     end
 
-    if self.ToggleBtn then
-        self.ToggleBtn.BackgroundColor3 = theme.Element
-        local s = self.ToggleBtn:FindFirstChildOfClass("UIStroke")
-        if s then s.Color = theme.Accent end
-        local ic = self.ToggleBtn:FindFirstChild("ToggleIcon")
-        if ic then ic.ImageColor3 = theme.Accent end
-    end
+    -- ToggleBtn hardcoded, tidak ikut theme
 
     if self.SearchFrame then
         self.SearchFrame.BackgroundColor3 = theme.Element
