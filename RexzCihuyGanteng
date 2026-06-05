@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz
+--// OWNER   : Rexz.
 
 --[[
     ================================================================
@@ -421,21 +421,21 @@ self.ToggleBtn = ToggleBtn
 Corner(ToggleBtn, 50)
 
 -- Mengambil instance stroke bawaan fungsi library
-local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 2)
+local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 4)
 
 local GlowFrame = Instance.new("ImageLabel")
 GlowFrame.Name = "GlowEffect"
 -- Diubah ke 74x74 agar pendaran lingkaran pas (tidak terlalu jauh melar keluar)
-GlowFrame.Size = UDim2.new(0, 74, 0, 74)
+GlowFrame.Size = UDim2.new(0, 64, 0, 64)
 GlowFrame.Position = UDim2.new(0.5, -37, 0.5, -37)
 GlowFrame.BackgroundTransparency = 1
 -- ID DIUBAH KE ASSET LINGKARAN NEON GLOW PREMIUM
 GlowFrame.Image = "rbxassetid://5028857084"
 GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
-GlowFrame.ImageTransparency = 0.55
+GlowFrame.ImageTransparency = 0.2
 GlowFrame.ZIndex = 9
 GlowFrame.Parent = ToggleBtn
-Corner(GlowFrame, 50)
+Corner(GlowFrame, 75)
 
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Name = "ToggleIcon"
