@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz.
+--// OWNER   : Rexz
 
 local RexzLibrary = {}
 RexzLibrary.__index = RexzLibrary
@@ -390,43 +390,57 @@ function RexzLibrary.new(dummyHubName, title)
     NotifLayout.Padding = UDim.new(0, 6)
     NotifLayout.Parent = NotifHolder
 
-    -- ── Toggle Button ──
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Name = "UiToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
-    ToggleBtn.Position = UDim2.new(0, 14, 0, 14)
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
-    ToggleBtn.Text = ""
-    ToggleBtn.Active = true
-    ToggleBtn.Draggable = true
-    ToggleBtn.Parent = ScreenGui
-    self.ToggleBtn = ToggleBtn
-    Corner(ToggleBtn, 50)
-    Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 1.5)
+-- ── Toggle Button ──
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "UiToggleBtn"
+ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
+ToggleBtn.Position = UDim2.new(0, 14, 0, 14)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
+ToggleBtn.Text = ""
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
+ToggleBtn.ZIndex = 10
+ToggleBtn.Parent = ScreenGui
+self.ToggleBtn = ToggleBtn
+Corner(ToggleBtn, 50)
+Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 2)
 
-    local ToggleIcon = Instance.new("ImageLabel")
-    ToggleIcon.Name = "ToggleIcon"
-    ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
-    ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
-    ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = ResolveIcon(75184333398586)
-    ToggleIcon.ImageColor3 = Color3.fromRGB(150, 100, 255)
-    ToggleIcon.Parent = ToggleBtn
+-- Glow blur di belakang
+local GlowFrame = Instance.new("ImageLabel")
+GlowFrame.Name = "GlowEffect"
+GlowFrame.Size = UDim2.new(0, 80, 0, 80)
+GlowFrame.Position = UDim2.new(0.5, -40, 0.5, -40)
+GlowFrame.BackgroundTransparency = 1
+GlowFrame.Image = "rbxassetid://5028857084"
+GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
+GlowFrame.ImageTransparency = 0.55
+GlowFrame.ZIndex = 9
+GlowFrame.Parent = ToggleBtn
 
-    -- ── Main Frame ──
-    local MainFrame = Instance.new("Frame")
-    MainFrame.Name = "MainContainer"
-    MainFrame.Size = UDim2.new(0, 500, 0, 320)
-    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -160)
-    MainFrame.BackgroundColor3 = self.Theme.Background
-    MainFrame.BorderSizePixel = 0
-    MainFrame.Active = true
-    MainFrame.Draggable = true
-    MainFrame.ClipsDescendants = true
-    MainFrame.Parent = ScreenGui
-    self.MainFrame = MainFrame
-    Corner(MainFrame, 10)
-    Stroke(MainFrame, self.Theme.Stroke, 1.2)
+-- Icon
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Name = "ToggleIcon"
+ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
+ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = ResolveIcon(75184333398586)
+ToggleIcon.ImageColor3 = Color3.fromRGB(200, 160, 255)
+ToggleIcon.ZIndex = 11
+ToggleIcon.Parent = ToggleBtn
+
+-- Hover
+ToggleBtn.MouseEnter:Connect(function()
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15),
+        { BackgroundColor3 = Color3.fromRGB(55, 30, 80) }):Play()
+    TweenService:Create(GlowFrame, TweenInfo.new(0.15),
+        { ImageTransparency = 0.35 }):Play()
+end)
+ToggleBtn.MouseLeave:Connect(function()
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15),
+        { BackgroundColor3 = Color3.fromRGB(35, 20, 55) }):Play()
+    TweenService:Create(GlowFrame, TweenInfo.new(0.15),
+        { ImageTransparency = 0.55 }):Play()
+end)
 
         -- ── Minimize / Hide (FIXED SIDEBAR BUG) ──
 local function MinimizeWindow()  
@@ -721,14 +735,13 @@ ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
     task.defer(function()
 
 -- ════════════════════════════════════════
---  CREDITS TAB  (Redesigned)
+--  CREDITS TAB  (Final)
 -- ════════════════════════════════════════
 local CreditTab = self:CreateTab("Credits", 124560466474914)
 
--- ── Helper: Mini divider label ──
 local function SectionDivider(parent, labelText)
     local Div = Instance.new("Frame")
-    Div.Size = UDim2.new(1, -4, 0, 22)
+    Div.Size = UDim2.new(1, -4, 0, 20)
     Div.BackgroundTransparency = 1
     Div.Parent = parent
 
@@ -742,7 +755,6 @@ local function SectionDivider(parent, labelText)
     local BG = Instance.new("Frame")
     BG.Size = UDim2.new(0, 0, 1, 0)
     BG.AutomaticSize = Enum.AutomaticSize.X
-    BG.Position = UDim2.new(0, 0, 0, 0)
     BG.BackgroundColor3 = self.Theme.Sidebar
     BG.BorderSizePixel = 0
     BG.Parent = Div
@@ -750,10 +762,9 @@ local function SectionDivider(parent, labelText)
     local DivLabel = Instance.new("TextLabel")
     DivLabel.Size = UDim2.new(0, 0, 1, 0)
     DivLabel.AutomaticSize = Enum.AutomaticSize.X
-    DivLabel.Position = UDim2.new(0, 0, 0, 0)
     DivLabel.BackgroundTransparency = 1
-    DivLabel.Text = "  ◆ " .. string.upper(labelText) .. "  "
-    DivLabel.TextColor3 = self.Theme.Accent
+    DivLabel.Text = "  " .. string.upper(labelText) .. "  "
+    DivLabel.TextColor3 = self.Theme.Muted
     DivLabel.TextSize = 8
     DivLabel.Font = Enum.Font.GothamBold
     DivLabel.Parent = BG
@@ -764,49 +775,72 @@ end
 -- ════════════════════════
 local HeroBanner = Instance.new("Frame")
 HeroBanner.Name = "HeroBanner"
-HeroBanner.Size = UDim2.new(1, -4, 0, 64)
-HeroBanner.BackgroundColor3 = self.Theme.TabActive
+HeroBanner.Size = UDim2.new(1, -4, 0, 60)
+HeroBanner.BackgroundColor3 = Color3.fromRGB(18, 14, 30)
 HeroBanner.BorderSizePixel = 0
 HeroBanner.ClipsDescendants = true
 HeroBanner.Parent = CreditTab.ScrollBox
-Corner(HeroBanner, 10)
-Stroke(HeroBanner, self.Theme.Accent, 1.5)
+Corner(HeroBanner, 8)
+Stroke(HeroBanner, self.Theme.Stroke, 1)
 
--- Gradient background
 local HeroGrad = Instance.new("UIGradient")
 HeroGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, self.Theme.Accent),
-    ColorSequenceKeypoint.new(1, self.Theme.Background),
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 40, 160)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(30, 20, 60)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 14, 22)),
 })
-HeroGrad.Rotation = 135
-HeroGrad.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0.7),
-    NumberSequenceKeypoint.new(1, 0.95),
-})
+HeroGrad.Rotation = 120
 HeroGrad.Parent = HeroBanner
 
+-- Accent line kiri
+local HeroLine = Instance.new("Frame")
+HeroLine.Size = UDim2.new(0, 2, 1, -16)
+HeroLine.Position = UDim2.new(0, 0, 0, 8)
+HeroLine.BackgroundColor3 = self.Theme.Accent
+HeroLine.BorderSizePixel = 0
+HeroLine.Parent = HeroBanner
+Corner(HeroLine, 2)
+
 local HubTitle = Instance.new("TextLabel")
-HubTitle.Size = UDim2.new(1, -16, 0, 28)
-HubTitle.Position = UDim2.new(0, 12, 0, 10)
+HubTitle.Size = UDim2.new(1, -16, 0, 24)
+HubTitle.Position = UDim2.new(0, 14, 0, 8)
 HubTitle.BackgroundTransparency = 1
-HubTitle.Text = "✦  REXZ HUB"
-HubTitle.TextColor3 = self.Theme.Accent
-HubTitle.TextSize = 18
+HubTitle.Text = "REXZ HUB"
+HubTitle.TextColor3 = Color3.fromRGB(220, 200, 255)
+HubTitle.TextSize = 17
 HubTitle.Font = Enum.Font.GothamBlack
 HubTitle.TextXAlignment = Enum.TextXAlignment.Left
-HubTitle.RichText = true
 HubTitle.Parent = HeroBanner
 
 local HubSub = Instance.new("TextLabel")
 HubSub.Size = UDim2.new(1, -16, 0, 14)
-HubSub.Position = UDim2.new(0, 12, 0, 38)
+HubSub.Position = UDim2.new(0, 14, 0, 34)
 HubSub.BackgroundTransparency = 1
-HubSub.Text = "Private Build  ·  Version V2.5  ·  © 2026"
+HubSub.Text = "Private Build  |  V2.5  |  2026"
 HubSub.TextColor3 = self.Theme.Muted
 HubSub.TextSize = 9
 HubSub.Font = Enum.Font.GothamMedium
 HubSub.TextXAlignment = Enum.TextXAlignment.Left
 HubSub.Parent = HeroBanner
+
+-- Version badge di kanan
+local VerBadge = Instance.new("Frame")
+VerBadge.Size = UDim2.new(0, 44, 0, 18)
+VerBadge.Position = UDim2.new(1, -52, 0.5, -9)
+VerBadge.BackgroundColor3 = self.Theme.Accent
+VerBadge.BorderSizePixel = 0
+VerBadge.Parent = HeroBanner
+Corner(VerBadge, 4)
+
+local VerTxt = Instance.new("TextLabel")
+VerTxt.Size = UDim2.new(1, 0, 1, 0)
+VerTxt.BackgroundTransparency = 1
+VerTxt.Text = "V2.5"
+VerTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
+VerTxt.TextSize = 9
+VerTxt.Font = Enum.Font.GothamBold
+VerTxt.TextXAlignment = Enum.TextXAlignment.Center
+VerTxt.Parent = VerBadge
 
 -- ════════════════════════
 -- OWNER CARD
@@ -815,39 +849,29 @@ SectionDivider(CreditTab.ScrollBox, "Developer")
 
 local OwnerCard = Instance.new("Frame")
 OwnerCard.Name = "OwnerCard"
-OwnerCard.Size = UDim2.new(1, -4, 0, 68)
+OwnerCard.Size = UDim2.new(1, -4, 0, 64)
 OwnerCard.BackgroundColor3 = self.Theme.Element
 OwnerCard.BorderSizePixel = 0
 OwnerCard.Parent = CreditTab.ScrollBox
 Corner(OwnerCard, 8)
 Stroke(OwnerCard, self.Theme.Stroke, 1)
 
--- Accent gradient bar kiri
 local AccentBar = Instance.new("Frame")
-AccentBar.Size = UDim2.new(0, 3, 1, -16)
+AccentBar.Size = UDim2.new(0, 2, 1, -16)
 AccentBar.Position = UDim2.new(0, 0, 0, 8)
 AccentBar.BackgroundColor3 = self.Theme.Accent
 AccentBar.BorderSizePixel = 0
 AccentBar.Parent = OwnerCard
 Corner(AccentBar, 2)
 
-local AccentBarGrad = Instance.new("UIGradient")
-AccentBarGrad.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, self.Theme.Accent),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(200, 160, 255)),
-})
-AccentBarGrad.Rotation = 90
-AccentBarGrad.Parent = AccentBar
-
--- Avatar frame
 local AvatarFrame = Instance.new("Frame")
-AvatarFrame.Size = UDim2.new(0, 44, 0, 44)
-AvatarFrame.Position = UDim2.new(0, 14, 0.5, -22)
+AvatarFrame.Size = UDim2.new(0, 42, 0, 42)
+AvatarFrame.Position = UDim2.new(0, 12, 0.5, -21)
 AvatarFrame.BackgroundColor3 = self.Theme.TabActive
 AvatarFrame.BorderSizePixel = 0
 AvatarFrame.Parent = OwnerCard
 Corner(AvatarFrame, 50)
-Stroke(AvatarFrame, self.Theme.Accent, 1.5)
+Stroke(AvatarFrame, self.Theme.Accent, 1.2)
 
 local AvatarImg = Instance.new("ImageLabel")
 AvatarImg.Size = UDim2.new(1, -4, 1, -4)
@@ -858,70 +882,66 @@ AvatarImg.Parent = AvatarFrame
 Corner(AvatarImg, 50)
 
 pcall(function()
-    -- ← GANTI USER ID INI
     local content = Players:GetUserThumbnailAsync(
-        10652722254,
+        10652722254, -- <- GANTI USER ID
         Enum.ThumbnailType.HeadShot,
         Enum.ThumbnailSize.Size150x150
     )
     AvatarImg.Image = content
 end)
 
--- Online dot
 local OnlineDot = Instance.new("Frame")
-OnlineDot.Size = UDim2.new(0, 10, 0, 10)
-OnlineDot.Position = UDim2.new(1, -10, 1, -10)
+OnlineDot.Size = UDim2.new(0, 9, 0, 9)
+OnlineDot.Position = UDim2.new(1, -9, 1, -9)
 OnlineDot.BackgroundColor3 = Color3.fromRGB(80, 220, 120)
 OnlineDot.BorderSizePixel = 0
 OnlineDot.ZIndex = 3
 OnlineDot.Parent = AvatarFrame
 Corner(OnlineDot, 50)
 
--- Info teks
 local OwnerName = Instance.new("TextLabel")
-OwnerName.Size = UDim2.new(1, -150, 0, 20)
-OwnerName.Position = UDim2.new(0, 68, 0, 12)
+OwnerName.Size = UDim2.new(1, -160, 0, 18)
+OwnerName.Position = UDim2.new(0, 64, 0, 10)
 OwnerName.BackgroundTransparency = 1
-OwnerName.Text = "Rexz"                            -- ← GANTI NAMA
+OwnerName.Text = "Rexz" -- <- GANTI NAMA
 OwnerName.TextColor3 = self.Theme.Text
-OwnerName.TextSize = 14
+OwnerName.TextSize = 13
 OwnerName.Font = Enum.Font.GothamBlack
 OwnerName.TextXAlignment = Enum.TextXAlignment.Left
 OwnerName.Parent = OwnerCard
 
 local OwnerBadge = Instance.new("Frame")
-OwnerBadge.Size = UDim2.new(0, 52, 0, 14)
-OwnerBadge.Position = UDim2.new(0, 68, 0, 32)
+OwnerBadge.Size = UDim2.new(0, 46, 0, 13)
+OwnerBadge.Position = UDim2.new(0, 64, 0, 30)
 OwnerBadge.BackgroundColor3 = self.Theme.Accent
 OwnerBadge.BorderSizePixel = 0
 OwnerBadge.Parent = OwnerCard
-Corner(OwnerBadge, 4)
+Corner(OwnerBadge, 3)
 
 local BadgeTxt = Instance.new("TextLabel")
 BadgeTxt.Size = UDim2.new(1, 0, 1, 0)
 BadgeTxt.BackgroundTransparency = 1
 BadgeTxt.Text = "OWNER"
 BadgeTxt.TextColor3 = Color3.fromRGB(255, 255, 255)
-BadgeTxt.TextSize = 8
+BadgeTxt.TextSize = 7
 BadgeTxt.Font = Enum.Font.GothamBold
 BadgeTxt.TextXAlignment = Enum.TextXAlignment.Center
 BadgeTxt.Parent = OwnerBadge
 
 local OwnerSub = Instance.new("TextLabel")
-OwnerSub.Size = UDim2.new(1, -150, 0, 12)
-OwnerSub.Position = UDim2.new(0, 68, 0, 50)
+OwnerSub.Size = UDim2.new(1, -160, 0, 12)
+OwnerSub.Position = UDim2.new(0, 64, 0, 46)
 OwnerSub.BackgroundTransparency = 1
-OwnerSub.Text = "UI · Script · Design"              -- ← GANTI DESKRIPSI
+OwnerSub.Text = "UI  |  Script  |  Design" -- <- GANTI
 OwnerSub.TextColor3 = self.Theme.Muted
 OwnerSub.TextSize = 9
 OwnerSub.Font = Enum.Font.GothamMedium
 OwnerSub.TextXAlignment = Enum.TextXAlignment.Left
 OwnerSub.Parent = OwnerCard
 
--- Copy username button
 local CopyBtn = Instance.new("TextButton")
-CopyBtn.Size = UDim2.new(0, 56, 0, 24)
-CopyBtn.Position = UDim2.new(1, -64, 0.5, -12)
+CopyBtn.Size = UDim2.new(0, 52, 0, 22)
+CopyBtn.Position = UDim2.new(1, -60, 0.5, -11)
 CopyBtn.BackgroundColor3 = self.Theme.TabActive
 CopyBtn.Text = "Copy"
 CopyBtn.TextColor3 = self.Theme.Accent
@@ -929,7 +949,7 @@ CopyBtn.TextSize = 10
 CopyBtn.Font = Enum.Font.GothamBold
 CopyBtn.BorderSizePixel = 0
 CopyBtn.Parent = OwnerCard
-Corner(CopyBtn, 6)
+Corner(CopyBtn, 5)
 Stroke(CopyBtn, self.Theme.Accent, 1)
 
 CopyBtn.MouseEnter:Connect(function()
@@ -943,22 +963,21 @@ CopyBtn.MouseLeave:Connect(function()
           TextColor3 = self.Theme.Accent }):Play()
 end)
 CopyBtn.MouseButton1Click:Connect(function()
-    if setclipboard then setclipboard("Rexz") end  -- ← GANTI USERNAME
+    if setclipboard then setclipboard("Rexz") end -- <- GANTI USERNAME
     local orig = CopyBtn.Text
-    CopyBtn.Text = "✓ OK"
+    CopyBtn.Text = "Copied"
     task.wait(1.5)
     CopyBtn.Text = orig
     self:Notify("Clipboard", "Username berhasil disalin.", 3)
 end)
 
 -- ════════════════════════
--- INFO STATS ROW
+-- INFO ROW
 -- ════════════════════════
 SectionDivider(CreditTab.ScrollBox, "Info")
 
 local InfoRow = Instance.new("Frame")
-InfoRow.Name = "InfoRow"
-InfoRow.Size = UDim2.new(1, -4, 0, 50)
+InfoRow.Size = UDim2.new(1, -4, 0, 46)
 InfoRow.BackgroundTransparency = 1
 InfoRow.Parent = CreditTab.ScrollBox
 
@@ -969,9 +988,9 @@ infoLayout.Padding = UDim.new(0, 4)
 infoLayout.Parent = InfoRow
 
 local infoData = {
-    { label = "Versi",   value = "V2.5",    icon = "📦" },
-    { label = "Status",  value = "Private", icon = "🔒" },
-    { label = "Build",   value = "Stable",  icon = "✅" },
+    { label = "Versi",   value = "V2.5"    },
+    { label = "Status",  value = "Private" },
+    { label = "Build",   value = "Stable"  },
 }
 
 for _, info in ipairs(infoData) do
@@ -980,22 +999,12 @@ for _, info in ipairs(infoData) do
     Card.BackgroundColor3 = self.Theme.Element
     Card.BorderSizePixel = 0
     Card.Parent = InfoRow
-    Corner(Card, 8)
+    Corner(Card, 7)
     Stroke(Card, self.Theme.Stroke, 1)
 
-    local Ico = Instance.new("TextLabel")
-    Ico.Size = UDim2.new(0, 20, 0, 20)
-    Ico.Position = UDim2.new(0, 8, 0.5, -10)
-    Ico.BackgroundTransparency = 1
-    Ico.Text = info.icon
-    Ico.TextSize = 14
-    Ico.Font = Enum.Font.GothamBold
-    Ico.TextXAlignment = Enum.TextXAlignment.Center
-    Ico.Parent = Card
-
     local Val = Instance.new("TextLabel")
-    Val.Size = UDim2.new(1, -36, 0, 18)
-    Val.Position = UDim2.new(0, 30, 0, 6)
+    Val.Size = UDim2.new(1, -10, 0, 18)
+    Val.Position = UDim2.new(0, 8, 0, 5)
     Val.BackgroundTransparency = 1
     Val.Text = info.value
     Val.TextColor3 = self.Theme.Accent
@@ -1005,8 +1014,8 @@ for _, info in ipairs(infoData) do
     Val.Parent = Card
 
     local Lbl = Instance.new("TextLabel")
-    Lbl.Size = UDim2.new(1, -36, 0, 11)
-    Lbl.Position = UDim2.new(0, 30, 1, -16)
+    Lbl.Size = UDim2.new(1, -10, 0, 11)
+    Lbl.Position = UDim2.new(0, 8, 1, -14)
     Lbl.BackgroundTransparency = 1
     Lbl.Text = info.label
     Lbl.TextColor3 = self.Theme.Muted
@@ -1017,30 +1026,29 @@ for _, info in ipairs(infoData) do
 end
 
 -- ════════════════════════
--- TIM / KONTRIBUTOR
+-- TIM
 -- ════════════════════════
 SectionDivider(CreditTab.ScrollBox, "Tim")
 
--- ← EDIT DATA TIM DI SINI
+-- <- EDIT DATA TIM
 local contribs = {
-    { name = "Rexz",  role = "Owner & Developer",  badge = "OWNER"  },
-    { name = "Rexz",  role = "UI Designer",         badge = "UI"     },
-    { name = "Rexz",  role = "Script Developer",    badge = "DEV"    },
+    { name = "Rexz", role = "Owner & Developer", badge = "OWNER" },
+    { name = "Rexz", role = "UI Designer",        badge = "UI"    },
+    { name = "Rexz", role = "Script Developer",   badge = "DEV"   },
 }
 
 for i, c in ipairs(contribs) do
     local Row = Instance.new("Frame")
-    Row.Size = UDim2.new(1, -4, 0, 32)
+    Row.Size = UDim2.new(1, -4, 0, 30)
     Row.BackgroundColor3 = self.Theme.Element
     Row.BorderSizePixel = 0
     Row.Parent = CreditTab.ScrollBox
     Corner(Row, 7)
     Stroke(Row, self.Theme.Stroke, 1)
 
-    -- Number circle
     local NumCircle = Instance.new("Frame")
-    NumCircle.Size = UDim2.new(0, 18, 0, 18)
-    NumCircle.Position = UDim2.new(0, 8, 0.5, -9)
+    NumCircle.Size = UDim2.new(0, 16, 0, 16)
+    NumCircle.Position = UDim2.new(0, 8, 0.5, -8)
     NumCircle.BackgroundColor3 = i == 1 and self.Theme.Accent or self.Theme.TabActive
     NumCircle.BorderSizePixel = 0
     NumCircle.Parent = Row
@@ -1057,8 +1065,8 @@ for i, c in ipairs(contribs) do
     Num.Parent = NumCircle
 
     local CName = Instance.new("TextLabel")
-    CName.Size = UDim2.new(0, 90, 1, 0)
-    CName.Position = UDim2.new(0, 32, 0, 0)
+    CName.Size = UDim2.new(0, 80, 1, 0)
+    CName.Position = UDim2.new(0, 30, 0, 0)
     CName.BackgroundTransparency = 1
     CName.Text = c.name
     CName.TextColor3 = self.Theme.Text
@@ -1068,8 +1076,8 @@ for i, c in ipairs(contribs) do
     CName.Parent = Row
 
     local CRole = Instance.new("TextLabel")
-    CRole.Size = UDim2.new(0, 100, 1, 0)
-    CRole.Position = UDim2.new(0, 122, 0, 0)
+    CRole.Size = UDim2.new(0, 110, 1, 0)
+    CRole.Position = UDim2.new(0, 112, 0, 0)
     CRole.BackgroundTransparency = 1
     CRole.Text = c.role
     CRole.TextColor3 = self.Theme.Muted
@@ -1078,15 +1086,13 @@ for i, c in ipairs(contribs) do
     CRole.TextXAlignment = Enum.TextXAlignment.Left
     CRole.Parent = Row
 
-    -- Badge di kanan
     local BadgeF = Instance.new("Frame")
-    BadgeF.Size = UDim2.new(0, 36, 0, 16)
-    BadgeF.Position = UDim2.new(1, -44, 0.5, -8)
-    BadgeF.BackgroundColor3 = i == 1 and self.Theme.Accent or self.Theme.Element
+    BadgeF.Size = UDim2.new(0, 34, 0, 14)
+    BadgeF.Position = UDim2.new(1, -42, 0.5, -7)
+    BadgeF.BackgroundColor3 = i == 1 and self.Theme.Accent or self.Theme.TabActive
     BadgeF.BorderSizePixel = 0
     BadgeF.Parent = Row
-    Corner(BadgeF, 4)
-    if i ~= 1 then Stroke(BadgeF, self.Theme.Stroke, 1) end
+    Corner(BadgeF, 3)
 
     local BadgeL = Instance.new("TextLabel")
     BadgeL.Size = UDim2.new(1, 0, 1, 0)
@@ -1104,49 +1110,44 @@ end
 -- ════════════════════════
 SectionDivider(CreditTab.ScrollBox, "Changelog")
 
--- ← EDIT CHANGELOG DI SINI
+-- <- EDIT CHANGELOG
 local changelog = {
     { ver = "V2.5", desc = "Credits redesign, hero banner, badge row" },
     { ver = "V2.4", desc = "Profile manager, save & load system"      },
-    { ver = "V2.3", desc = "Theme preset & custom hex color input"     },
+    { ver = "V2.3", desc = "Theme preset, custom hex color input"      },
     { ver = "V2.0", desc = "Sidebar kategori, search bar, minimize"   },
 }
 
 for i, log in ipairs(changelog) do
     local LogRow = Instance.new("Frame")
-    LogRow.Size = UDim2.new(1, -4, 0, 34)
+    LogRow.Size = UDim2.new(1, -4, 0, 32)
     LogRow.BackgroundColor3 = self.Theme.Element
     LogRow.BorderSizePixel = 0
     LogRow.Parent = CreditTab.ScrollBox
     Corner(LogRow, 7)
     Stroke(LogRow, i == 1 and self.Theme.Accent or self.Theme.Stroke, i == 1 and 1.2 or 1)
 
-    local Badge = Instance.new("TextLabel")
-    Badge.Size = UDim2.new(0, 38, 0, 18)
-    Badge.Position = UDim2.new(0, 8, 0.5, -9)
+    local Badge = Instance.new("Frame")
+    Badge.Size = UDim2.new(0, 36, 0, 16)
+    Badge.Position = UDim2.new(0, 8, 0.5, -8)
     Badge.BackgroundColor3 = i == 1 and self.Theme.Accent or self.Theme.TabActive
-    Badge.Text = log.ver
-    Badge.TextColor3 = i == 1 and Color3.fromRGB(255, 255, 255) or self.Theme.Muted
-    Badge.TextSize = 8
-    Badge.Font = Enum.Font.GothamBold
-    Badge.TextXAlignment = Enum.TextXAlignment.Center
     Badge.BorderSizePixel = 0
     Badge.Parent = LogRow
-    Corner(Badge, 5)
+    Corner(Badge, 4)
 
-    -- Garis titik vertikal (timeline feel)
-    if i < #changelog then
-        local Line = Instance.new("Frame")
-        Line.Size = UDim2.new(0, 1, 0, 5)
-        Line.Position = UDim2.new(0, 26, 1, 0)
-        Line.BackgroundColor3 = self.Theme.Stroke
-        Line.BorderSizePixel = 0
-        Line.Parent = LogRow
-    end
+    local BadgeTxt2 = Instance.new("TextLabel")
+    BadgeTxt2.Size = UDim2.new(1, 0, 1, 0)
+    BadgeTxt2.BackgroundTransparency = 1
+    BadgeTxt2.Text = log.ver
+    BadgeTxt2.TextColor3 = i == 1 and Color3.fromRGB(255, 255, 255) or self.Theme.Muted
+    BadgeTxt2.TextSize = 8
+    BadgeTxt2.Font = Enum.Font.GothamBold
+    BadgeTxt2.TextXAlignment = Enum.TextXAlignment.Center
+    BadgeTxt2.Parent = Badge
 
     local LogDesc = Instance.new("TextLabel")
-    LogDesc.Size = UDim2.new(1, -58, 1, 0)
-    LogDesc.Position = UDim2.new(0, 54, 0, 0)
+    LogDesc.Size = UDim2.new(1, -56, 1, 0)
+    LogDesc.Position = UDim2.new(0, 52, 0, 0)
     LogDesc.BackgroundTransparency = 1
     LogDesc.Text = log.desc
     LogDesc.TextColor3 = i == 1 and self.Theme.Text or self.Theme.Muted
@@ -1163,8 +1164,7 @@ end
 SectionDivider(CreditTab.ScrollBox, "Sosial")
 
 local SocialRow = Instance.new("Frame")
-SocialRow.Name = "SocialRow"
-SocialRow.Size = UDim2.new(1, -4, 0, 34)
+SocialRow.Size = UDim2.new(1, -4, 0, 30)
 SocialRow.BackgroundTransparency = 1
 SocialRow.Parent = CreditTab.ScrollBox
 
@@ -1174,11 +1174,10 @@ socLayout.SortOrder = Enum.SortOrder.LayoutOrder
 socLayout.Padding = UDim.new(0, 4)
 socLayout.Parent = SocialRow
 
--- ← EDIT SOSIAL DI SINI (label, warna, link/action)
+-- <- EDIT SOSIAL
 local socials = {
-    { label = "Discord", color = Color3.fromRGB(88, 101, 242),  copy = "discord.gg/xxxx" },
-    { label = "YouTube", color = Color3.fromRGB(200, 40,  40),  copy = "youtube.com/@rexz" },
-    { label = "Roblox",  color = Color3.fromRGB(150, 90, 255),  copy = "roblox.com/users/10652722254" },
+    { label = "Saluran", color = Color3.fromRGB(200, 40,  40), copy = "https://whatsapp.com/channel/0029Vb8PZy4HwXbBtQmAJ73m"            },
+    { label = "Roblox",  color = Color3.fromRGB(150, 90, 255), copy = "roblox.com/users/10652722254"  },
 }
 
 for _, soc in ipairs(socials) do
@@ -1191,7 +1190,7 @@ for _, soc in ipairs(socials) do
     SocBtn.Font = Enum.Font.GothamBold
     SocBtn.BorderSizePixel = 0
     SocBtn.Parent = SocialRow
-    Corner(SocBtn, 7)
+    Corner(SocBtn, 6)
     Stroke(SocBtn, soc.color, 1)
 
     SocBtn.MouseEnter:Connect(function()
@@ -1206,26 +1205,26 @@ for _, soc in ipairs(socials) do
     end)
     SocBtn.MouseButton1Click:Connect(function()
         if setclipboard then setclipboard(soc.copy) end
-        self:Notify("Sosial", soc.label .. " link disalin!", 2.5)
+        self:Notify("Sosial", soc.label .. " link disalin.", 2.5)
     end)
 end
 
 -- ════════════════════════
--- FOOTER COPYRIGHT
+-- FOOTER
 -- ════════════════════════
 local Footer = Instance.new("Frame")
-Footer.Size = UDim2.new(1, -4, 0, 28)
+Footer.Size = UDim2.new(1, -4, 0, 24)
 Footer.BackgroundColor3 = self.Theme.Element
 Footer.BorderSizePixel = 0
 Footer.Parent = CreditTab.ScrollBox
-Corner(Footer, 7)
+Corner(Footer, 6)
 Stroke(Footer, self.Theme.Stroke, 1)
 
 local FooterTxt = Instance.new("TextLabel")
 FooterTxt.Size = UDim2.new(1, -12, 1, 0)
 FooterTxt.Position = UDim2.new(0, 6, 0, 0)
 FooterTxt.BackgroundTransparency = 1
-FooterTxt.Text = "© 2026 Rexz Hub  ·  All rights reserved  ·  Private Build"
+FooterTxt.Text = "Copyright 2026  Rexz Hub  |  All rights reserved"
 FooterTxt.TextColor3 = self.Theme.Muted
 FooterTxt.TextSize = 8
 FooterTxt.Font = Enum.Font.GothamMedium
