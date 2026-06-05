@@ -409,7 +409,6 @@ function RexzLibrary.new(dummyHubName, title)
 
     -- ── Toggle Button ──
 local ToggleBtn = Instance.new("TextButton")
-local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "UiToggleBtn"
 ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
 ToggleBtn.Position = UDim2.new(0, 14, 0, 14)
