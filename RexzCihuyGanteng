@@ -409,6 +409,7 @@ function RexzLibrary.new(dummyHubName, title)
 
     -- ── Toggle Button ──
 local ToggleBtn = Instance.new("TextButton")
+local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "UiToggleBtn"
 ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
 ToggleBtn.Position = UDim2.new(0, 14, 0, 14)
@@ -421,19 +422,18 @@ ToggleBtn.Parent = ScreenGui
 self.ToggleBtn = ToggleBtn
 Corner(ToggleBtn, 50)
 
--- Mengambil instance stroke bawaan fungsi library
-local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 8)
+-- Mengambil instance stroke bawaan fungsi library (Awal Set Tebal: 6)
+local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 6)
 
 local GlowFrame = Instance.new("ImageLabel")
 GlowFrame.Name = "GlowEffect"
--- Diubah ke 74x74 agar pendaran lingkaran pas (tidak terlalu jauh melar keluar)
-GlowFrame.Size = UDim2.new(0, 64, 0, 64)
+-- Ngeset ukuran awal 74x74 dengan posisi offset -37 agar pas di tengah (74 / 2 = 37)
+GlowFrame.Size = UDim2.new(0, 74, 0, 74)
 GlowFrame.Position = UDim2.new(0.5, -37, 0.5, -37)
 GlowFrame.BackgroundTransparency = 1
--- ID DIUBAH KE ASSET LINGKARAN NEON GLOW PREMIUM
 GlowFrame.Image = "rbxassetid://133974093578054"
 GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
-GlowFrame.ImageTransparency = 0.2
+GlowFrame.ImageTransparency = 0.3 -- Dibuat agak pekat di awal
 GlowFrame.ZIndex = 9
 GlowFrame.Parent = ToggleBtn
 
@@ -458,18 +458,21 @@ RotateTween:Play()
 -- INTERAKSI MOUSE & EFEK PULSE LINGKARAN
 -- =======================================================
 local PulseTweenIn
+
 ToggleBtn.MouseEnter:Connect(function()
+    -- Tombol menggelap & Glow makin terang solid (0.1)
     TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(55, 30, 80) }):Play()
-    TweenService:Create(GlowFrame, TweenInfo.new(0.15), { ImageTransparency = 0.25 }):Play()
+    TweenService:Create(GlowFrame, TweenInfo.new(0.15), { ImageTransparency = 0.1 }):Play()
     
+    -- Stroke menebal dari 6 ke 9 pas di-hover
     if ToggleStroke and ToggleStroke:IsA("UIStroke") then
-        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 3.5, Color = Color3.fromRGB(180, 140, 255) }):Play()
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 9, Color = Color3.fromRGB(180, 140, 255) }):Play()
     end
 
-    -- Denyutan melingkar (Pulse Radial) pas di-hover
+    -- Denyutan melingkar (Pulse Radial) melebar halus dari 74 ke 94
     PulseTweenIn = TweenService:Create(GlowFrame, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-        Size = UDim2.new(0, 86, 0, 86),
-        Position = UDim2.new(0.5, -43, 0.5, -43)
+        Size = UDim2.new(0, 94, 0, 94),
+        Position = UDim2.new(0.5, -47, 0.5, -47)
     })
     PulseTweenIn:Play()
 end)
@@ -479,17 +482,20 @@ ToggleBtn.MouseLeave:Connect(function()
         PulseTweenIn:Cancel() 
     end
     
+    -- Kembalikan tombol ke warna dasar & kembalikan transparansi glow ke awal (0.3)
     TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(35, 20, 55) }):Play()
     TweenService:Create(GlowFrame, TweenInfo.new(0.15), { 
-        ImageTransparency = 0.55,
+        ImageTransparency = 0.3,
         Size = UDim2.new(0, 74, 0, 74),
         Position = UDim2.new(0.5, -37, 0.5, -37)
     }):Play()
     
+    -- Kembalikan ketebalan stroke ke default awal (6)
     if ToggleStroke and ToggleStroke:IsA("UIStroke") then
-        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 2, Color = Color3.fromRGB(150, 100, 255) }):Play()
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 6, Color = Color3.fromRGB(150, 100, 255) }):Play()
     end
 end)
+
 
 
 
