@@ -431,7 +431,7 @@ GlowFrame.Size = UDim2.new(0, 64, 0, 64)
 GlowFrame.Position = UDim2.new(0.5, -37, 0.5, -37)
 GlowFrame.BackgroundTransparency = 1
 -- ID DIUBAH KE ASSET LINGKARAN NEON GLOW PREMIUM
-GlowFrame.Image = "rbxassetid://89100730975903"
+GlowFrame.Image = "rbxassetid://133974093578054"
 GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
 GlowFrame.ImageTransparency = 0.2
 GlowFrame.ZIndex = 9
