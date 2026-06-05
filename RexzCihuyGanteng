@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz
+--// OWNER   : Rexz.
 
 --[[
     ================================================================
@@ -407,7 +407,7 @@ function RexzLibrary.new(dummyHubName, title)
     NotifLayout.Padding = UDim.new(0, 6)
     NotifLayout.Parent = NotifHolder
 
-    -- ── Toggle Button ──
+-- ── Toggle Button ──
 local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "UiToggleBtn"
 ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
@@ -420,83 +420,146 @@ ToggleBtn.ZIndex = 10
 ToggleBtn.Parent = ScreenGui
 self.ToggleBtn = ToggleBtn
 Corner(ToggleBtn, 50)
-
--- Mengambil instance stroke bawaan fungsi library (Awal Set Tebal: 6)
 local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 4)
 
+-- GlowFrame di ScreenGui agar tidak terpotong UICorner
 local GlowFrame = Instance.new("ImageLabel")
 GlowFrame.Name = "GlowEffect"
--- Ngeset ukuran awal 74x74 dengan posisi offset -37 agar pas di tengah (74 / 2 = 37)
 GlowFrame.Size = UDim2.new(0, 74, 0, 74)
-GlowFrame.Position = UDim2.new(0.5, -37, 0.5, -37)
+GlowFrame.Position = UDim2.new(0, -1, 0, -1)  -- center di ToggleBtn (14-15 = -1)
 GlowFrame.BackgroundTransparency = 1
 GlowFrame.Image = "rbxassetid://133974093578054"
 GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
-GlowFrame.ImageTransparency = 0.3 -- Dibuat agak pekat di awal
+GlowFrame.ImageTransparency = 0.3
 GlowFrame.ZIndex = 9
-GlowFrame.Parent = ToggleBtn
+GlowFrame.Parent = ScreenGui
 
+-- Icon juga di ScreenGui agar ZIndex di atas GlowFrame
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Name = "ToggleIcon"
 ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
-ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
+ToggleIcon.Position = UDim2.new(0, 25, 0, 25)  -- center: 14 + (44/2) - 11 = 25
 ToggleIcon.BackgroundTransparency = 1
 ToggleIcon.Image = ResolveIcon(75184333398586)
 ToggleIcon.ImageColor3 = Color3.fromRGB(200, 160, 255)
-ToggleIcon.ZIndex = 11
-ToggleIcon.Parent = ToggleBtn
+ToggleIcon.ZIndex = 12
+ToggleIcon.Parent = ScreenGui
 
--- =======================================================
--- ANIMASI LINGKARAN PINGGIR BERPUTAR (LOOPING)
--- =======================================================
-local RotateTweenInfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1)
-local RotateTween = TweenService:Create(GlowFrame, RotateTweenInfo, { Rotation = 360 })
+-- Sinkronisasi posisi GlowFrame & ToggleIcon saat ToggleBtn di-drag
+ToggleBtn:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+    local pos = ToggleBtn.AbsolutePosition
+    GlowFrame.Position = UDim2.new(0, pos.X - 15, 0, pos.Y - 15)
+    ToggleIcon.Position = UDim2.new(0, pos.X + 11, 0, pos.Y + 11)
+end)
+
+-- Animasi rotasi looping
+local RotateTween = TweenService:Create(GlowFrame,
+    TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.In, -1),
+    { Rotation = 360 })
 RotateTween:Play()
 
--- =======================================================
--- INTERAKSI MOUSE & EFEK PULSE LINGKARAN
--- =======================================================
+-- Interaksi hover & pulse
 local PulseTweenIn
 
 ToggleBtn.MouseEnter:Connect(function()
-    -- Tombol menggelap & Glow makin terang solid (0.1)
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(55, 30, 80) }):Play()
-    TweenService:Create(GlowFrame, TweenInfo.new(0.15), { ImageTransparency = 0.1 }):Play()
-    
-    -- Stroke menebal dari 6 ke 9 pas di-hover
-    if ToggleStroke and ToggleStroke:IsA("UIStroke") then
-        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 6, Color = Color3.fromRGB(180, 140, 255) }):Play()
-    end
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15),
+        { BackgroundColor3 = Color3.fromRGB(55, 30, 80) }):Play()
+    TweenService:Create(GlowFrame, TweenInfo.new(0.15),
+        { ImageTransparency = 0.1 }):Play()
+    TweenService:Create(ToggleStroke, TweenInfo.new(0.15),
+        { Thickness = 6, Color = Color3.fromRGB(180, 140, 255) }):Play()
 
-    -- Denyutan melingkar (Pulse Radial) melebar halus dari 74 ke 94
-    PulseTweenIn = TweenService:Create(GlowFrame, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
-        Size = UDim2.new(0, 94, 0, 94),
-        Position = UDim2.new(0.5, -47, 0.5, -47)
-    })
+    local pos = ToggleBtn.AbsolutePosition
+    PulseTweenIn = TweenService:Create(GlowFrame,
+        TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+            Size = UDim2.new(0, 94, 0, 94),
+            Position = UDim2.new(0, pos.X - 25, 0, pos.Y - 25),
+        })
     PulseTweenIn:Play()
 end)
 
 ToggleBtn.MouseLeave:Connect(function()
-    if PulseTweenIn then 
-        PulseTweenIn:Cancel() 
-    end
-    
-    -- Kembalikan tombol ke warna dasar & kembalikan transparansi glow ke awal (0.3)
-    TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(35, 20, 55) }):Play()
-    TweenService:Create(GlowFrame, TweenInfo.new(0.15), { 
+    if PulseTweenIn then PulseTweenIn:Cancel() end
+
+    local pos = ToggleBtn.AbsolutePosition
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15),
+        { BackgroundColor3 = Color3.fromRGB(35, 20, 55) }):Play()
+    TweenService:Create(GlowFrame, TweenInfo.new(0.15), {
         ImageTransparency = 0.3,
         Size = UDim2.new(0, 74, 0, 74),
-        Position = UDim2.new(0.5, -37, 0.5, -37)
+        Position = UDim2.new(0, pos.X - 15, 0, pos.Y - 15),
     }):Play()
-    
-    -- Kembalikan ketebalan stroke ke default awal (6)
-    if ToggleStroke and ToggleStroke:IsA("UIStroke") then
-        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 4, Color = Color3.fromRGB(150, 100, 255) }):Play()
-    end
+    TweenService:Create(ToggleStroke, TweenInfo.new(0.15),
+        { Thickness = 4, Color = Color3.fromRGB(150, 100, 255) }):Play()
 end)
 
+-- Klik flash
+ToggleBtn.MouseButton1Click:Connect(function()
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.08),
+        { BackgroundColor3 = Color3.fromRGB(150, 100, 255) }):Play()
+    TweenService:Create(ToggleIcon, TweenInfo.new(0.08),
+        { ImageTransparency = 0.2 }):Play()
+    task.wait(0.1)
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.2),
+        { BackgroundColor3 = Color3.fromRGB(35, 20, 55) }):Play()
+    TweenService:Create(ToggleIcon, TweenInfo.new(0.2),
+        { ImageTransparency = 0 }):Play()
+end)
 
+ToggleBtn.MouseButton1Click:Connect(ToggleHideWindow)
 
+-- Label animasi di samping
+local SideLabel = Instance.new("Frame")
+SideLabel.Name = "SideHintFrame"
+SideLabel.Size = UDim2.new(0, 0, 0, 28)
+SideLabel.Position = UDim2.new(0, 62, 0, 22)
+SideLabel.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
+SideLabel.BorderSizePixel = 0
+SideLabel.ClipsDescendants = true
+SideLabel.ZIndex = 10
+SideLabel.Visible = false
+SideLabel.Parent = ScreenGui
+Corner(SideLabel, 6)
+Stroke(SideLabel, Color3.fromRGB(150, 100, 255), 1)
+
+local SideLabelText = Instance.new("TextLabel")
+SideLabelText.Size = UDim2.new(1, -16, 1, 0)
+SideLabelText.Position = UDim2.new(0, 8, 0, 0)
+SideLabelText.BackgroundTransparency = 1
+SideLabelText.Text = "Rexz Hub"  -- <- GANTI TEKS
+SideLabelText.TextColor3 = Color3.fromRGB(200, 160, 255)
+SideLabelText.TextSize = 11
+SideLabelText.Font = Enum.Font.GothamBold
+SideLabelText.TextXAlignment = Enum.TextXAlignment.Left
+SideLabelText.TextTransparency = 1
+SideLabelText.ZIndex = 11
+SideLabelText.Parent = SideLabel
+
+-- Sinkronisasi posisi SideLabel saat drag
+ToggleBtn:GetPropertyChangedSignal("AbsolutePosition"):Connect(function()
+    local pos = ToggleBtn.AbsolutePosition
+    SideLabel.Position = UDim2.new(0, pos.X + 52, 0, pos.Y + 8)
+end)
+
+ToggleBtn.MouseEnter:Connect(function()
+    SideLabel.Visible = true
+    SideLabel.Size = UDim2.new(0, 0, 0, 28)
+    SideLabelText.TextTransparency = 1
+    TweenService:Create(SideLabel, TweenInfo.new(0.2, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+        { Size = UDim2.new(0, 90, 0, 28) }):Play()
+    TweenService:Create(SideLabelText, TweenInfo.new(0.2),
+        { TextTransparency = 0 }):Play()
+end)
+
+ToggleBtn.MouseLeave:Connect(function()
+    TweenService:Create(SideLabel, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
+        { Size = UDim2.new(0, 0, 0, 28) }):Play()
+    TweenService:Create(SideLabelText, TweenInfo.new(0.1),
+        { TextTransparency = 1 }):Play()
+    task.delay(0.15, function()
+        if SideLabel then SideLabel.Visible = false end
+    end)
+end)
 
     -- ── Minimize / Hide ──
     local function MinimizeWindow()  
