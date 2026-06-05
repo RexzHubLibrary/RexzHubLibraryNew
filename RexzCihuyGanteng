@@ -10,15 +10,18 @@
 --// STATUS  : Private
 --// OWNER   : Rexz
 
-//================================================================
-//COPYRIGHT © 2026 REXZ_. ALL RIGHTS RESERVED.
-//================================================================
+--[[
+    ================================================================
+    COPYRIGHT © 2026 REXZ_. ALL RIGHTS RESERVED.
+    ================================================================
     - This software and its source code are strictly private.
     - Unauthorized copying, modification, distribution, or public 
       display of this file via any medium is strictly prohibited.
     - Any usage without the explicit permission of the owner 
       will be considered a violation of intellectual property.
-//================================================================
+    ================================================================
+]]
+
 
 
 local RexzLibrary = {}
