@@ -10,17 +10,15 @@
 --// STATUS  : Private
 --// OWNER   : Rexz
 
---[[
-    ================================================================
-    COPYRIGHT © 2026 REXZ_. ALL RIGHTS RESERVED.
-    ================================================================
+================================================================
+COPYRIGHT © 2026 REXZ_. ALL RIGHTS RESERVED.
+================================================================
     - This software and its source code are strictly private.
     - Unauthorized copying, modification, distribution, or public 
       display of this file via any medium is strictly prohibited.
     - Any usage without the explicit permission of the owner 
       will be considered a violation of intellectual property.
-    ================================================================
-]]
+================================================================
 
 
 local RexzLibrary = {}
@@ -430,7 +428,7 @@ GlowFrame.Size = UDim2.new(0, 64, 0, 64)
 GlowFrame.Position = UDim2.new(0.5, -37, 0.5, -37)
 GlowFrame.BackgroundTransparency = 1
 -- ID DIUBAH KE ASSET LINGKARAN NEON GLOW PREMIUM
-GlowFrame.Image = "rbxassetid://102823813339631"
+GlowFrame.Image = "rbxassetid://89100730975903"
 GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
 GlowFrame.ImageTransparency = 0.2
 GlowFrame.ZIndex = 9
