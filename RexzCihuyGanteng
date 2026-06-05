@@ -407,49 +407,91 @@ function RexzLibrary.new(dummyHubName, title)
     NotifLayout.Parent = NotifHolder
 
     -- ── Toggle Button ──
-    local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Name = "UiToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
-    ToggleBtn.Position = UDim2.new(0, 14, 0, 14)
-    ToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
-    ToggleBtn.Text = ""
-    ToggleBtn.Active = true
-    ToggleBtn.Draggable = true
-    ToggleBtn.ZIndex = 10
-    ToggleBtn.Parent = ScreenGui
-    self.ToggleBtn = ToggleBtn
-    Corner(ToggleBtn, 50)
-    Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 2)
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Name = "UiToggleBtn"
+ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
+ToggleBtn.Position = UDim2.new(0, 14, 0, 14)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
+ToggleBtn.Text = ""
+ToggleBtn.Active = true
+ToggleBtn.Draggable = true
+ToggleBtn.ZIndex = 10
+ToggleBtn.Parent = ScreenGui
+self.ToggleBtn = ToggleBtn
+Corner(ToggleBtn, 50)
 
-    local GlowFrame = Instance.new("ImageLabel")
-    GlowFrame.Name = "GlowEffect"
-    GlowFrame.Size = UDim2.new(0, 80, 0, 80)
-    GlowFrame.Position = UDim2.new(0.5, -40, 0.5, -40)
-    GlowFrame.BackgroundTransparency = 1
-    GlowFrame.Image = "rbxassetid://5028857084"
-    GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
-    GlowFrame.ImageTransparency = 0.55
-    GlowFrame.ZIndex = 9
-    GlowFrame.Parent = ToggleBtn
+-- Pastikan fungsi Stroke di library lu me-return instance UIStroke-nya
+local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 2)
 
-    local ToggleIcon = Instance.new("ImageLabel")
-    ToggleIcon.Name = "ToggleIcon"
-    ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
-    ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
-    ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = ResolveIcon(75184333398586)
-    ToggleIcon.ImageColor3 = Color3.fromRGB(200, 160, 255)
-    ToggleIcon.ZIndex = 11
-    ToggleIcon.Parent = ToggleBtn
+local GlowFrame = Instance.new("ImageLabel")
+GlowFrame.Name = "GlowEffect"
+GlowFrame.Size = UDim2.new(0, 80, 0, 80)
+GlowFrame.Position = UDim2.new(0.5, -40, 0.5, -40)
+GlowFrame.BackgroundTransparency = 1
+GlowFrame.Image = "rbxassetid://5028857084"
+GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
+GlowFrame.ImageTransparency = 0.55
+GlowFrame.ZIndex = 9
+GlowFrame.Parent = ToggleBtn
 
-    ToggleBtn.MouseEnter:Connect(function()
-        TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(55, 30, 80) }):Play()
-        TweenService:Create(GlowFrame, TweenInfo.new(0.15), { ImageTransparency = 0.35 }):Play()
-    end)
-    ToggleBtn.MouseLeave:Connect(function()
-        TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(35, 20, 55) }):Play()
-        TweenService:Create(GlowFrame, TweenInfo.new(0.15), { ImageTransparency = 0.55 }):Play()
-    end)
+local ToggleIcon = Instance.new("ImageLabel")
+ToggleIcon.Name = "ToggleIcon"
+ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
+ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
+ToggleIcon.BackgroundTransparency = 1
+ToggleIcon.Image = ResolveIcon(75184333398586)
+ToggleIcon.ImageColor3 = Color3.fromRGB(200, 160, 255)
+ToggleIcon.ZIndex = 11
+ToggleIcon.Parent = ToggleBtn
+
+-- =======================================================
+-- ANIMASI LINGKARAN PINGGIR BERPUTAR (LOOPING)
+-- =======================================================
+local RotateTweenInfo = TweenInfo.new(4, Enum.EasingStyle.Linear, Enum.EasingDirection.InOut, -1) -- -1 artinya loop selamanya
+local RotateTween = TweenService:Create(GlowFrame, RotateTweenInfo, { Rotation = 360 })
+RotateTween:Play()
+
+-- =======================================================
+-- INTERAKSI MOUSE & EFEK PULSE PINGGIRAN
+-- =======================================================
+local PulseTweenIn
+ToggleBtn.MouseEnter:Connect(function()
+    -- Efek hover dasar
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(55, 30, 80) }):Play()
+    TweenService:Create(GlowFrame, TweenInfo.new(0.15), { ImageTransparency = 0.25 }):Play()
+    
+    -- Tebalkan Stroke pinggir pas di-hover
+    if ToggleStroke and ToggleStroke:IsA("UIStroke") then
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 3.5, Color = Color3.fromRGB(180, 140, 255) }):Play()
+    end
+
+    -- Animasi Denyut (Pulse) berulang pada Glow pas mouse nempel
+    PulseTweenIn = TweenService:Create(GlowFrame, TweenInfo.new(0.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), {
+        Size = UDim2.new(0, 92, 0, 92),
+        Position = UDim2.new(0.5, -46, 0.5, -46)
+    })
+    PulseTweenIn:Play()
+end)
+
+ToggleBtn.MouseLeave:Connect(function()
+    -- Matikan animasi denyut hover, balikkan ke ukuran awal
+    if PulseTweenIn then 
+        PulseTweenIn:Cancel() 
+    end
+    
+    TweenService:Create(ToggleBtn, TweenInfo.new(0.15), { BackgroundColor3 = Color3.fromRGB(35, 20, 55) }):Play()
+    TweenService:Create(GlowFrame, TweenInfo.new(0.15), { 
+        ImageTransparency = 0.55,
+        Size = UDim2.new(0, 80, 0, 80),
+        Position = UDim2.new(0.5, -40, 0.5, -40)
+    }):Play()
+    
+    -- Kembalikan ukuran Stroke ke awal
+    if ToggleStroke and ToggleStroke:IsA("UIStroke") then
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 2, Color = Color3.fromRGB(150, 100, 255) }):Play()
+    end
+end)
+
 
     -- ── Minimize / Hide ──
     local function MinimizeWindow()  
