@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz.
+--// OWNER   : Rexz
 
 --[[
     ================================================================
@@ -411,7 +411,7 @@ local ToggleBtn = Instance.new("TextButton")
 ToggleBtn.Name = "UiToggleBtn"
 ToggleBtn.Size = UDim2.new(0, 44, 0, 44)
 ToggleBtn.Position = UDim2.new(0, 14, 0, 14)
-ToggleBtn.BackgroundColor3 = Color3.fromRGB(219,33,33)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(35, 20, 55)
 ToggleBtn.Text = ""
 ToggleBtn.Active = true
 ToggleBtn.Draggable = true
@@ -430,11 +430,12 @@ GlowFrame.Size = UDim2.new(0, 74, 0, 74)
 GlowFrame.Position = UDim2.new(0.5, -37, 0.5, -37)
 GlowFrame.BackgroundTransparency = 1
 -- ID DIUBAH KE ASSET LINGKARAN NEON GLOW PREMIUM
-GlowFrame.Image = "rbxassetid://13110255287"
+GlowFrame.Image = "rbxassetid://5028857084"
 GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
 GlowFrame.ImageTransparency = 0.55
 GlowFrame.ZIndex = 9
 GlowFrame.Parent = ToggleBtn
+Corner(GlowFrame, 50)
 
 local ToggleIcon = Instance.new("ImageLabel")
 ToggleIcon.Name = "ToggleIcon"
@@ -442,7 +443,7 @@ ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
 ToggleIcon.Position = UDim2.new(0.5, -11, 0.5, -11)
 ToggleIcon.BackgroundTransparency = 1
 ToggleIcon.Image = ResolveIcon(75184333398586)
-ToggleIcon.ImageColor3 = Color3.fromRGB(200, 0, 0)
+ToggleIcon.ImageColor3 = Color3.fromRGB(200, 160, 255)
 ToggleIcon.ZIndex = 11
 ToggleIcon.Parent = ToggleBtn
 
