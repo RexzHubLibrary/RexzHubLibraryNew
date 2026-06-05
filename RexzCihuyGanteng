@@ -428,7 +428,7 @@ GlowFrame.Name = "GlowEffect"
 GlowFrame.Size = UDim2.new(0, 74, 0, 74)
 GlowFrame.Position = UDim2.new(0, -1, 0, -1)  -- center di ToggleBtn (14-15 = -1)
 GlowFrame.BackgroundTransparency = 1
-GlowFrame.Image = "rbxassetid://6014260380"
+GlowFrame.Image = "rbxassetid://74845977883324"
 GlowFrame.ImageColor3 = Color3.fromRGB(150, 100, 255)
 GlowFrame.ImageTransparency = 0
 GlowFrame.ZIndex = 15
@@ -440,7 +440,7 @@ ToggleIcon.Name = "ToggleIcon"
 ToggleIcon.Size = UDim2.new(0, 22, 0, 22)
 ToggleIcon.Position = UDim2.new(0, 25, 0, 25)  -- center: 14 + (44/2) - 11 = 25
 ToggleIcon.BackgroundTransparency = 1
-ToggleIcon.Image = ResolveIcon(75184333398586)
+ToggleIcon.Image = ResolveIcon(90087977730968)
 ToggleIcon.ImageColor3 = Color3.fromRGB(200, 160, 255)
 ToggleIcon.ZIndex = 12
 ToggleIcon.Parent = ScreenGui
