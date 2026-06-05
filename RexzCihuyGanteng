@@ -423,7 +423,7 @@ self.ToggleBtn = ToggleBtn
 Corner(ToggleBtn, 50)
 
 -- Mengambil instance stroke bawaan fungsi library (Awal Set Tebal: 6)
-local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 6)
+local ToggleStroke = Stroke(ToggleBtn, Color3.fromRGB(150, 100, 255), 4)
 
 local GlowFrame = Instance.new("ImageLabel")
 GlowFrame.Name = "GlowEffect"
@@ -466,7 +466,7 @@ ToggleBtn.MouseEnter:Connect(function()
     
     -- Stroke menebal dari 6 ke 9 pas di-hover
     if ToggleStroke and ToggleStroke:IsA("UIStroke") then
-        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 9, Color = Color3.fromRGB(180, 140, 255) }):Play()
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 6, Color = Color3.fromRGB(180, 140, 255) }):Play()
     end
 
     -- Denyutan melingkar (Pulse Radial) melebar halus dari 74 ke 94
@@ -492,7 +492,7 @@ ToggleBtn.MouseLeave:Connect(function()
     
     -- Kembalikan ketebalan stroke ke default awal (6)
     if ToggleStroke and ToggleStroke:IsA("UIStroke") then
-        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 6, Color = Color3.fromRGB(150, 100, 255) }):Play()
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.15), { Thickness = 4, Color = Color3.fromRGB(150, 100, 255) }):Play()
     end
 end)
 
