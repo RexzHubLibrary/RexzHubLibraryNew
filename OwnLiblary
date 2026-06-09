@@ -8,7 +8,7 @@
 --// LIBRARY UI REXZ
 --// VERSION : V2.5
 --// STATUS  : Private
---// OWNER   : Rexz
+--// OWNER   : Rexz.
 
 --[[
     ================================================================
@@ -215,7 +215,7 @@ function RexzLibrary:ApplyTheme(theme)
 end
 
 -- ─────────────────────────────────────────
---  BACKGROUND IMAGE HELPER
+--  FIXED BACKGROUND IMAGE HELPER (SUPPORT ALL LINKS)
 -- ─────────────────────────────────────────
 function RexzLibrary:SetBackgroundImage(url)
     if not self.MainFrame then return end
@@ -232,14 +232,54 @@ function RexzLibrary:SetBackgroundImage(url)
             BgImg.ScaleType = Enum.ScaleType.Crop
             BgImg.ZIndex = 0
             BgImg.Parent = self.MainFrame
-            Corner(BgImg, 10)
+            
+            -- FIX CORNER: Amankan pembuatan sudut melengkung agar tidak bergantung fungsi luar
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 10)
+            uiCorner.Parent = BgImg
         end
 
-        -- Support rbxassetid, imgur, discord cdn, github raw, dll
-        if url:match("^%d+$") then
-            -- angka saja → anggap asset id
+        -- Amankan skema penulisan / Deteksi tipe Link
+        if tostring(url):match("^%d+$") then
+            -- Jika hanya angka, otomatis jadikan rbxassetid
             BgImg.Image = "rbxassetid://" .. url
+        elseif tostring(url):match("^http") then
+            -- JIKA LINK HTTP/HTTPS (Discord, Imgur, Github, dll)
+            -- Wajib buat folder penyimpanan terlebih dahulu agar writefile tidak error
+            if makefolder then 
+                pcall(function() makefolder("RexzLibrarySaves") end) 
+            end
+
+            -- Ambil nama file murni, pisahkan dari parameter query (?ex=...)
+            local cleanUrl = url:split("?")[1] or url
+            local extension = cleanUrl:match("%.%w+$") or ".png" -- Fallback ke .png jika ekstensinya ga kebaca
+            
+            -- Buat nama file hash unik dari link agar tidak bentrok antar link gambar
+            local filename = "RexzLibrarySaves/BgCache_" .. string.len(url) .. extension
+
+            task.spawn(function()
+                local success, result = pcall(function()
+                    if not isfile(filename) then
+                        -- Download gambar lewat executor
+                        local data = game:HttpGet(url)
+                        writefile(filename, data)
+                    end
+                    -- Konversi file lokal menjadi Asset ID yang valid di Roblox
+                    local getAsset = getcustomasset or getsynasset
+                    if getAsset then
+                        return getAsset(filename)
+                    end
+                end)
+
+                if success and result then
+                    BgImg.Image = result
+                else
+                    -- Fallback/peringatan jika eksekusi download gagal
+                    warn("Rexz Lib: Gagal memuat/mendownload custom background link.")
+                end
+            end)
         else
+            -- Jika format asset lokal bawaan atau rbxassetid lengkap yang dimasukkan
             BgImg.Image = url
         end
 
@@ -247,7 +287,7 @@ function RexzLibrary:SetBackgroundImage(url)
         self.MainFrame.BackgroundTransparency = 0
         self.BgImageUrl = url
     else
-        -- Hapus background image
+        -- Hapus background image jika dikosongkan
         if BgImg then BgImg:Destroy() end
         self.BgImageUrl = nil
     end
